@@ -72,22 +72,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Builds\$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\tinyglhf;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Builds\$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\tinyglhf;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Builds\$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\tinyglhf;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Builds\$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\glm;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\tinyglhf;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
