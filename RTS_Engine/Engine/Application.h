@@ -1,34 +1,52 @@
 #pragma once
-#include "Window.h"
-#include "ApplicationEvents.h"
+#include "Renderer.h"
 
-#include <chrono>
+struct GLFWwindow;
 
 namespace Bennett
 {
-	class Application
+
+	struct WindowDetails
 	{
-	public:
-		Application();
-		virtual ~Application() = default;
+		std::string Title;
+		unsigned int Width;
+		unsigned int Height;
 
-		void Run();
-		void OnEvent(Event& e);
+		WindowDetails(
+			const std::string& title = "Bennett Engine",
+			unsigned int width = 1280,
+			unsigned int height = 720)
+			: Title(title), Width(width), Height(height)
+		{
 
-		inline Window& GetWindow() { return *m_Window; };
-		inline static Application& Get() { return *s_Instance; };
-
-	private:
-		//TODO: WindowCloseEvent for application (declaration)
-		bool OnWindowClose(WindowCloseEvent& e);
-
-		std::unique_ptr<Bennett::Window> m_Window;
-		bool m_IsRunning = true;
-
-		//Static pointer to this application.
-		static Application* s_Instance;
+		}
 	};
 
-	Application* CreateApplication();
+	class Application
+	{
+	private:
+		bool m_IsRunning;
+		GLFWwindow* m_Window;
+		Renderer m_Renderer;
+
+		bool InitialiseWindow(const WindowDetails& details);
+		bool InitialiseRenderer();
+		void DestroyWindow();
+		void DestroyRenderer();
+
+		void Update(float DeltaTime);
+		void Render();
+
+	public:
+		Application();
+		~Application();
+
+		void GameLoop();
+
+		bool Initialise(int argc, char** argv, const WindowDetails& details);
+		void Destroy();
+	};
+
+	Application* CreateApplication(int argc, char** argv, const WindowDetails& details);
 }
 

@@ -8,27 +8,30 @@
 
 #include <iostream>
 
-int main()
+#include "BennettPCH.h"
+#include "Application.h"
+#include "Logger.h"
+
+using namespace Bennett;
+
+extern Application* CreateApplication(int, char**, WindowDetails);
+
+int main(int argc, char **argv)
 {
-	//Initialise GLFW.
-	glfwInit();
+	WindowDetails details = WindowDetails();
+	details.Title = "Yet another engine but in Vulkan!";
 
-	//Create an empty window.
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	auto app = Bennett::CreateApplication(argc, argv, details);
 
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Vulkan Test", nullptr, nullptr);
-
-	glm::mat4 matrix;
-	glm::vec4 vec;
-	auto test = matrix * vec;
-
-	while (!glfwWindowShouldClose(window))
+	if (!app)
 	{
-		glfwPollEvents();
+		Log("Application Run finished. Application deleting.", LOG_CRITICAL);
+		return 0;
 	}
-	
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
-	return 0;
+	app->GameLoop();
+
+	Log("Application has finished running, it is now closing.", LOG_SAFE);
+	delete app;
+	app = nullptr;
 }

@@ -1,65 +1,129 @@
+#include <GLFW/glfw3.h>
 #include "BennettPCH.h"
 #include "Application.h"
-
 #include "Logger.h"
 
 namespace Bennett
 {
-	Application* Application::s_Instance = nullptr;
+	bool Application::InitialiseWindow(const WindowDetails& details)
+	{
+		if (m_Window)
+		{
+			DestroyWindow();
+		}
+
+		//Initialise GLFW.
+		glfwInit();
+
+		//Create an empty window.
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+		m_Window = glfwCreateWindow(details.Width, details.Height, details.Title.c_str(), nullptr, nullptr);
+
+		if (!m_Window)
+		{
+			Log("Failed to create window.", LOG_CRITICAL);
+			return false;
+		}
+		
+		return true;
+	}
+
+	void Application::DestroyWindow()
+	{
+		glfwDestroyWindow(m_Window);
+		glfwTerminate();
+	}
+
+	bool Application::InitialiseRenderer()
+	{
+		return m_Renderer.Initialise(*m_Window);
+	}
+
+	void Application::DestroyRenderer()
+	{
+		m_Renderer.Shutdown();
+	}
 
 	Application::Application()
 	{
-		if (s_Instance)
-			Log("Application instance already existing!", LOG_CRITICAL);
-
-		m_Window = std::unique_ptr<Window>(Window::Create());
-
-		//m_Window->SetEventCallback(BIND_EVENT_FN(OnEvent));
+		Log("Application created.", LOG_SAFE);
+		m_Window = nullptr;
+		m_IsRunning = true;
 	}
 
-	void Application::Run()
+	Application::~Application()
 	{
-		float lTime = GetTickCount();
-		float cTime = GetTickCount();
-		float dTime = GetTickCount();
+		Log("Destroying application", LOG_MINIMAL);
+		Destroy();
+	}
 
-		while (m_IsRunning)
+	void Application::Update(float DeltaTime)
+	{
+	}
+
+	void Application::Render()
+	{
+		m_Renderer.RenderFrame();
+
+		//m_Renderer.Render();
+
+	}
+
+
+	bool Application::Initialise(int argc, char** argv, const WindowDetails& details)
+	{
+		if (InitialiseWindow(details) && InitialiseRenderer())
 		{
-			cTime = GetTickCount();
+			Log("Initialised application successfully.", LOG_SAFE);
+			return true;
+		}
+		else
+		{
+			Log("Failed to initialise application.", LOG_CRITICAL);
+			return false;
+		}
+	}
+
+	void Application::Destroy()
+	{
+		DestroyRenderer();
+		DestroyWindow();
+	}
+
+	void Application::GameLoop()
+	{
+		float lTime = glfwGetTime();
+		float cTime = glfwGetTime();
+		float dTime = glfwGetTime();
+
+		while (m_IsRunning && !glfwWindowShouldClose(m_Window))
+		{
+			glfwPollEvents();
+
+			cTime = glfwGetTime();
 			dTime = cTime - lTime;
 
-			Log(dTime, LOG_SPECIAL);
+			if (dTime > 0.1)
+				dTime = 0.1f;
 
-			if (m_Window)
-				m_Window->OnUpdate(dTime);
-			else
-			{
-				Log("Window not initialised.", LOG_SERIOUS);
-				m_IsRunning = false;
-			}
+			Update(dTime);
+			Render();
 
 			lTime = cTime;
 		}
 	}
 
-	void Application::OnEvent(Event& e)
+	Application* CreateApplication(int argc, char** argv, const WindowDetails& details)
 	{
+		Application* app = new Application();
 		
-		//TODO: Event Dispatcher for windows events.
-		//EventDispatcher dispatcher(e);
-		//dispatcher.Dispatch<WindowCloseEvent>(BIND_EVENT_FN(OnWindowClose));
+		if (!app->Initialise(argc, argv, details))
+		{
+			delete app;
+			app = nullptr;
+		}
 
-	}
-
-	bool Application::OnWindowClose(WindowCloseEvent& e)
-	{
-		m_IsRunning = false;
-		return true;
-	}
-
-	//TODO: Move to be defined in CLIENT using a child application.
-	Application * CreateApplication()
-	{
-		return new Application;
+		return app;
 	}
 }
