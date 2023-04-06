@@ -167,34 +167,38 @@ namespace Bennett
 		bool InitialiseGraphicsPipeline();
 
 		//Framebuffers
+		int m_CurrentRenderFrame = 0;
+		const int MAX_FRAMES_IN_FLIGHT = 2;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		bool CreateFrameBuffers();
 
 		//Command Queue
 		VkCommandPool m_CommandPool;
-		VkCommandBuffer m_CommandBuffer;
+		std::vector<VkCommandBuffer> m_CommandBuffers;
 		bool CreateCommandPool();
 		bool CreateCommandBuffer();
-		bool RecordCommandBuffer(uint32_t imageIndex);
+		bool RecordCommandBuffer();
 
 		//Create syncronisation objects
 		//e.g. fences or semaphores
-		VkSemaphore m_ImageAvailableSemaphore;
-		VkSemaphore m_RenderFinishedSemaphore;
-		VkFence		m_InFlightFence;
+		std::vector<VkSemaphore> m_ImageAvailableSemaphores;
+		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+		std::vector<VkFence> m_InFlightFences;
 		bool CreateSyncObjects();
 
 		//Wait for the previous frame to finish
 		void WaitForFrame();
 
+		uint32_t m_CurrentImageIndex;
 		//Acquire an image from the swap chain
-		uint32_t AquireSwapchainImageIndex();
+		void AquireSwapchainImageIndex();
 		//Record a command buffer which draws the scene onto that image
 		void Render();
 		//Submit the recorded command buffer
 		void SubmitCommandData();
 		//Present the swap chain image
 		void Present(uint32_t& imageIndex);
+
 	public:
 		Renderer();
 
@@ -204,7 +208,9 @@ namespace Bennett
 		void SetViewport(int x, int y, int w, int h, float maxDepth, float minDepth);
 		void SetScissorRect(int x, int y, int w, int h);
 
+		void StartFrame();
 		void RenderFrame();
+		void EndFrame();
 		
 		~Renderer();
 	};

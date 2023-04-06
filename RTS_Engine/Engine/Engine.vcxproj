@@ -171,16 +171,22 @@
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="BennettPCH.cpp" />
     <ClCompile Include="entrypoint.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="ApplicationEvents.h" />
     <ClInclude Include="BennettPCH.h" />
     <ClInclude Include="Event.h" />
+    <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Logger.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.frag" />

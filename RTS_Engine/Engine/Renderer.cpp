@@ -55,13 +55,15 @@ namespace Bennett
 
 	bool Renderer::CreateCommandBuffer()
 	{
+		m_CommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+
 		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.commandBufferCount = 1;
+		allocInfo.commandBufferCount = m_CommandBuffers.size();
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandPool = m_CommandPool;
 
-		if (vkAllocateCommandBuffers(m_Device, &allocInfo, &m_CommandBuffer) != VK_SUCCESS)
+		if (vkAllocateCommandBuffers(m_Device, &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS)
 		{
 			Log("Failed to allocate command buffer.", LOG_CRITICAL);
 			return false;
@@ -70,7 +72,7 @@ namespace Bennett
 		return true;
 	}
 
-	bool Renderer::RecordCommandBuffer(uint32_t imageIndex)
+	bool Renderer::RecordCommandBuffer()
 	{
 		/*
 		* Flags parameter determins how you use the command buffer.
@@ -85,7 +87,7 @@ namespace Bennett
 		beginInfo.pInheritanceInfo = nullptr;
 		beginInfo.pNext = nullptr;
 
-		if (vkBeginCommandBuffer(m_CommandBuffer, &beginInfo) != VK_SUCCESS)
+		if (vkBeginCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame], &beginInfo) != VK_SUCCESS)
 		{
 			Log("Failed to begin recording command buffer.", LOG_CRITICAL);
 			return false;
@@ -97,68 +99,77 @@ namespace Bennett
 		renderPassInfo.clearValueCount = 1;
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderPassInfo.renderPass = m_RenderPass;
-		renderPassInfo.framebuffer = m_Framebuffers[imageIndex];
+		renderPassInfo.framebuffer = m_Framebuffers[m_CurrentImageIndex];
 		renderPassInfo.renderArea.offset = { 0 ,0 };
 		renderPassInfo.renderArea.extent = m_SwapChainExtent;
 		renderPassInfo.pClearValues = &colour;
 
-		vkCmdSetViewport(m_CommandBuffer, 0, 1, &m_Viewport);
-		vkCmdSetScissor(m_CommandBuffer, 0, 1, &m_ScissorRect);
+		vkCmdSetViewport(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_Viewport);
+		vkCmdSetScissor(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_ScissorRect);
 
-		vkCmdBeginRenderPass(m_CommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentRenderFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	}
 
-		Render();
+	void Renderer::StartFrame()
+	{
+		WaitForFrame();
+		AquireSwapchainImageIndex();
+		//Reset
+		vkResetCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame], 0);
+		//Record
+		RecordCommandBuffer();
+	}
 
-		vkCmdEndRenderPass(m_CommandBuffer);
+	void Renderer::EndFrame()
+	{
+		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentRenderFrame]);
 
-
-		if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS)
+		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame]) != VK_SUCCESS)
 		{
 			Log("Failed to record command buffer.", LOG_CRITICAL);
-			return false;
+			return;
 		}
 
-		return true;
+		SubmitCommandData();
+		Present(m_CurrentImageIndex);
 	}
 
 	void Renderer::Render()
 	{
 		//Bind a graphics pipeline rather thana compute one.
-		vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 
 		//Set up scissor and viewport.
-		vkCmdDraw(m_CommandBuffer, 3, 1, 0, 0);
+		vkCmdDraw(m_CommandBuffers[m_CurrentRenderFrame], 3, 1, 0, 0);
 	}
 
-	uint32_t Renderer::AquireSwapchainImageIndex()
+	void Renderer::AquireSwapchainImageIndex()
 	{
-		uint32_t renderImageIndex;
-		vkAcquireNextImageKHR(m_Device, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphore, VK_NULL_HANDLE, &renderImageIndex);
-		return renderImageIndex;
+		vkAcquireNextImageKHR(m_Device, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentRenderFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
 	}
 
 	void Renderer::WaitForFrame()
 	{
-		vkWaitForFences(m_Device, 1, &m_InFlightFence, VK_TRUE, UINT64_MAX);
-		vkResetFences(m_Device, 1, &m_InFlightFence);
+		vkWaitForFences(m_Device, 1, &m_InFlightFences[m_CurrentRenderFrame], VK_TRUE, UINT64_MAX);
+		vkResetFences(m_Device, 1, &m_InFlightFences[m_CurrentRenderFrame]);
 	}
 
 	void Renderer::SubmitCommandData()
 	{
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphore };
-		VkSemaphore signalSemaphore[] = { m_RenderFinishedSemaphore };
+		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphores[m_CurrentRenderFrame] };
+		VkSemaphore signalSemaphore[] = { m_RenderFinishedSemaphores[m_CurrentRenderFrame] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphore;
 		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.pCommandBuffers = &m_CommandBuffer;
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentRenderFrame];
 		submitInfo.commandBufferCount = 1;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphore;
 
-		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFence) != VK_SUCCESS)
+		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentRenderFrame]) != VK_SUCCESS)
 		{
 			Log("Failed to submit the graphics queue.", LOG_CRITICAL);
 		}
@@ -166,25 +177,20 @@ namespace Bennett
 
 	void Renderer::RenderFrame()
 	{
-		WaitForFrame();
-		auto imageIndex = AquireSwapchainImageIndex();
-		
-		//Reset
-		vkResetCommandBuffer(m_CommandBuffer, 0);
-		//Record
-		RecordCommandBuffer(imageIndex);
+		StartFrame();
+
 		//Submit
+		Render();
 
-		SubmitCommandData();
-
-
-		Present(imageIndex);
+		EndFrame();
+			
+		m_CurrentRenderFrame = (m_CurrentRenderFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Renderer::Present(uint32_t& imageIndex)
 	{
-		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphore };
-		VkSemaphore signalSemaphore[] = { m_RenderFinishedSemaphore };
+		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphores[m_CurrentRenderFrame] };
+		VkSemaphore signalSemaphore[] = { m_RenderFinishedSemaphores[m_CurrentRenderFrame] };
 		VkSwapchainKHR swapchain[] = {m_SwapChain};
 		//SUBMITTING
 		VkPresentInfoKHR presentInfo{};
@@ -495,6 +501,10 @@ namespace Bennett
 
 	bool Renderer::CreateSyncObjects()
 	{
+		m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+		m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
 		VkSemaphoreCreateInfo semaphoreInfo{};
 		semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
@@ -503,22 +513,25 @@ namespace Bennett
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphore) != VK_SUCCESS)
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			Log("Failed to create image availability semaphore.", LOG_CRITICAL);
-			return false;
-		}
+			if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS)
+			{
+				Log("Failed to create image availability semaphore.", LOG_CRITICAL);
+				return false;
+			}
 
-		if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphore) != VK_SUCCESS)
-		{
-			Log("Failed to create render finished semaphore.", LOG_CRITICAL);
-			return false;
-		}
+			if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS)
+			{
+				Log("Failed to create render finished semaphore.", LOG_CRITICAL);
+				return false;
+			}
 
-		if (vkCreateFence(m_Device, &fenceInfo, nullptr, &m_InFlightFence) != VK_SUCCESS)
-		{
-			Log("Failed to create fence.", LOG_CRITICAL);
-			return false;
+			if (vkCreateFence(m_Device, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
+			{
+				Log("Failed to create fence.", LOG_CRITICAL);
+				return false;
+			}
 		}
 
 		return true;
@@ -583,9 +596,14 @@ namespace Bennett
 	{
 		if (m_IsInitialised)
 		{
-			vkDestroySemaphore(m_Device, m_ImageAvailableSemaphore, nullptr);
-			vkDestroySemaphore(m_Device, m_RenderFinishedSemaphore, nullptr);
-			vkDestroyFence(m_Device, m_InFlightFence, nullptr);
+			vkDeviceWaitIdle(m_Device);
+
+			for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+			{
+				vkDestroySemaphore(m_Device, m_ImageAvailableSemaphores[i], nullptr);
+				vkDestroySemaphore(m_Device, m_RenderFinishedSemaphores[i], nullptr);
+				vkDestroyFence(m_Device, m_InFlightFences[i], nullptr);
+			}
 
 			vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
 
