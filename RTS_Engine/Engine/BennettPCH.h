@@ -6,8 +6,8 @@
 #include <windows.h>
 #endif // _WIN32
 
-
 //C++ Libraries
+#include <array>
 #include <iostream>
 #include <string>
 #include <cmath>
@@ -15,8 +15,8 @@
 #include <vector>
 #include <algorithm>
 
-#ifdef _DEBUG
+//GLM
+#include <glm/glm.hpp>
+
+//Adding Logger
 #include "Logger.h"
-#else
-#define void Log(T var, int statusLevel) {};
-#endif // _DEBUG

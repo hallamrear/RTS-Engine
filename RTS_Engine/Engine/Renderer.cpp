@@ -5,8 +5,8 @@
 #include <GLFW/glfw3native.h>
 
 #include "BennettPCH.h"
-#include "Logger.h"
 #include "Renderer.h"
+#include "Vertex.h"
 #include <fstream>
 #include <set>
 
@@ -118,6 +118,7 @@ namespace Bennett
 		vkResetCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame], 0);
 		//Record
 		RecordCommandBuffer();
+		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 	}
 
 	void Renderer::EndFrame()
@@ -132,15 +133,7 @@ namespace Bennett
 
 		SubmitCommandData();
 		Present(m_CurrentImageIndex);
-	}
-
-	void Renderer::Render()
-	{
-		//Bind a graphics pipeline rather thana compute one.
-		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
-
-		//Set up scissor and viewport.
-		vkCmdDraw(m_CommandBuffers[m_CurrentRenderFrame], 3, 1, 0, 0);
+		m_CurrentRenderFrame = (m_CurrentRenderFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void Renderer::AquireSwapchainImageIndex()
@@ -175,18 +168,6 @@ namespace Bennett
 		}
 	}
 
-	void Renderer::RenderFrame()
-	{
-		StartFrame();
-
-		//Submit
-		Render();
-
-		EndFrame();
-			
-		m_CurrentRenderFrame = (m_CurrentRenderFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-	}
-
 	void Renderer::Present(uint32_t& imageIndex)
 	{
 		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphores[m_CurrentRenderFrame] };
@@ -203,6 +184,31 @@ namespace Bennett
 		presentInfo.pResults = nullptr;
 
 		vkQueuePresentKHR(m_GraphicsQueue, &presentInfo);
+	}
+
+	const VkDevice& Renderer::GetDevice() const
+	{
+		return m_Device;
+	}
+
+	const VkCommandBuffer& Renderer::GetCommandBuffer() const
+	{
+		return m_CommandBuffers[m_CurrentRenderFrame];
+	}
+
+	const VkPhysicalDevice& Renderer::GetPhysicalDevice() const
+	{
+		return m_PhysicalDevice;
+	}
+
+	const VkCommandPool& Renderer::GetCommandPool() const
+	{
+		return m_CommandPool;
+	}
+
+	const VkQueue& Renderer::GetGraphicsQueue() const
+	{
+		return m_GraphicsQueue;
 	}
 
 	void Renderer::SetViewport(int x, int y, int w, int h, float maxDepth = 1.0f, float minDepth = 0.0f)
@@ -337,12 +343,15 @@ namespace Bennett
 
 #pragma region VERTEX INPUT ASSEMBLY
 
+		auto vertexAttributes = Vertex::GetAttributeDescription();
+		auto vertexBindings = Vertex::GetBindingDescription();
+
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
-		vertexInputInfo.pVertexBindingDescriptions = nullptr;
-		vertexInputInfo.vertexBindingDescriptionCount = 0;
+		vertexInputInfo.pVertexAttributeDescriptions = vertexAttributes.data();
+		vertexInputInfo.vertexAttributeDescriptionCount = vertexAttributes.size();
+		vertexInputInfo.pVertexBindingDescriptions = &vertexBindings;
+		vertexInputInfo.vertexBindingDescriptionCount = 1;
 
 #pragma endregion
 
@@ -624,13 +633,9 @@ namespace Bennett
 				vkDestroyImageView(m_Device, imageView, nullptr);
 			}
 
-			for (auto image : m_SwapChainImages)
-			{
-				vkDestroyImage(m_Device, image, nullptr);
-			}
-
 			vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 			DestroyWindowSurface();
+			vkDestroyDevice(m_Device, nullptr);
 			DestroyVulkanInstance();
 		}
 	}

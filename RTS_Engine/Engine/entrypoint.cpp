@@ -10,7 +10,6 @@
 
 #include "BennettPCH.h"
 #include "Application.h"
-#include "Logger.h"
 
 using namespace Bennett;
 

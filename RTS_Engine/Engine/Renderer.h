@@ -2,6 +2,8 @@
 #include <optional>
 #include <vulkan/vulkan.h>
 
+class GLFWwindow;
+
 namespace Bennett
 {
 	class Renderer
@@ -82,7 +84,10 @@ namespace Bennett
 		);
 
 		//This variable is used to determine which validation layers we want to enable.
-		const std::vector<const char*> m_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+		const std::vector<const char*> m_ValidationLayers = 
+		{ 
+			"VK_LAYER_KHRONOS_validation"
+		};
 
 		//This variable is used to determine whether we want to enable validation layers.
 		#ifdef NDEBUG
@@ -192,14 +197,18 @@ namespace Bennett
 		uint32_t m_CurrentImageIndex;
 		//Acquire an image from the swap chain
 		void AquireSwapchainImageIndex();
-		//Record a command buffer which draws the scene onto that image
-		void Render();
 		//Submit the recorded command buffer
 		void SubmitCommandData();
 		//Present the swap chain image
 		void Present(uint32_t& imageIndex);
 
 	public:
+		const VkDevice& GetDevice() const;
+		const VkCommandBuffer& GetCommandBuffer() const;
+		const VkPhysicalDevice& GetPhysicalDevice() const;
+		const VkCommandPool& GetCommandPool() const;
+		const VkQueue& GetGraphicsQueue() const;
+
 		Renderer();
 
 		bool Initialise(GLFWwindow& window);
@@ -209,7 +218,6 @@ namespace Bennett
 		void SetScissorRect(int x, int y, int w, int h);
 
 		void StartFrame();
-		void RenderFrame();
 		void EndFrame();
 		
 		~Renderer();

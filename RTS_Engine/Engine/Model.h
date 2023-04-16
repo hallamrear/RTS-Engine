@@ -1,16 +1,20 @@
 #pragma once
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "Mesh.h"
 
-class Model
+namespace Bennett
 {
-private:
-	VertexBuffer m_VertexBuffer;
-	IndexBuffer m_IndexBuffer;
+	class Model
+	{
+	private:
+		std::vector<Mesh*> m_Meshes;
 
-public:
+	public:
+		Model(const Renderer& renderer);
+		~Model();
 
-
-
-};
+		void Render(const Renderer& renderer);
+	};
+}
 

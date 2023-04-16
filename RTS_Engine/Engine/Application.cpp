@@ -1,7 +1,7 @@
 #include <GLFW/glfw3.h>
 #include "BennettPCH.h"
 #include "Application.h"
-#include "Logger.h"
+#include "Model.h"
 
 namespace Bennett
 {
@@ -50,6 +50,7 @@ namespace Bennett
 		Log("Application created.", LOG_SAFE);
 		m_Window = nullptr;
 		m_IsRunning = true;
+
 	}
 
 	Application::~Application()
@@ -60,14 +61,20 @@ namespace Bennett
 
 	void Application::Update(float DeltaTime)
 	{
+		if (!model)
+		{
+			model = new Model(m_Renderer);
+		}
 	}
 
 	void Application::Render()
 	{
-		m_Renderer.RenderFrame();
-
 		//m_Renderer.Render();
+		m_Renderer.StartFrame();
+		//Submit
+		model->Render(m_Renderer);
 
+		m_Renderer.EndFrame();
 	}
 
 

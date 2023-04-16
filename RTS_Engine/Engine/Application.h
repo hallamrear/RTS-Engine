@@ -5,6 +5,7 @@ struct GLFWwindow;
 
 namespace Bennett
 {
+	class Model;
 
 	struct WindowDetails
 	{
@@ -25,6 +26,8 @@ namespace Bennett
 	class Application
 	{
 	private:
+		Model* model;
+
 		bool m_IsRunning;
 		GLFWwindow* m_Window;
 		Renderer m_Renderer;
