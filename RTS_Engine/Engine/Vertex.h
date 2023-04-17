@@ -7,13 +7,15 @@ namespace Bennett
 	{
 	public:
 		glm::vec3 Position;
-		glm::vec3 Colour;
+		glm::vec3 Normal;
+		glm::vec2 UV;
+		glm::vec4 Colour;
 
-		Vertex(const glm::vec3& position, const glm::vec3& colour);
-		Vertex(float x, float y, float z);
+		Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& uv, const glm::vec4& colour);
+		Vertex();
 		~Vertex();
 
 		static VkVertexInputBindingDescription GetBindingDescription();
-		static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescription();
+		static std::array<VkVertexInputAttributeDescription, 4> GetAttributeDescription();
 	};
 }

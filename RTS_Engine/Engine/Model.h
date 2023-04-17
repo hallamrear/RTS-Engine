@@ -5,13 +5,20 @@
 
 namespace Bennett
 {
+	class Renderer;
+
 	class Model
 	{
-	private:
+	friend class ModelLoader;
+
+	protected:
 		std::vector<Mesh*> m_Meshes;
+		Model();
 
 	public:
-		Model(const Renderer& renderer);
+		glm::vec3 Position;
+		float Rotation;
+
 		~Model();
 
 		void Render(const Renderer& renderer);

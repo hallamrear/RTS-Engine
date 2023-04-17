@@ -4,8 +4,19 @@
 
 namespace Bennett
 {
+    void IndexBuffer::Bind(const Renderer& renderer)
+    {
+        vkCmdBindIndexBuffer(renderer.GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+    }
+
     bool IndexBuffer::CreateBuffer(const Renderer& renderer, IndexBuffer& buffer, const std::vector<unsigned int>& indices)
     {
+        if (indices.size() <= 0)
+        {
+            Log("No indices passed into create buffer.", LOG_MINIMAL);
+            return false;
+        }
+
         VkBufferCreateInfo bufferInfo{};
         bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferInfo.size = sizeof(indices[0]) * indices.size();

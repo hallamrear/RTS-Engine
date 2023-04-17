@@ -26,7 +26,8 @@ namespace Bennett
 	class Application
 	{
 	private:
-		Model* model;
+		Model* m_ModelOne;
+		Model* m_ModelTwo;
 
 		bool m_IsRunning;
 		GLFWwindow* m_Window;

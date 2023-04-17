@@ -4,7 +4,7 @@
 namespace Bennett
 {
 	class Renderer;
-
+	 
 	class Buffer
 	{
 	private:
@@ -17,10 +17,10 @@ namespace Bennett
 		VkDeviceMemory m_BufferMemory;
 
 		int m_Count;
-		static uint32_t FindMemoryType(const Renderer& renderer, uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
 		
 	public:
 		int Count() const;
 		virtual void Bind(const Renderer& renderer) = 0;
+		static uint32_t FindMemoryType(const Renderer& renderer, uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
 	};
 }

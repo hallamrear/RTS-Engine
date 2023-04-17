@@ -6,6 +6,13 @@ class GLFWwindow;
 
 namespace Bennett
 {
+	static struct UniformBufferObject
+	{
+		glm::mat4 Model;
+		glm::mat4 View;
+		glm::mat4 Projection;
+	};
+
 	class Renderer
 	{
 	private:
@@ -171,6 +178,16 @@ namespace Bennett
 		VkPipelineLayout m_PipelineLayout;
 		bool InitialiseGraphicsPipeline();
 
+		//Create descriptor layout
+		VkDescriptorSetLayout m_DescriptorSetLayout;
+		bool CreateDescriptorLayout();
+		//Create descriptor pools
+		VkDescriptorPool m_DescriptorPool;
+		bool CreateDescriptorPool();
+		//Create descriptor sets
+		std::vector<VkDescriptorSet> m_DescriptorSets;
+		bool CreateDescriptorSets();
+
 		//Framebuffers
 		int m_CurrentRenderFrame = 0;
 		const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -194,6 +211,7 @@ namespace Bennett
 		//Wait for the previous frame to finish
 		void WaitForFrame();
 
+
 		uint32_t m_CurrentImageIndex;
 		//Acquire an image from the swap chain
 		void AquireSwapchainImageIndex();
@@ -202,7 +220,16 @@ namespace Bennett
 		//Present the swap chain image
 		void Present(uint32_t& imageIndex);
 
+
+		//Uniform Buffers
+		std::vector<VkBuffer> m_UniformBuffers;
+		std::vector<VkDeviceMemory> m_UniformBuffersMemory;
+		std::vector<void*> m_UniformBuffersMapped;
+		bool CreateUniformBuffers();
+
 	public:
+		static UniformBufferObject UniformMatrixBuffer;
+
 		const VkDevice& GetDevice() const;
 		const VkCommandBuffer& GetCommandBuffer() const;
 		const VkPhysicalDevice& GetPhysicalDevice() const;
@@ -218,6 +245,7 @@ namespace Bennett
 		void SetScissorRect(int x, int y, int w, int h);
 
 		void StartFrame();
+		void UpdateUniformBuffer() const;
 		void EndFrame();
 		
 		~Renderer();

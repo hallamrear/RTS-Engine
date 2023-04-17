@@ -9,9 +9,12 @@
 #include "Vertex.h"
 #include <fstream>
 #include <set>
+#include "Buffer.h"
 
 namespace Bennett
 {
+	UniformBufferObject Renderer::UniformMatrixBuffer = UniformBufferObject();
+
 	Renderer::Renderer()
 	{
 		m_PhysicalDevice = VK_NULL_HANDLE;
@@ -45,7 +48,11 @@ namespace Bennett
 		result &= CreateSwapChain(window);
 		result &= CreateSwapChainImageViews();
 		result &= CreateRenderPass();
+		result &= CreateDescriptorLayout();
+		result &= CreateDescriptorPool();
 		result &= InitialiseGraphicsPipeline();
+		result &= CreateUniformBuffers();
+		result &= CreateDescriptorSets();
 		result &= CreateFrameBuffers();
 		result &= CreateCommandPool(); 
 		result &= CreateCommandBuffer();
@@ -92,6 +99,8 @@ namespace Bennett
 			Log("Failed to begin recording command buffer.", LOG_CRITICAL);
 			return false;
 		}
+
+		vkCmdBindDescriptorSets(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSets[m_CurrentRenderFrame], 0, nullptr);
 
 		VkClearValue colour = { 0.0f, 0.0f, 0.0f, 1.0f };
 
@@ -147,8 +156,15 @@ namespace Bennett
 		vkResetFences(m_Device, 1, &m_InFlightFences[m_CurrentRenderFrame]);
 	}
 
+	void Renderer::UpdateUniformBuffer() const
+	{
+		memcpy(m_UniformBuffersMapped[m_CurrentRenderFrame], &UniformMatrixBuffer, sizeof(UniformMatrixBuffer));
+	}
+
 	void Renderer::SubmitCommandData()
 	{
+		UpdateUniformBuffer();
+
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		VkSemaphore waitSemaphore[] = { m_ImageAvailableSemaphores[m_CurrentRenderFrame] };
@@ -184,6 +200,49 @@ namespace Bennett
 		presentInfo.pResults = nullptr;
 
 		vkQueuePresentKHR(m_GraphicsQueue, &presentInfo);
+	}
+
+	bool Renderer::CreateUniformBuffers()
+	{
+		VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+		m_UniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+		m_UniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+		m_UniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			VkBufferCreateInfo bufferInfo{};
+			bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+			bufferInfo.size = bufferSize;
+			bufferInfo.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+			bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+			if (vkCreateBuffer(m_Device, &bufferInfo, nullptr, &m_UniformBuffers[i]))
+			{
+				Log("Failed to create uniform buffer.", LOG_SERIOUS);
+				return false;
+			}
+
+			VkMemoryRequirements memRequirements;
+			vkGetBufferMemoryRequirements(m_Device, m_UniformBuffers[i], &memRequirements);
+
+			VkMemoryAllocateInfo allocInfo{};
+			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+			allocInfo.allocationSize = memRequirements.size;
+			allocInfo.memoryTypeIndex = Bennett::Buffer::FindMemoryType(*this, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+			if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &m_UniformBuffersMemory[i]) != VK_SUCCESS)
+			{
+				Log("Failed to allocate memory for uniform buffer.", LOG_SERIOUS);
+				return false;
+			}
+
+			vkBindBufferMemory(m_Device, m_UniformBuffers[i], m_UniformBuffersMemory[i], 0);
+			vkMapMemory(m_Device, m_UniformBuffersMemory[i], 0, bufferSize, 0, &m_UniformBuffersMapped[i]);
+		}
+
+		return true;
 	}
 
 	const VkDevice& Renderer::GetDevice() const
@@ -379,7 +438,7 @@ namespace Bennett
 		rasterizer.lineWidth = 1.0f;
 
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 		//Altering depth values and biasing.
 		rasterizer.depthBiasEnable = VK_FALSE;
@@ -465,8 +524,8 @@ namespace Bennett
 
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-		pipelineLayoutCreateInfo.setLayoutCount = 0;
+		pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+		pipelineLayoutCreateInfo.setLayoutCount = 1;
 		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
 		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
@@ -504,6 +563,92 @@ namespace Bennett
 		}
 
 #pragma endregion
+
+		return true;
+	}
+
+	bool Renderer::CreateDescriptorLayout()
+	{
+		VkDescriptorSetLayoutBinding uboLayoutBinding{};
+		uboLayoutBinding.binding = 0;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr;
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = 1;
+		layoutInfo.pBindings = &uboLayoutBinding;
+
+		if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
+		{
+			Log("Failed to create descriptor set layout!", LOG_SERIOUS);
+			return false;
+		}
+
+
+		return true;
+	}
+
+	bool Renderer::CreateDescriptorPool()
+	{
+		VkDescriptorPoolSize poolSize{};
+		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize.descriptorCount = MAX_FRAMES_IN_FLIGHT;
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.poolSizeCount = 1;
+		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
+
+		if (vkCreateDescriptorPool(m_Device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
+		{
+			Log("Failed to create descriptor pool", LOG_SERIOUS);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Renderer::CreateDescriptorSets()
+	{
+		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
+
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = m_DescriptorPool;
+		allocInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
+		allocInfo.pSetLayouts = layouts.data();
+
+		m_DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+		if (vkAllocateDescriptorSets(m_Device, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
+		{
+			Log("failed to create descriptor sets!", LOG_CRITICAL);
+			return false;
+		}
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = m_UniformBuffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(UniformBufferObject);
+
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.dstSet = m_DescriptorSets[i];
+			descriptorWrite.dstBinding = 0;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.pBufferInfo = &bufferInfo;
+			descriptorWrite.pImageInfo = nullptr;
+			descriptorWrite.pTexelBufferView = nullptr;
+			vkUpdateDescriptorSets(m_Device, 1, &descriptorWrite, 0, nullptr);
+		}
+
 
 		return true;
 	}
@@ -606,6 +751,15 @@ namespace Bennett
 		if (m_IsInitialised)
 		{
 			vkDeviceWaitIdle(m_Device);
+
+			for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+			{
+				vkDestroyBuffer(m_Device, m_UniformBuffers[i], nullptr);
+				vkFreeMemory(m_Device, m_UniformBuffersMemory[i], nullptr);
+			}
+
+			vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
+			vkDestroyDescriptorSetLayout(m_Device, m_DescriptorSetLayout, nullptr);
 
 			for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 			{
