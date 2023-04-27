@@ -2,10 +2,14 @@
 
 layout(binding = 0) uniform UniformBufferObject
 {
-	mat4 Model;
 	mat4 View;
 	mat4 Projection;
 } UBO;
+
+layout(push_constant) uniform PushConstants
+{
+	mat4 Model;
+} PC;
 
 layout(location = 0) in vec3 inPosition;
 layout(location = 1) in vec3 inNormal;
@@ -16,7 +20,7 @@ layout(location = 0) out vec3 outColour;
 
 void main()
 {
-	mat4 MVP =	UBO.Projection * UBO.View * UBO.Model;
+	mat4 MVP =	UBO.Projection * UBO.View * PC.Model;
 	gl_Position = MVP * vec4(inPosition, 1.0f);
 	outColour = (MVP * vec4(inNormal, 1.0f)).rgb;
 }

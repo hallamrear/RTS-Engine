@@ -16,9 +16,6 @@ namespace Bennett
 		Model();
 
 	public:
-		glm::vec3 Position;
-		float Rotation;
-
 		~Model();
 
 		void Render(const Renderer& renderer);

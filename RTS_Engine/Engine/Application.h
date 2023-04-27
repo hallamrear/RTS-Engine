@@ -1,12 +1,11 @@
 #pragma once
 #include "Renderer.h"
+#include "Entity.h"
 
 struct GLFWwindow;
 
 namespace Bennett
 {
-	class Model;
-
 	struct WindowDetails
 	{
 		std::string Title;
@@ -26,8 +25,7 @@ namespace Bennett
 	class Application
 	{
 	private:
-		Model* m_ModelOne;
-		Model* m_ModelTwo;
+		std::vector<Entity> m_Entities;
 
 		bool m_IsRunning;
 		GLFWwindow* m_Window;

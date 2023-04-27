@@ -6,11 +6,15 @@ class GLFWwindow;
 
 namespace Bennett
 {
-	static struct UniformBufferObject
+	struct UniformBufferObject
 	{
-		glm::mat4 Model;
 		glm::mat4 View;
 		glm::mat4 Projection;
+	};
+
+	struct PushConstantBuffer
+	{
+		glm::mat4 ModelMatrix;
 	};
 
 	class Renderer
@@ -227,6 +231,11 @@ namespace Bennett
 		std::vector<void*> m_UniformBuffersMapped;
 		bool CreateUniformBuffers();
 
+		void BeginRenderPass();
+		void EndRenderPass();
+
+		static PushConstantBuffer m_PushConstantBuffer;
+
 	public:
 		static UniformBufferObject UniformMatrixBuffer;
 
@@ -245,7 +254,9 @@ namespace Bennett
 		void SetScissorRect(int x, int y, int w, int h);
 
 		void StartFrame();
-		void UpdateUniformBuffer() const;
+		void BindDescriptorSet() const;
+		void UpdateUniformBuffers() const;
+		void PushModelMatrix(const glm::mat4& modelMatrix) const;
 		void EndFrame();
 		
 		~Renderer();

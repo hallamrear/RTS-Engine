@@ -52,7 +52,6 @@ namespace Bennett
 		Log("Application created.", LOG_SAFE);
 		m_Window = nullptr;
 		m_IsRunning = true;
-
 	}
 
 	Application::~Application()
@@ -65,38 +64,25 @@ namespace Bennett
 
 	void Application::Update(float DeltaTime)
 	{
-		r += 5 * DeltaTime;
-		if (r ) r -= 360.0f;
-
-		if (!m_ModelOne)
+		for (auto& ent : m_Entities)
 		{
-			m_ModelOne = AssetManager::GetModel(m_Renderer, "blasterD");
-			m_ModelOne->Position = glm::vec3(2.5f, 0.0f, 0.0f);
+			ent.Update(DeltaTime);
 		}
-
-		if (!m_ModelTwo)
-		{
-			m_ModelTwo = AssetManager::GetModel(m_Renderer, "blasterD");
-			m_ModelTwo->Position = glm::vec3(-2.5f, 0.0f, 0.0f);
-		}
-
-		if (m_ModelOne->Rotation < 0.0f)   m_ModelOne->Rotation += 360.0f;
-		if (m_ModelTwo->Rotation > 360.0f) m_ModelTwo->Rotation -= 360.0f;
 	}
 
 	void Application::Render()
 	{
-		m_Renderer.UniformMatrixBuffer.Model = glm::mat4(1.0f); //glm::rotate(glm::mat4(1.0f), glm::radians(r), glm::vec3(0.0f, 1.0f, 0.0f));
-		float x = 2.5f * sin(r); float z = 2.5f * cos(r);
-		m_Renderer.UniformMatrixBuffer.View = glm::lookAt(glm::vec3(x, 0.0f, z), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		m_Renderer.UniformMatrixBuffer.View = glm::lookAt(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		m_Renderer.UniformMatrixBuffer.Projection = glm::perspective(glm::radians(45.0f), 1280.0f / 720.0f, 0.1f, 10.0f);
 		m_Renderer.UniformMatrixBuffer.Projection[1][1] *= -1;
 
 		//m_Renderer.Render();
 		m_Renderer.StartFrame();
 		//Submit
-		m_ModelOne->Render(m_Renderer);
-		m_ModelTwo->Render(m_Renderer);
+		for (auto& ent : m_Entities)
+		{
+			ent.Render(m_Renderer);
+		}
 
 		m_Renderer.EndFrame();
 	}
@@ -107,6 +93,18 @@ namespace Bennett
 		if (InitialiseWindow(details) && InitialiseRenderer())
 		{
 			Log("Initialised application successfully.", LOG_SAFE);
+
+			for (size_t i = 0; i < 10; i++)
+			{
+				float x = rand() % 20 - 10;
+				float y = rand() % 20 - 10;
+
+				m_Entities.push_back(Entity());
+				m_Entities.back()._Model = AssetManager::GetModel(m_Renderer, "blasterD");
+				m_Entities.back().Position = glm::vec3(x, y, 0.0f);
+				m_Entities.back().Rotation = rand() % 360 + 1;
+			}
+
 			return true;
 		}
 		else

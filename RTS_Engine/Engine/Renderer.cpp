@@ -14,6 +14,7 @@
 namespace Bennett
 {
 	UniformBufferObject Renderer::UniformMatrixBuffer = UniformBufferObject();
+	PushConstantBuffer Renderer::m_PushConstantBuffer = PushConstantBuffer();
 
 	Renderer::Renderer()
 	{
@@ -100,10 +101,21 @@ namespace Bennett
 			return false;
 		}
 
+		BindDescriptorSet();
+
+		vkCmdSetViewport(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_Viewport);
+		vkCmdSetScissor(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_ScissorRect);
+
+	}
+
+	void Renderer::BindDescriptorSet() const
+	{
 		vkCmdBindDescriptorSets(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSets[m_CurrentRenderFrame], 0, nullptr);
+	}
 
+	void Renderer::BeginRenderPass()
+	{
 		VkClearValue colour = { 0.0f, 0.0f, 0.0f, 1.0f };
-
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.clearValueCount = 1;
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -112,11 +124,12 @@ namespace Bennett
 		renderPassInfo.renderArea.offset = { 0 ,0 };
 		renderPassInfo.renderArea.extent = m_SwapChainExtent;
 		renderPassInfo.pClearValues = &colour;
-
-		vkCmdSetViewport(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_Viewport);
-		vkCmdSetScissor(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_ScissorRect);
-
 		vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentRenderFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	}
+
+	void Renderer::EndRenderPass()
+	{
+		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentRenderFrame]);
 	}
 
 	void Renderer::StartFrame()
@@ -127,13 +140,15 @@ namespace Bennett
 		vkResetCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame], 0);
 		//Record
 		RecordCommandBuffer();
+
+		BeginRenderPass();
+
 		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
 	}
 
 	void Renderer::EndFrame()
 	{
-		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentRenderFrame]);
-
+		EndRenderPass();
 		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame]) != VK_SUCCESS)
 		{
 			Log("Failed to record command buffer.", LOG_CRITICAL);
@@ -156,14 +171,20 @@ namespace Bennett
 		vkResetFences(m_Device, 1, &m_InFlightFences[m_CurrentRenderFrame]);
 	}
 
-	void Renderer::UpdateUniformBuffer() const
+	void Renderer::UpdateUniformBuffers() const
 	{
 		memcpy(m_UniformBuffersMapped[m_CurrentRenderFrame], &UniformMatrixBuffer, sizeof(UniformMatrixBuffer));
 	}
 
+	void Renderer::PushModelMatrix(const glm::mat4& modelMatrix) const
+	{
+		m_PushConstantBuffer.ModelMatrix = modelMatrix;
+		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
+	}
+
 	void Renderer::SubmitCommandData()
 	{
-		UpdateUniformBuffer();
+		UpdateUniformBuffers();
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -522,19 +543,23 @@ namespace Bennett
 
 #pragma region Creating Pipeline
 
+		VkPushConstantRange pushConstantInfo{};
+		pushConstantInfo.offset = 0;
+		pushConstantInfo.size = sizeof(PushConstantBuffer);
+		pushConstantInfo.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+
 		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
 		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 		pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
 		pipelineLayoutCreateInfo.setLayoutCount = 1;
-		pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-		pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
+		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantInfo;
 
 		if (vkCreatePipelineLayout(m_Device, &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
 		{
 			Log("Failed to create pipeline layout.", LOG_CRITICAL);
 			return false;
 		}
-
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -775,10 +800,6 @@ namespace Bennett
 				vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
 			}
 
-			vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
-			vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
-			vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
-
 			vkDestroyShaderModule(m_Device, m_FragShaderModule, nullptr);
 			vkDestroyShaderModule(m_Device, m_VertShaderModule, nullptr);
 
@@ -787,8 +808,15 @@ namespace Bennett
 				vkDestroyImageView(m_Device, imageView, nullptr);
 			}
 
+			vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
+
 			vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+
 			DestroyWindowSurface();
+
+			vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
+			vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
+
 			vkDestroyDevice(m_Device, nullptr);
 			DestroyVulkanInstance();
 		}

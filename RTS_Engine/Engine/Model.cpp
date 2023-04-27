@@ -21,16 +21,14 @@ namespace Bennett
 
 	void Model::Render(const Renderer& renderer)
 	{
-		glm::mat4 matrix = glm::mat4(1.0f);
-		matrix = glm::translate(matrix, Position);
-		matrix = glm::rotate(glm::mat4(1.0f), glm::radians(Rotation), glm::vec3(0.0f, 1.0f, 0.0f));
-		renderer.UniformMatrixBuffer.Model = matrix;
-
 		if (m_Meshes.size() <= 0)
 		{
 			Log("Trying to draw a model with 0 meshes.", LOG_MINIMAL);
 			return;
 		}
+
+		renderer.BindDescriptorSet();
+		renderer.UpdateUniformBuffers();
 
 		for (size_t i = 0; i < m_Meshes.size(); i++)
 		{

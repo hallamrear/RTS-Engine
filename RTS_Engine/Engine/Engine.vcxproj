@@ -188,12 +188,14 @@
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="BennettPCH.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="Entity.cpp" />
     <ClCompile Include="entrypoint.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="Services.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
@@ -204,6 +206,7 @@
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="BennettPCH.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="Entity.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Logger.h" />
@@ -212,6 +215,7 @@
     <ClInclude Include="ModelLoader.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Services.h" />
     <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />
