@@ -98,10 +98,13 @@ namespace Bennett
 			{
 				float x = rand() % 20 - 10;
 				float y = rand() % 20 - 10;
+				float z = 0.0f;
+				x = i;
+				z = i;
 
 				m_Entities.push_back(Entity());
 				m_Entities.back()._Model = AssetManager::GetModel(m_Renderer, "blasterD");
-				m_Entities.back().Position = glm::vec3(x, y, 0.0f);
+				m_Entities.back().Position = glm::vec3(x, y, z);
 				m_Entities.back().Rotation = rand() % 360 + 1;
 			}
 

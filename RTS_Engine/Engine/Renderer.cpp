@@ -11,6 +11,8 @@
 #include <set>
 #include "Buffer.h"
 
+#define INIT_CHECK(func) if(func != true) return false;
+
 namespace Bennett
 {
 	UniformBufferObject Renderer::UniformMatrixBuffer = UniformBufferObject();
@@ -41,24 +43,26 @@ namespace Bennett
 
 	bool Renderer::InitialiseCoreVulkanSystem(GLFWwindow& window)
 	{
-		bool result = CreateVulkanInstance();
+		INIT_CHECK(CreateVulkanInstance())
 		CreateDebugMessenger();
-		result &= CreateWindowSurface(window);
-		result &= PickPhysicalDevice();
-		result &= CreateLogicalDevice();
-		result &= CreateSwapChain(window);
-		result &= CreateSwapChainImageViews();
-		result &= CreateRenderPass();
-		result &= CreateDescriptorLayout();
-		result &= CreateDescriptorPool();
-		result &= InitialiseGraphicsPipeline();
-		result &= CreateUniformBuffers();
-		result &= CreateDescriptorSets();
-		result &= CreateFrameBuffers();
-		result &= CreateCommandPool(); 
-		result &= CreateCommandBuffer();
-		result &= CreateSyncObjects();
-		return result;
+		INIT_CHECK(CreateWindowSurface(window))
+		INIT_CHECK(PickPhysicalDevice())
+		INIT_CHECK(CreateLogicalDevice())
+		INIT_CHECK(CreateSwapChain(window))
+		INIT_CHECK(CreateSwapChainImageViews())
+		INIT_CHECK(CreateRenderPass())
+		INIT_CHECK(CreateDescriptorLayout())
+		INIT_CHECK(CreateDescriptorPool())
+		INIT_CHECK(InitialiseGraphicsPipeline())
+		INIT_CHECK(CreateUniformBuffers())
+		INIT_CHECK(CreateDepthResources())
+		INIT_CHECK(CreateDescriptorSets())
+		INIT_CHECK(CreateFrameBuffers())
+		INIT_CHECK(CreateCommandPool())
+		INIT_CHECK(CreateCommandBuffer())
+		INIT_CHECK(CreateSyncObjects())
+
+		return true;
 	}
 
 	bool Renderer::CreateCommandBuffer()
@@ -88,7 +92,7 @@ namespace Bennett
 		* VK_COMMAND_BUFFER_USAGE_RENDER_PASS_CONTINUE_BIT - This is a secondary command buffer used entirely within a single render pass.
 		* VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT - The command buffer can be resubmitted while it is also pending exectution.
 		*/
-
+		
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = 0;
@@ -115,7 +119,10 @@ namespace Bennett
 
 	void Renderer::BeginRenderPass()
 	{
-		VkClearValue colour = { 0.0f, 0.0f, 0.0f, 1.0f };
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+		clearValues[1].depthStencil = { 1.0f, 0 };
+
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.clearValueCount = 1;
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -123,7 +130,8 @@ namespace Bennett
 		renderPassInfo.framebuffer = m_Framebuffers[m_CurrentImageIndex];
 		renderPassInfo.renderArea.offset = { 0 ,0 };
 		renderPassInfo.renderArea.extent = m_SwapChainExtent;
-		renderPassInfo.pClearValues = &colour;
+		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues = clearValues.data();
 		vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentRenderFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
@@ -335,13 +343,13 @@ namespace Bennett
 
 		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
 		{
-			VkImageView attachments[] = { m_SwapChainImageViews[i] };
+			std::array<VkImageView, 2> attachments = { m_SwapChainImageViews[i], m_DepthImageView };
 
 			VkFramebufferCreateInfo framebufferInfo{};
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferInfo.renderPass = m_RenderPass;
-			framebufferInfo.attachmentCount = 1;
-			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.attachmentCount = 2;
+			framebufferInfo.pAttachments = attachments.data();
 			framebufferInfo.width = m_SwapChainExtent.width;
 			framebufferInfo.height = m_SwapChainExtent.height;
 			framebufferInfo.layers = 1;
@@ -513,7 +521,21 @@ namespace Bennett
 #pragma endregion
 
 #pragma region Depth/Stencil
-		VkPipelineDepthStencilStateCreateInfo stencilinfo{};
+		VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+
+		depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencilInfo.depthTestEnable = VK_TRUE;
+		depthStencilInfo.depthWriteEnable = VK_TRUE;
+		depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
+		depthStencilInfo.maxDepthBounds = 1.0f;
+		depthStencilInfo.minDepthBounds = 0.0f;
+
+		depthStencilInfo.stencilTestEnable = VK_FALSE;
+		depthStencilInfo.front = {};
+		depthStencilInfo.back = {};
+
+
 #pragma endregion
 
 #pragma region Colour Blending
@@ -569,7 +591,7 @@ namespace Bennett
 		pipelineInfo.pInputAssemblyState = &inputAssembly;
 		pipelineInfo.pRasterizationState = &rasterizer;
 		pipelineInfo.pMultisampleState = &multisampling;
-		pipelineInfo.pDepthStencilState = &stencilinfo;
+		pipelineInfo.pDepthStencilState = &depthStencilInfo;
 		pipelineInfo.pColorBlendState = &colorBlendingInfo;
 		pipelineInfo.pDynamicState = &dynamicState;
 		pipelineInfo.pViewportState = &viewportState;
@@ -717,7 +739,12 @@ namespace Bennett
 	}
 
 	bool Renderer::CreateRenderPass()
-	{
+	{	/*
+		- VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL: Images used as color attachment
+		- VK_IMAGE_LAYOUT_PRESENT_SRC_KHR: Images to be presented in the swapchain
+		- VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: Images to be used as destination for a memory copy operation
+		*/
+
 		//Create a single color buffer using one of the images of swap chain.
 		VkAttachmentDescription colorAttachment{};
 		colorAttachment.format = m_SwapChainFormat;
@@ -727,36 +754,49 @@ namespace Bennett
 		colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
 		colorAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-
-		/*
-		- VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL: Images used as color attachment
-		- VK_IMAGE_LAYOUT_PRESENT_SRC_KHR: Images to be presented in the swapchain
-		- VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: Images to be used as destination for a memory copy operation
-		*/
 		colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
 		VkAttachmentReference colorAttachmentRef{};
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+
+		VkAttachmentDescription depthAttachment{};
+		depthAttachment.format = FindDepthFormat();
+		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+		depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+		depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+		depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+		depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+		VkAttachmentReference depthAttachmentRef{};
+		depthAttachmentRef.attachment = 1;
+		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+
+
 
 		VkSubpassDescription subpass{};
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass.pColorAttachments = &colorAttachmentRef;
 		subpass.colorAttachmentCount = 1;
+		subpass.pDepthStencilAttachment = &depthAttachmentRef;
+
+		std::array<VkAttachmentDescription, 2> attachments = { colorAttachment, depthAttachment };
 
 		VkSubpassDependency dependency{};
 		dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
 		dependency.dstSubpass = 0;
-		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 		dependency.srcAccessMask = 0;
-		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+		dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+		dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = 1;
-		renderPassInfo.pAttachments = &colorAttachment;
+		renderPassInfo.attachmentCount = attachments.size();
+		renderPassInfo.pAttachments = attachments.data();
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpass;
 		renderPassInfo.dependencyCount = 1;
@@ -903,48 +943,48 @@ namespace Bennett
 		* that we want to use. Global in this context means they apply to the entire program rather than
 		* a specific device.
 		*/
-		VkInstanceCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-		createInfo.pApplicationInfo = &appInfo;
+VkInstanceCreateInfo createInfo{};
+createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+createInfo.pApplicationInfo = &appInfo;
 
-		/*
-		* The next two parameters specify the desired global extensions.
-		* As vulkan is platform agnostic, we need to use an extension to interface
-		* with the window system. We use glfw's built in funcitons to find these.
-		*/
+/*
+* The next two parameters specify the desired global extensions.
+* As vulkan is platform agnostic, we need to use an extension to interface
+* with the window system. We use glfw's built in funcitons to find these.
+*/
 
-		std::vector<const char*> requiredExtensions = GetRequiredExtensions();
-		createInfo.enabledExtensionCount = requiredExtensions.size();
-		createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+std::vector<const char*> requiredExtensions = GetRequiredExtensions();
+createInfo.enabledExtensionCount = requiredExtensions.size();
+createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
-		/*
-		* The last two struct members determine the global validation layers to enable.
-		*/
+/*
+* The last two struct members determine the global validation layers to enable.
+*/
 
-		if (m_EnableValidationLayers && !CheckValidationLayerSupport())
-		{
-			Log("Validation layers are enabled but failed to support them.", LOG_SERIOUS);
-			createInfo.enabledLayerCount = 0;
-		}
+if (m_EnableValidationLayers && !CheckValidationLayerSupport())
+{
+	Log("Validation layers are enabled but failed to support them.", LOG_SERIOUS);
+	createInfo.enabledLayerCount = 0;
+}
 
-		if (m_EnableValidationLayers)
-		{
-			createInfo.enabledLayerCount = m_ValidationLayers.size();
-			createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
-		}
-		else
-		{
-			createInfo.enabledLayerCount = 0;
-		}
+if (m_EnableValidationLayers)
+{
+	createInfo.enabledLayerCount = m_ValidationLayers.size();
+	createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
+}
+else
+{
+	createInfo.enabledLayerCount = 0;
+}
 
-		//We can now create the instance.
-		if (vkCreateInstance(&createInfo, nullptr, &m_Instance) != VK_SUCCESS)
-		{
-			Log("Failed to create vulkan instance.", LOG_CRITICAL);
-			return false;
-		}
+//We can now create the instance.
+if (vkCreateInstance(&createInfo, nullptr, &m_Instance) != VK_SUCCESS)
+{
+	Log("Failed to create vulkan instance.", LOG_CRITICAL);
+	return false;
+}
 
-		return true;
+return true;
 	}
 
 	void Renderer::DestroyVulkanInstance()
@@ -956,7 +996,7 @@ namespace Bennett
 	bool Renderer::CheckValidationLayerSupport()
 	{
 		/*
-		* Check if all the requested layers are available by first listing all of the 
+		* Check if all the requested layers are available by first listing all of the
 		* available layers using vkEnumerateInstanceLayerProperties and store in the vector.
 		*/
 		uint32_t layerCount;
@@ -966,7 +1006,7 @@ namespace Bennett
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
 		/*
-		* Next, check all the layers that are needed are 
+		* Next, check all the layers that are needed are
 		* also layers in this vector.
 		*/
 		for (const char* layerName : m_ValidationLayers)
@@ -991,7 +1031,116 @@ namespace Bennett
 		return true;
 
 	}
-	
+
+	bool Renderer::CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) 
+	{
+		VkImageCreateInfo imageInfo{};
+		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageInfo.extent.width = width;
+		imageInfo.extent.height = height;
+		imageInfo.extent.depth = 1;
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = format;
+		imageInfo.tiling = tiling;
+		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageInfo.usage = usage;
+		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		if (vkCreateImage(m_Device, &imageInfo, nullptr, &image) != VK_SUCCESS) 
+		{
+			Log("Failed to create image", LOG_SERIOUS);
+			return false;
+		}
+
+		VkMemoryRequirements memRequirements;
+		vkGetImageMemoryRequirements(m_Device, image, &memRequirements);
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(*this, memRequirements.memoryTypeBits, properties);
+
+		if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+			Log("Failed to allocate image memory", LOG_SERIOUS);
+		}
+
+		vkBindImageMemory(m_Device, image, imageMemory, 0);
+
+		return true;
+	}
+
+	bool Renderer::CreateImageView(VkImageView& imageView, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags)
+	{
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = image;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = format;
+		viewInfo.subresourceRange.aspectMask = aspectFlags;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		if (vkCreateImageView(m_Device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) 
+		{
+			Log("Failed to create image view", LOG_SERIOUS);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Renderer::CreateDepthResources()
+	{
+		VkFormat depthFormat = FindDepthFormat();
+
+		if(!CreateImage(m_SwapChainExtent.width, m_SwapChainExtent.height, depthFormat,
+			VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+			m_DepthImage, m_DepthImageMemory))
+			return false;
+
+		if (!CreateImageView(m_DepthImageView, m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT))
+			return false;
+
+		return true;
+	}
+
+	VkFormat Renderer::FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
+	{
+		for (VkFormat format : candidates) 
+		{
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &props);
+
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+				return format;
+			}
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+				return format;
+			}
+		}
+
+		throw std::runtime_error("failed to find supported format!");
+	}
+
+	VkFormat Renderer::FindDepthFormat()
+	{
+		return FindSupportedFormat(
+			{ VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+		);
+	}
+
+	bool Renderer::HasStencilComponent(VkFormat format)
+	{
+		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;;
+	}
+
 	std::vector<const char*> Renderer::GetRequiredExtensions()
 	{
 		uint32_t glfwExtensionCount = 0;

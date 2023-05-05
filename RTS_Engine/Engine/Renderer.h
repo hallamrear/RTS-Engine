@@ -126,6 +126,18 @@ namespace Bennett
 		//Validation Layers
 		bool CheckValidationLayerSupport();
 
+		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		bool CreateImageView(VkImageView& imageView, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+
+		//Depth/Stencil
+		VkImage m_DepthImage;
+		VkDeviceMemory m_DepthImageMemory;
+		VkImageView m_DepthImageView;
+		bool CreateDepthResources();
+		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+		VkFormat FindDepthFormat();
+		bool HasStencilComponent(VkFormat format);
+
 		//Extensions
 		std::vector<const char*> GetRequiredExtensions();
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice device);

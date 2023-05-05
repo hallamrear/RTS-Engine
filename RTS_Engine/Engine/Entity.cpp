@@ -7,7 +7,7 @@ namespace Bennett
 
 	Entity::Entity()
 	{
-		m_Speed = (rand() % 500 + 100);
+		m_Speed = (rand() % 50 + 100);
 	}
 
 	Entity::~Entity()
