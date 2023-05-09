@@ -188,6 +188,7 @@
     <ClCompile Include="AssetManager.cpp" />
     <ClCompile Include="BennettPCH.cpp" />
     <ClCompile Include="Buffer.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="entrypoint.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="AssetManager.h" />
     <ClInclude Include="BennettPCH.h" />
     <ClInclude Include="Buffer.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Event.h" />
     <ClInclude Include="IndexBuffer.h" />

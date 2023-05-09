@@ -1,6 +1,7 @@
 #pragma once
 #include "Renderer.h"
 #include "Entity.h"
+#include "Camera.h"
 
 struct GLFWwindow;
 
@@ -26,16 +27,20 @@ namespace Bennett
 	{
 	private:
 		std::vector<Entity> m_Entities;
+		Entity Floor;
 
 		bool m_IsRunning;
 		GLFWwindow* m_Window;
 		Renderer m_Renderer;
+		Camera m_Camera;
 
 		bool InitialiseWindow(const WindowDetails& details);
 		bool InitialiseRenderer();
+
 		void DestroyWindow();
 		void DestroyRenderer();
 
+		void ProcessInput(const float& deltaTime);
 		void Update(float DeltaTime);
 		void Render();
 
@@ -44,6 +49,7 @@ namespace Bennett
 		~Application();
 
 		void GameLoop();
+
 
 		bool Initialise(int argc, char** argv, const WindowDetails& details);
 		void Destroy();

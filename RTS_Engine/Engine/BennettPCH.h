@@ -18,7 +18,12 @@
 //GLM
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 //Adding Logger
 #include "Logger.h"
+
+//System Defines
+#define TIMESTEP_CAP 0.2f

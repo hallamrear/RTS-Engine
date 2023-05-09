@@ -10,12 +10,14 @@ namespace Bennett
 	private:
 		float m_Speed;
 	public:
+		glm::vec3 Scale;
 		glm::vec3 Position;
-		float Rotation;
+		glm::quat Rotation;
 
 		Model* _Model;
 
 		Entity();
+		Entity(glm::vec3 scale, glm::vec3 position, glm::vec3 rotation);
 		~Entity();
 
 		void Update(const float& deltaTime);
