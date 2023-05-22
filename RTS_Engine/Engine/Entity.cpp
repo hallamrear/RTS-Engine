@@ -5,7 +5,6 @@
 namespace Bennett
 {
 	Entity::Entity(const std::string& name)
-	Entity::Entity()
 	{
 		m_Name = name;
 		Scale = glm::vec3(1.0f, 1.0f, 1.0f);
