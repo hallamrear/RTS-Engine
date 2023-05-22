@@ -4,17 +4,19 @@
 
 namespace Bennett
 {
-
+	Entity::Entity(const std::string& name)
 	Entity::Entity()
 	{
+		m_Name = name;
 		Scale = glm::vec3(1.0f, 1.0f, 1.0f);
 		Position = glm::vec3(0.0f, 0.0f, 0.0f);
 		Rotation = glm::quat();
 		m_Speed = 1.0f;
 	}
 
-	Entity::Entity(glm::vec3 scale, glm::vec3 position, glm::vec3 rotation)
+	Entity::Entity(const std::string& name, glm::vec3 scale, glm::vec3 position, glm::vec3 rotation)
 	{
+		m_Name = name;
 		Scale = scale;
 		Position = position;
 		Rotation = glm::quat(rotation);
@@ -25,9 +27,9 @@ namespace Bennett
 
 	}
 
-	void Entity::Update(const float& deltaTime)
+	void Entity::Update(const float& DeltaTime)
 	{
-		Rotation = glm::rotate(Rotation, glm::vec3(0.0f, m_Speed * deltaTime, 0.0f));
+		Rotation = glm::rotate(Rotation, glm::vec3(0.0f, m_Speed * DeltaTime, 0.0f));
 	}
 
 	void Entity::Render(const Renderer& renderer)
@@ -43,4 +45,8 @@ namespace Bennett
 		_Model->Render(renderer);
 	}
 
+	const std::string& Entity::GetName() const
+	{
+		return m_Name;
+	}
 }

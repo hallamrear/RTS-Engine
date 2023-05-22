@@ -2,7 +2,9 @@
 #include "BennettPCH.h"
 #include "Application.h"
 #include "AssetManager.h"
+#include "LevelManager.h"
 #include "Model.h"
+#include "World.h"
 
 namespace Bennett
 {
@@ -59,15 +61,10 @@ namespace Bennett
 		Log("Destroying application", LOG_MINIMAL);
 		Destroy();
 	}
-
-	float r;
-
+	
 	void Application::Update(float DeltaTime)
 	{
-		for (auto& ent : m_Entities)
-		{
-			ent.Update(DeltaTime);
-		}
+		m_World.Update(DeltaTime);
 	}
 
 	void Application::Render()
@@ -77,13 +74,8 @@ namespace Bennett
 
 		//m_Renderer.Render();
 		m_Renderer.StartFrame();
-		//Submit
-		for (auto& ent : m_Entities)
-		{
-			ent.Render(m_Renderer);
-		}
-
-		Floor.Render(m_Renderer);
+		
+		m_World.Render(m_Renderer);
 
 		m_Renderer.EndFrame();
 	}
@@ -94,32 +86,7 @@ namespace Bennett
 		{
 			Log("Initialised application successfully.", LOG_SAFE);
 
-			for (int i = -10; i < 10; i += 2)
-			{
-				for (int j = -10; j < 10; j += 2)
-				{
-					float x = rand() % 20 - 10;
-					float y = rand() % 20 - 10;
-					float z = 0.0f;
-					x = i;
-					y = 0.0f;
-					z = j;
-
-					m_Entities.push_back(Entity());
-					m_Entities.back()._Model = AssetManager::GetModel(m_Renderer, "blasterD");
-					m_Entities.back().Position = glm::vec3(x, y, z);
-					m_Entities.back().Rotation = glm::quat(glm::vec3(0.0f, rand() % 360 + 1, 0.0f));
-				}
-			}
-
-			m_Entities.push_back(Entity());
-			m_Entities.back()._Model = AssetManager::GetModel(m_Renderer, "car3");
-			m_Entities.back().Position = glm::vec3();
-			m_Entities.back().Rotation = glm::quat(glm::vec3(0.0f, rand() % 360 + 1, 0.0f));
-
-			Floor._Model = AssetManager::GetModel(m_Renderer, "testFloor");
-			Floor.Position = glm::vec3(0.0f, 0.0f, 0.0f);
-			Floor.Scale = glm::vec3(10.0f, 10.0f, 10.0f);
+			LevelManager::LoadLevel(m_Renderer, "Assets/testLevel.xml", m_World);
 
 			return true;
 		}
@@ -160,38 +127,38 @@ namespace Bennett
 		}
 	}
 
-	void Application::ProcessInput(const float& deltaTime)
+	void Application::ProcessInput(const float& DeltaTime)
 	{
 		float speed = 5;
 
 		if (glfwGetKey(m_Window, GLFW_KEY_W))
 		{
-			m_Camera.Translate(glm::vec3(speed * deltaTime, 0.0f, speed * deltaTime));
+			m_Camera.Translate(glm::vec3(speed * DeltaTime, 0.0f, speed * DeltaTime));
 		}
 
 		if (glfwGetKey(m_Window, GLFW_KEY_S))
 		{
-			m_Camera.Translate(glm::vec3(-speed * deltaTime, 0.0f, -speed * deltaTime));
+			m_Camera.Translate(glm::vec3(-speed * DeltaTime, 0.0f, -speed * DeltaTime));
 		}
 
 		if (glfwGetKey(m_Window, GLFW_KEY_A))
 		{
-			m_Camera.Translate(glm::vec3(speed * deltaTime, 0.0f, -speed * deltaTime));
+			m_Camera.Translate(glm::vec3(speed * DeltaTime, 0.0f, -speed * DeltaTime));
 		}
 
 		if (glfwGetKey(m_Window, GLFW_KEY_D))
 		{
-			m_Camera.Translate(glm::vec3(-speed * deltaTime, 0.0f, speed * deltaTime));
+			m_Camera.Translate(glm::vec3(-speed * DeltaTime, 0.0f, speed * DeltaTime));
 		}
 
 		if (glfwGetKey(m_Window, GLFW_KEY_R))
 		{
-			m_Camera.Translate(glm::vec3(0.0f, speed * deltaTime, 0.0f));
+			m_Camera.Translate(glm::vec3(0.0f, speed * DeltaTime, 0.0f));
 		}
 
 		if (glfwGetKey(m_Window, GLFW_KEY_F))
 		{
-			m_Camera.Translate(glm::vec3(0.0f, -speed * deltaTime, 0.0f));
+			m_Camera.Translate(glm::vec3(0.0f, -speed * DeltaTime, 0.0f));
 		}
 	}
 

@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Entity.h"
 #include "Camera.h"
+#include "World.h"
 
 struct GLFWwindow;
 
@@ -26,8 +27,7 @@ namespace Bennett
 	class Application
 	{
 	private:
-		std::vector<Entity> m_Entities;
-		Entity Floor;
+		World m_World;
 
 		bool m_IsRunning;
 		GLFWwindow* m_Window;
@@ -40,7 +40,7 @@ namespace Bennett
 		void DestroyWindow();
 		void DestroyRenderer();
 
-		void ProcessInput(const float& deltaTime);
+		void ProcessInput(const float& DeltaTime);
 		void Update(float DeltaTime);
 		void Render();
 
@@ -56,5 +56,4 @@ namespace Bennett
 	};
 
 	Application* CreateApplication(int argc, char** argv, const WindowDetails& details);
-}
-
+	}

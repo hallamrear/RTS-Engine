@@ -9,6 +9,7 @@ namespace Bennett
 	{
 	private:
 		float m_Speed;
+		std::string m_Name;
 	public:
 		glm::vec3 Scale;
 		glm::vec3 Position;
@@ -16,11 +17,13 @@ namespace Bennett
 
 		Model* _Model;
 
-		Entity();
-		Entity(glm::vec3 scale, glm::vec3 position, glm::vec3 rotation);
+		Entity(const std::string& name = "");
+		Entity(const std::string& name, glm::vec3 scale, glm::vec3 position, glm::vec3 rotation);
 		~Entity();
 
 		void Update(const float& deltaTime);
 		void Render(const Renderer& renderer);
+
+		const std::string& GetName() const;
 	};
 }

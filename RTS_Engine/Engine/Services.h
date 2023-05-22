@@ -15,8 +15,14 @@ namespace Bennett
 		};
 
 		static AssetManager m_AssetManager;
+		static Renderer m_Renderer;
 
-		static AssetManager& Get() { return m_AssetManager; };
+	public:
+		static void Initialise();
+		static void Shutdown();
+
+		static AssetManager& GetAsset() { return m_AssetManager; };
+		static Renderer& Get() { return m_Renderer; };
 	};
 }
 

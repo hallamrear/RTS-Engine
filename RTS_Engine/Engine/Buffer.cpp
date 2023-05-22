@@ -51,7 +51,7 @@ namespace Bennett
 		allocInfo.allocationSize = memoryRequirements.size;
 		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(renderer, memoryRequirements.memoryTypeBits, properties);
 
-		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &buffer) != VK_SUCCESS)
+		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
 		{
 			Log("Failed to allocate memory for a vertex buffer.", LOG_CRITICAL);
 			return false;
