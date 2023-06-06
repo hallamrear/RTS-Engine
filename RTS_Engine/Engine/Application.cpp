@@ -1,7 +1,9 @@
-#include <GLFW/glfw3.h>
 #include "BennettPCH.h"
+#include <GLFW/glfw3.h>
+
 #include "Application.h"
 #include "AssetManager.h"
+#include "InputMonitor.h"
 #include "LevelManager.h"
 #include "Model.h"
 #include "World.h"
@@ -48,7 +50,7 @@ namespace Bennett
 		m_Renderer.Shutdown();
 	}
 
-	Application::Application()
+	Application::Application() : m_CameraController(CameraController::Get())
 	{
 		srand(time(NULL));
 		Log("Application created.", LOG_SAFE);
@@ -69,8 +71,8 @@ namespace Bennett
 
 	void Application::Render()
 	{
-		m_Renderer.UniformMatrixBuffer.View = m_Camera.GetViewMatrix();
-		m_Renderer.UniformMatrixBuffer.Projection = m_Camera.GetProjectionMatrix();
+		m_Renderer.UniformMatrixBuffer.View = m_CameraController.GetCurrentCamera().GetViewMatrix();
+		m_Renderer.UniformMatrixBuffer.Projection = m_CameraController.GetCurrentCamera().GetProjectionMatrix();
 
 		//m_Renderer.Render();
 		m_Renderer.StartFrame();
@@ -86,6 +88,16 @@ namespace Bennett
 		{
 			Log("Initialised application successfully.", LOG_SAFE);
 
+			std::vector<int> applicationControls =
+			{
+				GLFW_KEY_F1,
+				GLFW_KEY_F2,
+				GLFW_KEY_F3
+			};
+			m_ApplicationControls = new InputMonitor(applicationControls);
+
+			InputMonitor::AttachToWindow(*m_Window);
+			m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
 			LevelManager::LoadLevel(m_Renderer, "Assets/testLevel.xml", m_World);
 
 			return true;
@@ -129,37 +141,14 @@ namespace Bennett
 
 	void Application::ProcessInput(const float& DeltaTime)
 	{
-		float speed = 5;
+		m_CameraController.GetCurrentCamera().ProcessInput(DeltaTime);
 
-		if (glfwGetKey(m_Window, GLFW_KEY_W))
-		{
-			m_Camera.Translate(glm::vec3(speed * DeltaTime, 0.0f, speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_S))
-		{
-			m_Camera.Translate(glm::vec3(-speed * DeltaTime, 0.0f, -speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_A))
-		{
-			m_Camera.Translate(glm::vec3(speed * DeltaTime, 0.0f, -speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_D))
-		{
-			m_Camera.Translate(glm::vec3(-speed * DeltaTime, 0.0f, speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_R))
-		{
-			m_Camera.Translate(glm::vec3(0.0f, speed * DeltaTime, 0.0f));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_F))
-		{
-			m_Camera.Translate(glm::vec3(0.0f, -speed * DeltaTime, 0.0f));
-		}
+		if (m_ApplicationControls->GetKeyState(GLFW_KEY_F1))
+			m_CameraController.SetCamera(FREE_CAM);
+		if (m_ApplicationControls->GetKeyState(GLFW_KEY_F2))
+			m_CameraController.SetCamera(STANDARD_CAM);
+		if (m_ApplicationControls->GetKeyState(GLFW_KEY_F3))
+			m_CameraController.SetCamera(SCRIPTED_CAMERA);
 	}
 
 	Application* CreateApplication(int argc, char** argv, const WindowDetails& details)

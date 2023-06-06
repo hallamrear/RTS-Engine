@@ -19,6 +19,7 @@ namespace Bennett
 		Scale = scale;
 		Position = position;
 		Rotation = glm::quat(rotation);
+		m_Speed = 100;
 	}
 
 	Entity::~Entity()
@@ -36,7 +37,7 @@ namespace Bennett
 		glm::mat4 matrix = glm::mat4(1.0f);
 		glm::mat4 scale = glm::scale(matrix, Scale);
 		glm::mat4 translate = glm::translate(matrix, Position);
-		glm::mat4 rotate =glm::toMat4(Rotation);
+		glm::mat4 rotate = glm::toMat4(Rotation);
 		matrix = scale * translate * rotate;
 
 		renderer.PushModelMatrix(matrix);

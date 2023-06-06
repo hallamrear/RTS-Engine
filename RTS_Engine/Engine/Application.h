@@ -1,8 +1,8 @@
 #pragma once
 #include "Renderer.h"
 #include "Entity.h"
-#include "Camera.h"
 #include "World.h"
+#include "CameraController.h"
 
 struct GLFWwindow;
 
@@ -32,7 +32,8 @@ namespace Bennett
 		bool m_IsRunning;
 		GLFWwindow* m_Window;
 		Renderer m_Renderer;
-		Camera m_Camera;
+		CameraController& m_CameraController;
+		InputMonitor* m_ApplicationControls;
 
 		bool InitialiseWindow(const WindowDetails& details);
 		bool InitialiseRenderer();
@@ -50,10 +51,9 @@ namespace Bennett
 
 		void GameLoop();
 
-
 		bool Initialise(int argc, char** argv, const WindowDetails& details);
 		void Destroy();
 	};
 
 	Application* CreateApplication(int argc, char** argv, const WindowDetails& details);
-	}
+}
