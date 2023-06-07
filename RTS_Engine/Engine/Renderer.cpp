@@ -1,10 +1,10 @@
+#include "BennettPCH.h"
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-#include "BennettPCH.h"
 #include "Renderer.h"
 #include "Vertex.h"
 #include <fstream>
@@ -120,7 +120,7 @@ namespace Bennett
 	void Renderer::BeginRenderPass()
 	{
 		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+		clearValues[0].color = { {0.245f, 0.245f, 0.245f, 1.0f} };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 
 		VkRenderPassBeginInfo renderPassInfo{};

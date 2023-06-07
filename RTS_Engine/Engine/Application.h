@@ -16,8 +16,8 @@ namespace Bennett
 
 		WindowDetails(
 			const std::string& title = "Bennett Engine",
-			unsigned int width = 1280,
-			unsigned int height = 720)
+			unsigned int width = WINDOW_WIDTH,
+			unsigned int height = WINDOW_HEIGHT)
 			: Title(title), Width(width), Height(height)
 		{
 

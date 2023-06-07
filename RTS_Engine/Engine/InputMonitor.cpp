@@ -4,6 +4,7 @@
 
 namespace Bennett
 {
+	GLFWwindow* InputMonitor::m_AttachedWindow = nullptr;
 	bool InputMonitor::m_IsAttached = false;
 	std::vector<InputMonitor*> InputMonitor::m_Instances = std::vector<InputMonitor*>();
 
@@ -23,6 +24,31 @@ namespace Bennett
 		{
 			itr->second = state;
 		}
+	}
+
+	glm::vec2 InputMonitor::GetMousePosition() const
+	{
+		glm::vec2 position;
+		if (!m_IsAttached)
+		{
+			Log("Tried to get mouse position but InputMonitor has not been attached to a window. Returning 0,0.", LOG_MINIMAL);
+		}
+		else
+		{
+			double x = 0.0f;
+			double y = 0.0f;
+			glfwGetCursorPos(m_AttachedWindow, &x, &y);
+			position = glm::vec2(x, y);
+		}
+
+		return position;
+	}
+
+	void InputMonitor::SetMousePositionToCentre() const
+	{
+		double x = WINDOW_WIDTH / 2;
+		double y = WINDOW_HEIGHT / 2;
+		glfwSetCursorPos(m_AttachedWindow, x, y);
 	}
 
 	bool InputMonitor::GetKeyState(int key)
@@ -68,6 +94,7 @@ namespace Bennett
 		if (m_IsAttached == false)
 		{
 			glfwSetKeyCallback(&window, InputMonitor::GLFWInputCallback);
+			m_AttachedWindow = &window;
 			m_IsAttached = true;
 		}
 	}

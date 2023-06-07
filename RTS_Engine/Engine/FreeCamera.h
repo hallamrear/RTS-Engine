@@ -7,6 +7,9 @@ namespace Bennett
         public Camera
     {
 	private:
+        glm::vec2 m_MousePositionLastFrame;
+        bool m_IsMouseLocked;
+        float m_MouseSensitivity;
 
 	public:
         FreeCamera();

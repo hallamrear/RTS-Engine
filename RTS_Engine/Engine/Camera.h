@@ -25,25 +25,52 @@ namespace Bennett
 			GLFW_KEY_F,			 //Rotate Down
 			GLFW_KEY_Q,			 //Rotate Left
 			GLFW_KEY_E,			 //Rotate Right
+			GLFW_KEY_TAB,		 //Toggle Mouse Lock
 		};
+
+		glm::vec3 m_ForwardVector;
+		glm::vec3 m_RightVector;
+		glm::vec3 m_UpVector;
+
+		float m_NearPlaneDistance;
+		float m_FarPlaneDistance;
+		float m_AspectRatio;
+		float m_FOVAngle;
+		glm::vec3 m_Position;
+		glm::vec3 m_Rotation;
+		float m_MovementSpeed;
+		float m_RotationSpeed;
 
 		Camera();
 
-	public:
-		float NearPlaneDistance;
-		float FarPlaneDistance;
-		float AspectRatio;
-		float FOVAngle;
-		glm::vec3 Position;
-		glm::quat Rotation;
+		void UpdateBasisVectors();
+		void ClampRotations();
 
-		float MovementSpeed = 20.0f;
-		float RotationSpeed = 80.0f;
+	public:
 
 		virtual ~Camera() = 0;
 
 		virtual glm::mat4 GetViewMatrix() = 0;
 		virtual glm::mat4 GetProjectionMatrix() = 0;
+
+		float GetNearPlaneDistance() const;
+		float GetFarPlaneDistance() const;
+		float GetAspectRatio() const;
+		float GetFOVAngleRadians() const;
+		float GetFOVAngleDegrees() const;
+		float GetMovementSpeed() const;
+		float GetRotationSpeed() const;
+		const glm::vec3& GetPosition() const;
+		const glm::vec3& GetRotation() const;
+
+		void SetNearPlaneDistance(const float& nearPlane);
+		void SetFarPlaneDistance(const float& farPlane);
+		void SetAspectRatio(const float& aspectRatio);
+		void SetFOVAngle(const float& fovAngleDegrees);
+		void SetMovementSpeed(const float& movementSpeed);
+		void SetRotationSpeed(const float& rotationSpeed);
+		void SetPosition(const glm::vec3& position);
+		void SetRotation(const glm::vec3& rotation);
 
 		virtual void ProcessInput(const float& deltaTime) = 0;
 		void Translate(const glm::vec3& offset);

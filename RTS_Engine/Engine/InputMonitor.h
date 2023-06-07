@@ -9,6 +9,7 @@ namespace Bennett
 	class InputMonitor
 	{
 	private:
+		static GLFWwindow* m_AttachedWindow;
 		static bool m_IsAttached;
 		static std::vector<InputMonitor*> m_Instances;
 		static void GLFWInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -23,6 +24,8 @@ namespace Bennett
 		InputMonitor(const std::vector<int>& keyIdsToTrack);
 		~InputMonitor();
 
+		glm::vec2 GetMousePosition() const;
+		void SetMousePositionToCentre() const;
 		bool GetKeyState(int key);
 		bool GetIsEnabled();
 		void SetIsEnabled(const bool& state);

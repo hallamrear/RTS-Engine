@@ -16,13 +16,13 @@ namespace Bennett
 
 	glm::mat4 StandardCamera::GetViewMatrix()
 	{
-		glm::mat4 view = glm::lookAt(Position, Position + glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 view = glm::lookAt(m_Position, m_Position + glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		return view;
 	}
 
 	glm::mat4 StandardCamera::GetProjectionMatrix()
 	{
-		glm::mat4 projection = glm::perspective(FOVAngle, AspectRatio, NearPlaneDistance, FarPlaneDistance);
+		glm::mat4 projection = glm::perspective(m_FOVAngle, m_AspectRatio, m_NearPlaneDistance, m_FarPlaneDistance);
 		//vulkan uses weird coordinates so multiply by -1.
 		projection[1][1] *= -1;
 		return projection;

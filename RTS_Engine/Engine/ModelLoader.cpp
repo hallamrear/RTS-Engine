@@ -1,8 +1,7 @@
+#include "BennettPCH.h"
 #define TINYOBJLOADER_IMPLEMENTATION  
 #include <tiny_obj_loader.h>
 #include <istream>
-
-#include "BennettPCH.h"
 #include "ModelLoader.h"
 #include "Model.h"
 #include "Renderer.h"
