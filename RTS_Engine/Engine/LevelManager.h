@@ -7,8 +7,6 @@ namespace Bennett
 
 	class LevelManager
 	{
-		friend class World;
-
 	private:
 
 	public:

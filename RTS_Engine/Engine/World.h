@@ -9,6 +9,8 @@ namespace Bennett
 	class World
 	{
 	private:
+		friend class LevelManager;
+
 		bool m_IsLoaded;
 		std::unordered_map<std::string, Entity*> m_Entities;
 

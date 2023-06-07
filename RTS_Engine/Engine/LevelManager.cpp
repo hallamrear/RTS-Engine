@@ -28,6 +28,8 @@ namespace Bennett
             Entity* floor = world.SpawnEntity("Terrain");
             floor->_Model = AssetManager::GetModel(renderer, terrainName);
         }
+
+        world.m_IsLoaded = true;
     }
 
     void LevelManager::UnloadLevel(World& world)
@@ -35,6 +37,7 @@ namespace Bennett
         if (world.IsLoaded() == false)
             return;
 
-
+        world.DeleteAllEntities();
+        world.m_IsLoaded = false;
     }
 }

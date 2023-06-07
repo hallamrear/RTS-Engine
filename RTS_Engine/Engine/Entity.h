@@ -10,6 +10,9 @@ namespace Bennett
 	private:
 		float m_Speed;
 		std::string m_Name;
+
+	protected:
+
 	public:
 		glm::vec3 Scale;
 		glm::vec3 Position;

@@ -29,7 +29,7 @@ namespace Bennett
 
 	void Entity::Update(const float& DeltaTime)
 	{
-		Rotation = glm::rotate(Rotation, glm::vec3(0.0f, m_Speed * DeltaTime, 0.0f));
+		Rotation = glm::rotate(Rotation, glm::vec3(m_Speed * DeltaTime, m_Speed * DeltaTime, 0.0f));
 	}
 
 	void Entity::Render(const Renderer& renderer)

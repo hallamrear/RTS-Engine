@@ -92,7 +92,8 @@ namespace Bennett
 			{
 				GLFW_KEY_F1,
 				GLFW_KEY_F2,
-				GLFW_KEY_F3
+				GLFW_KEY_F3,
+				GLFW_KEY_F6
 			};
 			m_ApplicationControls = new InputMonitor(applicationControls);
 
@@ -149,6 +150,12 @@ namespace Bennett
 			m_CameraController.SetCamera(STANDARD_CAM);
 		if (m_ApplicationControls->GetKeyState(GLFW_KEY_F3))
 			m_CameraController.SetCamera(SCRIPTED_CAMERA);
+
+		if (m_ApplicationControls->GetKeyState(GLFW_KEY_F6))
+		{
+			LevelManager::UnloadLevel(m_World);
+			LevelManager::LoadLevel(m_Renderer, "Assets/testLevel.xml", m_World);
+		}
 	}
 
 	Application* CreateApplication(int argc, char** argv, const WindowDetails& details)
