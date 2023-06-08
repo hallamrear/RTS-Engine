@@ -19,7 +19,7 @@ namespace Bennett
 		m_Meshes.clear();
 	}
 
-	void Model::Render(const Renderer& renderer)
+	void Model::Render(const Renderer& renderer) const
 	{
 		if (m_Meshes.size() <= 0)
 		{

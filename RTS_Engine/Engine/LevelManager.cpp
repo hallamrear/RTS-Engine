@@ -2,6 +2,7 @@
 #include "LevelManager.h"
 #include "AssetManager.h"
 #include "Entity.h"
+#include "Model.h"
 #include "tinyxml2.h"
 
 namespace Bennett
@@ -26,7 +27,7 @@ namespace Bennett
         if (terrainName != "")
         {
             Entity* floor = world.SpawnEntity("Terrain");
-            floor->_Model = AssetManager::GetModel(renderer, terrainName);
+            floor->SetModel(AssetManager::GetModel(renderer, terrainName));
         }
 
         world.m_IsLoaded = true;
@@ -38,6 +39,7 @@ namespace Bennett
             return;
 
         world.DeleteAllEntities();
+
         world.m_IsLoaded = false;
     }
 }

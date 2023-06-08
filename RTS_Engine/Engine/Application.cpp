@@ -119,14 +119,14 @@ namespace Bennett
 	void Application::GameLoop()
 	{
 		float lTime = glfwGetTime();
-		float cTime = glfwGetTime();
-		float dTime = glfwGetTime();
+		float cTime = lTime;
+		float dTime = cTime;
 
 		while (m_IsRunning && !glfwWindowShouldClose(m_Window))
 		{
 			glfwPollEvents();
 
-			cTime = glfwGetTime();
+			cTime = (float)glfwGetTime();
 			dTime = cTime - lTime;
 
 			if (dTime > TIMESTEP_CAP)

@@ -4,7 +4,7 @@
 #include "World.h"
 #include "CameraController.h"
 
-struct GLFWwindow;
+class GLFWwindow;
 
 namespace Bennett
 {

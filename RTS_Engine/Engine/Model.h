@@ -18,7 +18,7 @@ namespace Bennett
 	public:
 		~Model();
 
-		void Render(const Renderer& renderer);
+		void Render(const Renderer& renderer) const;
 	};
 }
 

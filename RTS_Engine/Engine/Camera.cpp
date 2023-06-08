@@ -7,6 +7,9 @@ namespace Bennett
 {
 	Camera::Camera() : m_Controller(CameraController::Get())
 	{
+		m_ForwardVector = glm::vec3(0.0f, 0.0f, 1.0f);
+		m_RightVector   = glm::vec3(1.0f, 0.0f, 0.0f);
+		m_UpVector      = glm::vec3(0.0f, 1.0f, 0.0f);
 		m_NearPlaneDistance = 0.1f;
 		m_FarPlaneDistance = 1000.0f;
 		m_AspectRatio = (1280.0f / 720.0f);
