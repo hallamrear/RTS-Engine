@@ -39,7 +39,9 @@ namespace Bennett
 		glm::mat4 rotate = glm::toMat4(m_Rotation);
 		matrix = scale * translate * rotate;
 		renderer.PushModelMatrix(matrix);
-		m_Model->Render(renderer);
+
+		if(m_Model != nullptr)
+			m_Model->Render(renderer);
 	}
 
 	void Entity::SetModel(const Model* model)
