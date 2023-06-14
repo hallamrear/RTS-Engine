@@ -16,7 +16,7 @@ namespace Bennett
 
 	public:
 		static Model* GetModel(const Renderer& renderer, const std::string& modelName);
-		static Texture* GetTexture(const Renderer& renderer, const std::string& textureName);
+		static Texture* GetTexture(Renderer& renderer, const std::string& textureName);
 	};
 }
 

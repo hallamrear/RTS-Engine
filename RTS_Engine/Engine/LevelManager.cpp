@@ -7,7 +7,7 @@
 
 namespace Bennett
 {
-    void LevelManager::LoadLevel(const Renderer& renderer, const std::string& levelName, World& world)
+    void LevelManager::LoadLevel(Renderer& renderer, const std::string& levelName, World& world)
     {
         if (world.IsLoaded())
         {
@@ -28,6 +28,11 @@ namespace Bennett
         {
             Entity* floor = world.SpawnEntity("Terrain");
             floor->SetModel(AssetManager::GetModel(renderer, terrainName));
+            
+            Entity* altFloor = world.SpawnEntity("Terrain2");
+            altFloor->SetModel(AssetManager::GetModel(renderer, terrainName));
+            altFloor->Translate(glm::vec3(200.0f, 200.0f, 0.0f));
+            altFloor->Rotate(glm::vec3(0.0f, -90.0f, 90.0f));
         }
 
         world.m_IsLoaded = true;

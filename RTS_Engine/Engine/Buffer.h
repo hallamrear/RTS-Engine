@@ -11,7 +11,7 @@ namespace Bennett
 
 	protected:
 		static bool CreateGenericBuffer(const Renderer& renderer, const VkDeviceSize& deviceSize, const VkBufferUsageFlags& usageFlags, const VkMemoryPropertyFlags& properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-		static void CopyBuffers(const Renderer& renderer, VkBuffer src, VkBuffer dst, size_t size);
+		static void CopyBuffers(Renderer& renderer, VkBuffer src, VkBuffer dst, size_t size);
 
 		VkBuffer m_Buffer;
 		VkDeviceMemory m_BufferMemory;

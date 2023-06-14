@@ -33,8 +33,10 @@ namespace Bennett
         return model;
     }
 
-    Texture* AssetManager::GetTexture(const Renderer& renderer, const std::string& textureName)
+    Texture* AssetManager::GetTexture(Renderer& renderer, const std::string& textureName)
     {
+        return TextureLoader::Load(renderer, textureName);
+
         return nullptr;
     }
 }

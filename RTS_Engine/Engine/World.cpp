@@ -102,9 +102,12 @@ namespace Bennett
     }
     void World::Render(const Renderer& renderer)
     {
+        //todo : remove
+        Renderer& r = const_cast<Renderer&>(renderer);
+
         for (auto& ent : m_Entities)
         {
-            ent.second->Render(renderer);
+            ent.second->Render(r);
         }
     }
 }

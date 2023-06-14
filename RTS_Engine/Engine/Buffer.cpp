@@ -62,36 +62,15 @@ namespace Bennett
 		return true; 
 	}
 
-	void Buffer::CopyBuffers(const Renderer& renderer, VkBuffer src, VkBuffer dst, size_t size)
+	void Buffer::CopyBuffers(Renderer& renderer, VkBuffer src, VkBuffer dst, size_t size)
 	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.commandBufferCount = 1;
-		allocInfo.commandPool = renderer.GetCommandPool();
+		VkCommandBuffer cmd = renderer.BeginSingleTimeCommands();
 
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(renderer.GetDevice(), nullptr, &commandBuffer);
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.pNext = nullptr;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-		vkBeginCommandBuffer(commandBuffer, &beginInfo);
 		VkBufferCopy copyRegion{};
-		copyRegion.srcOffset = 0;
-		copyRegion.dstOffset = 0;
 		copyRegion.size = size;
-		vkCmdCopyBuffer(commandBuffer, src, dst, 1, &copyRegion);
-		vkEndCommandBuffer(commandBuffer);
+		vkCmdCopyBuffer(cmd, src, dst, 1, &copyRegion);
 
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-		vkQueueSubmit(renderer.GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(renderer.GetGraphicsQueue());
-
-		vkFreeCommandBuffers(renderer.GetDevice(), renderer.GetCommandPool(), 1, &commandBuffer);
+		renderer.EndSingleTimeCommands(cmd);
 	}
 
 	int Buffer::Count() const

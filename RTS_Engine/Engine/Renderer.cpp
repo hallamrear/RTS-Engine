@@ -10,6 +10,7 @@
 #include <fstream>
 #include <set>
 #include "Buffer.h"
+#include "Texture.h"
 
 #define INIT_CHECK(func) if(func != true) return false;
 
@@ -50,15 +51,21 @@ namespace Bennett
 		INIT_CHECK(CreateLogicalDevice())
 		INIT_CHECK(CreateSwapChain(window))
 		INIT_CHECK(CreateSwapChainImageViews())
+		INIT_CHECK(CreateCommandPool())
 		INIT_CHECK(CreateRenderPass())
+		INIT_CHECK(CreateTextureSampler())
 		INIT_CHECK(CreateDescriptorLayout())
 		INIT_CHECK(CreateDescriptorPool())
 		INIT_CHECK(InitialiseGraphicsPipeline())
 		INIT_CHECK(CreateUniformBuffers())
 		INIT_CHECK(CreateDepthResources())
-		INIT_CHECK(CreateDescriptorSets())
+		INIT_CHECK(AllocateDescriptorSets())
+
+		Texture texture;
+		Texture::Create(texture, *this, "Assets/cat.png");
+
+		INIT_CHECK(UpdateDescriptorSets(texture))
 		INIT_CHECK(CreateFrameBuffers())
-		INIT_CHECK(CreateCommandPool())
 		INIT_CHECK(CreateCommandBuffer())
 		INIT_CHECK(CreateSyncObjects())
 
@@ -140,6 +147,46 @@ namespace Bennett
 		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentRenderFrame]);
 	}
 
+	bool Renderer::CreateTextureSampler()
+	{
+		/*
+			VK_SAMPLER_ADDRESS_MODE_REPEAT: Repeat the texture when going beyond the image dimensions.
+			VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT: Like repeat, but inverts the coordinates to mirror the image when going beyond the dimensions.
+			VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE: Take the color of the edge closest to the coordinate beyond the image dimensions.
+			VK_SAMPLER_ADDRESS_MODE_MIRROR_CLAMP_TO_EDGE: Like clamp to edge, but instead uses the edge opposite to the closest edge.
+			VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER: Return a solid color when sampling beyond the dimensions of the image.
+		*/
+
+		VkPhysicalDeviceProperties props;
+		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &props);
+
+		VkSamplerCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		createInfo.magFilter = VK_FILTER_LINEAR;
+		createInfo.minFilter = VK_FILTER_LINEAR;
+		createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		createInfo.anisotropyEnable = VK_TRUE;
+		createInfo.maxAnisotropy = props.limits.maxSamplerAnisotropy;
+		createInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		createInfo.unnormalizedCoordinates = VK_FALSE;
+		createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		createInfo.mipLodBias = 0.0f;
+		createInfo.minLod = 0.0f;
+		createInfo.maxLod = 0.0f;
+		createInfo.compareEnable = VK_FALSE;
+		createInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+		if (vkCreateSampler(m_Device, &createInfo, nullptr, &m_TextureSampler) != VK_SUCCESS) 
+		{
+			Log("Failed to create texture sampler.", LOG_SERIOUS);
+			return false;
+		}
+
+		return true;
+	}
+
 	void Renderer::StartFrame()
 	{
 		WaitForFrame();
@@ -166,6 +213,55 @@ namespace Bennett
 		SubmitCommandData();
 		Present(m_CurrentImageIndex);
 		m_CurrentRenderFrame = (m_CurrentRenderFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+	}
+
+	VkCommandBuffer Renderer::BeginSingleTimeCommands()
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = m_CommandPool;
+		allocInfo.commandBufferCount = 1;
+
+		VkCommandBuffer commandBuffer;
+		vkAllocateCommandBuffers(m_Device, &allocInfo, &commandBuffer);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+		return commandBuffer;
+	}
+
+	void Renderer::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
+	{
+		vkEndCommandBuffer(commandBuffer);
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+
+		vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(m_GraphicsQueue);
+
+		vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &commandBuffer);
+	}
+
+	void Renderer::RebuildDefaultShaders()
+	{
+		if (m_BuildShadersAtRuntime)
+		{
+			std::string rebuildShadersCommand = "call buildShaders.bat";
+			system(rebuildShadersCommand.c_str());
+		}
+	}
+
+	void Renderer::BindTexture(const Texture& texture)
+	{
+		UpdateDescriptorSets(texture);
 	}
 
 	void Renderer::AquireSwapchainImageIndex()
@@ -327,7 +423,6 @@ namespace Bennett
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		poolInfo.queueFamilyIndex = familyIndices.GraphicsFamily.value();
 
-
 		if (vkCreateCommandPool(m_Device, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 		{
 			Log("Failed to create the command pool.", LOG_CRITICAL);
@@ -402,6 +497,8 @@ namespace Bennett
 	bool Renderer::InitialiseGraphicsPipeline()
 	{
 #pragma region SHADER SETUP
+		RebuildDefaultShaders();
+
 		m_FragShaderModule = CreateShaderModule("FragmentShader.spv");
 		m_VertShaderModule = CreateShaderModule("VertexShader.spv");
 
@@ -623,10 +720,18 @@ namespace Bennett
 		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 		uboLayoutBinding.pImmutableSamplers = nullptr;
 
+		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+		samplerLayoutBinding.binding = 1;
+		samplerLayoutBinding.descriptorCount = 1;
+		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		samplerLayoutBinding.pImmutableSamplers = nullptr;
+		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+
+		std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = 1;
-		layoutInfo.pBindings = &uboLayoutBinding;
+		layoutInfo.bindingCount = 2;
+		layoutInfo.pBindings = bindings.data();
 
 		if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
 		{
@@ -634,20 +739,22 @@ namespace Bennett
 			return false;
 		}
 
-
 		return true;
 	}
 
 	bool Renderer::CreateDescriptorPool()
 	{
-		VkDescriptorPoolSize poolSize{};
-		poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSize.descriptorCount = MAX_FRAMES_IN_FLIGHT;
+		std::array<VkDescriptorPoolSize, 2> poolSize{};
+		poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize[0].descriptorCount = MAX_FRAMES_IN_FLIGHT;
+		poolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSize[1].descriptorCount = MAX_FRAMES_IN_FLIGHT;
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
+		poolInfo.poolSizeCount = poolSize.size();
+		poolInfo.pPoolSizes = poolSize.data();
 		poolInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
 
 		if (vkCreateDescriptorPool(m_Device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
@@ -659,7 +766,7 @@ namespace Bennett
 		return true;
 	}
 
-	bool Renderer::CreateDescriptorSets()
+	bool Renderer::AllocateDescriptorSets()
 	{
 		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
 
@@ -669,13 +776,21 @@ namespace Bennett
 		allocInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
 		allocInfo.pSetLayouts = layouts.data();
 
+		m_DescriptorSets.clear();
 		m_DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+
 		if (vkAllocateDescriptorSets(m_Device, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
 		{
 			Log("failed to create descriptor sets!", LOG_CRITICAL);
 			return false;
 		}
 
+		return true;
+	}
+
+
+	bool Renderer::UpdateDescriptorSets(const Texture & textureForSampler)
+	{		
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorBufferInfo bufferInfo{};
@@ -683,17 +798,29 @@ namespace Bennett
 			bufferInfo.offset = 0;
 			bufferInfo.range = sizeof(UniformBufferObject);
 
-			VkWriteDescriptorSet descriptorWrite{};
-			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrite.dstSet = m_DescriptorSets[i];
-			descriptorWrite.dstBinding = 0;
-			descriptorWrite.dstArrayElement = 0;
-			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrite.descriptorCount = 1;
-			descriptorWrite.pBufferInfo = &bufferInfo;
-			descriptorWrite.pImageInfo = nullptr;
-			descriptorWrite.pTexelBufferView = nullptr;
-			vkUpdateDescriptorSets(m_Device, 1, &descriptorWrite, 0, nullptr);
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = textureForSampler.GetImageView();
+			imageInfo.sampler = m_TextureSampler;
+
+			std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};
+			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[0].dstSet = m_DescriptorSets[i];
+			descriptorWrites[0].dstBinding = 0;
+			descriptorWrites[0].dstArrayElement = 0;
+			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrites[0].descriptorCount = 1;
+			descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[1].dstSet = m_DescriptorSets[i];
+			descriptorWrites[1].dstBinding = 1;
+			descriptorWrites[1].dstArrayElement = 0;
+			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrites[1].descriptorCount = 1;
+			descriptorWrites[1].pImageInfo = &imageInfo;
+
+			vkUpdateDescriptorSets(m_Device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 		}
 
 
@@ -1270,7 +1397,10 @@ return true;
 				!swapChainSupportDetails.PresentModes.empty();
 		}
 
-		bool result = indices.IsComplete() && extensionsSupported && isSwapChainAdequate;
+		VkPhysicalDeviceFeatures supportedFeatures;
+		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+		bool result = indices.IsComplete() && extensionsSupported && isSwapChainAdequate && supportedFeatures.samplerAnisotropy;
 		return result;
 	}
 
@@ -1316,17 +1446,31 @@ return true;
 		queueCreateInfo.pQueuePriorities = &priority;
 
 		//Specifying used device features e.g. geometry shaders
-		VkPhysicalDeviceFeatures deviceFeatures{};
+		VkPhysicalDeviceDescriptorIndexingFeatures indexing_features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT, nullptr };
+		VkPhysicalDeviceFeatures2 bindlessFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, &indexing_features };
+		vkGetPhysicalDeviceFeatures2(m_PhysicalDevice, &bindlessFeatures);
+		bindlessFeatures.features.samplerAnisotropy = VK_TRUE;
+		bool isBindlessSupported = indexing_features.descriptorBindingPartiallyBound && indexing_features.runtimeDescriptorArray;
+		
+		if (isBindlessSupported == false)
+		{
+			Log("Bindless texturing not supported.", LOG_SERIOUS);
+			return false;
+		}
 
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		createInfo.pQueueCreateInfos = &queueCreateInfo;
 		createInfo.queueCreateInfoCount = 1;
-		createInfo.pEnabledFeatures = &deviceFeatures;
+		createInfo.pEnabledFeatures = nullptr;
 
 		//Enabling swapchain as a device extension/
 		createInfo.enabledExtensionCount = m_DeviceExtensions.size();
 		createInfo.ppEnabledExtensionNames = m_DeviceExtensions.data();
+
+		indexing_features.descriptorBindingPartiallyBound = VK_TRUE;
+		indexing_features.runtimeDescriptorArray = VK_TRUE;
+		createInfo.pNext = &bindlessFeatures;
 
 		if (m_EnableValidationLayers)
 		{

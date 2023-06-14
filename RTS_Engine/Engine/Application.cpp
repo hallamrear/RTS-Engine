@@ -100,7 +100,7 @@ namespace Bennett
 			InputMonitor::AttachToWindow(*m_Window);
 			m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
 			LevelManager::LoadLevel(m_Renderer, "Assets/testLevel.xml", m_World);
-
+			
 			return true;
 		}
 		else

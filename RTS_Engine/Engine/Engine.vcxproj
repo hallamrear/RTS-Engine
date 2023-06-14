@@ -45,12 +45,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Builds\$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\tinyobj;$(SolutionDir)External\tinyxml;$(SolutionDir)External\bullet\includes;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyobj;$(SolutionDir)External\tinyxml;$(SolutionDir)External\bullet\includes;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>Builds\$(Platform)\$(Configuration)\</IntDir>
-    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\tinyobj;$(SolutionDir)External\tinyxml;$(SolutionDir)External\bullet\includes;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyobj;$(SolutionDir)External\tinyxml;$(SolutionDir)External\bullet\includes;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -149,6 +149,7 @@
     <ClCompile Include="Services.cpp" />
     <ClCompile Include="StandardCamera.cpp" />
     <ClCompile Include="Terrain.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Vertex.cpp" />
@@ -179,6 +180,7 @@
     <ClInclude Include="Services.h" />
     <ClInclude Include="StandardCamera.h" />
     <ClInclude Include="Terrain.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Vertex.h" />

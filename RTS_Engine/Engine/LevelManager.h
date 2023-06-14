@@ -10,7 +10,7 @@ namespace Bennett
 	private:
 
 	public:
-		static void LoadLevel(const Renderer& renderer, const std::string& levelName, World& world);
+		static void LoadLevel(Renderer& renderer, const std::string& levelName, World& world);
 		static void UnloadLevel(World& world);
 	};
 }

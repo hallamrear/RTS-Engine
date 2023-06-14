@@ -1,6 +1,7 @@
 #include "BennettPCH.h"
 #include "Entity.h"
 #include "Model.h"
+#include "Texture.h"
 #include "AssetManager.h"
 
 namespace Bennett
@@ -31,7 +32,7 @@ namespace Bennett
 
 	}
 
-	void Entity::Render(const Renderer& renderer)
+	void Entity::Render(Renderer& renderer)
 	{
 		glm::mat4 matrix = glm::mat4(1.0f);
 		glm::mat4 scale = glm::scale(matrix, m_Scale);
@@ -39,6 +40,9 @@ namespace Bennett
 		glm::mat4 rotate = glm::toMat4(m_Rotation);
 		matrix = scale * translate * rotate;
 		renderer.PushModelMatrix(matrix);
+		
+		if (m_Texture != nullptr)
+			renderer.BindTexture(GetTexture());
 
 		if(m_Model != nullptr)
 			m_Model->Render(renderer);
@@ -47,6 +51,11 @@ namespace Bennett
 	void Entity::SetModel(const Model* model)
 	{
 		m_Model = model;
+	}
+
+	void Entity::SetTexture(const Texture* texture)
+	{
+		m_Texture = texture;
 	}
 
 	const std::string& Entity::GetName() const
