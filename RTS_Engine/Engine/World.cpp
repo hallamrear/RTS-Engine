@@ -7,9 +7,19 @@ namespace Bennett
 {
     void World::DeleteAllEntities()
     {
-        for (auto& ent : m_Entities)
+        for (auto itr = m_Entities.begin(); itr != m_Entities.end(); /*it++*/)
         {
-            DestroyEntity(ent.second);
+            Entity* entity = itr->second;
+            if (entity == nullptr)
+            {
+                ++itr;
+            }
+            else
+            {
+                delete itr->second;
+                itr->second = nullptr;
+                itr = m_Entities.erase(itr);
+            }
         }
 
         m_Entities.clear();
@@ -92,9 +102,12 @@ namespace Bennett
     }
     void World::Render(const Renderer& renderer)
     {
+        //todo : remove
+        Renderer& r = const_cast<Renderer&>(renderer);
+
         for (auto& ent : m_Entities)
         {
-            ent.second->Render(renderer);
+            ent.second->Render(r);
         }
     }
 }

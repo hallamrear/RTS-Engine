@@ -9,9 +9,9 @@ namespace Bennett
 	private:
 
 	public:
-		void Bind(const Renderer& renderer) override;
+		void Bind() override;
 
-		static bool CreateBuffer(const Renderer& renderer, IndexBuffer& buffer, const std::vector<unsigned int>& indices);
-		static void DestroyBuffer(const Renderer& renderer, IndexBuffer& buffer);
+		static bool Create(IndexBuffer& buffer, const std::vector<unsigned int>& indices);
+		static void Destroy(IndexBuffer& buffer);
 	};
 }

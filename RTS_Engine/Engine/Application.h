@@ -1,59 +1,34 @@
 #pragma once
-#include "Renderer.h"
 #include "Entity.h"
-#include "Camera.h"
 #include "World.h"
+#include "CameraController.h"
+#include "WindowDetails.h"
 
-struct GLFWwindow;
-
-namespace Bennett
+class Application
 {
-	struct WindowDetails
-	{
-		std::string Title;
-		unsigned int Width;
-		unsigned int Height;
+private:
+	Bennett::World m_World;
+	Bennett::CameraController& m_CameraController;
+	Bennett::InputMonitor* m_ApplicationControls;
 
-		WindowDetails(
-			const std::string& title = "Bennett Engine",
-			unsigned int width = 1280,
-			unsigned int height = 720)
-			: Title(title), Width(width), Height(height)
-		{
-
-		}
-	};
-
-	class Application
-	{
-	private:
-		World m_World;
-
-		bool m_IsRunning;
-		GLFWwindow* m_Window;
-		Renderer m_Renderer;
-		Camera m_Camera;
-
-		bool InitialiseWindow(const WindowDetails& details);
-		bool InitialiseRenderer();
-
-		void DestroyWindow();
-		void DestroyRenderer();
-
-		void ProcessInput(const float& DeltaTime);
-		void Update(float DeltaTime);
-		void Render();
-
-	public:
-		Application();
-		~Application();
-
-		void GameLoop();
+	bool m_IsRunning;
 
 
-		bool Initialise(int argc, char** argv, const WindowDetails& details);
-		void Destroy();
-	};
+	bool InitialiseServices();
+	void ShutdownServices();
 
-	Application* CreateApplication(int argc, char** argv, const WindowDetails& details);
-	}
+	void ProcessInput(const float& DeltaTime);
+	void Update(float DeltaTime);
+	void Render();
+
+public:
+	Application();
+	~Application();
+
+	void GameLoop();
+
+	bool Initialise(int argc, char** argv, const Bennett::WindowDetails& details);
+	void Destroy();
+};
+
+Application* CreateApplication(int argc, char** argv, const Bennett::WindowDetails& details);

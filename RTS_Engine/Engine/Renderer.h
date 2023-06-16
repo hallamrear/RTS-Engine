@@ -2,10 +2,13 @@
 #include <optional>
 #include <vulkan/vulkan.h>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace Bennett
 {
+	class Texture;
+	class Window;
+
 	struct UniformBufferObject
 	{
 		glm::mat4 View;
@@ -197,18 +200,19 @@ namespace Bennett
 		//Create descriptor layout
 		VkDescriptorSetLayout m_DescriptorSetLayout;
 		bool CreateDescriptorLayout();
+		bool CreateDescriptorPool();
+		bool AllocateDescriptorSets();
 		//Create descriptor pools
 		VkDescriptorPool m_DescriptorPool;
-		bool CreateDescriptorPool();
 		//Create descriptor sets
 		std::vector<VkDescriptorSet> m_DescriptorSets;
-		bool CreateDescriptorSets();
 
 		//Framebuffers
 		int m_CurrentRenderFrame = 0;
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		bool CreateFrameBuffers();
+		bool UpdateDescriptorSets(const Texture& textureForSampler);
 
 		//Command Queue
 		VkCommandPool m_CommandPool;
@@ -226,7 +230,6 @@ namespace Bennett
 
 		//Wait for the previous frame to finish
 		void WaitForFrame();
-
 
 		uint32_t m_CurrentImageIndex;
 		//Acquire an image from the swap chain
@@ -248,6 +251,9 @@ namespace Bennett
 
 		static PushConstantBuffer m_PushConstantBuffer;
 
+		bool CreateTextureSampler();
+		VkSampler m_TextureSampler;
+
 	public:
 		static UniformBufferObject UniformMatrixBuffer;
 
@@ -259,7 +265,7 @@ namespace Bennett
 
 		Renderer();
 
-		bool Initialise(GLFWwindow& window);
+		bool Initialise(Window& window);
 		void Shutdown();
 
 		void SetViewport(int x, int y, int w, int h, float maxDepth, float minDepth);
@@ -270,7 +276,16 @@ namespace Bennett
 		void UpdateUniformBuffers() const;
 		void PushModelMatrix(const glm::mat4& modelMatrix) const;
 		void EndFrame();
+
+		VkCommandBuffer BeginSingleTimeCommands();
+		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+		void RebuildDefaultShaders();
+		void BindTexture(const Texture& texture);
 		
 		~Renderer();
+
+		static bool CreateImage(const uint32_t& width, const uint32_t& height);
+		static bool CreateImageView(VkImageView& imageView, const VkImage& image, const VkFormat& format);
 	};
 }

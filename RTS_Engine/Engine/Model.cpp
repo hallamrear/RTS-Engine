@@ -19,7 +19,7 @@ namespace Bennett
 		m_Meshes.clear();
 	}
 
-	void Model::Render(const Renderer& renderer)
+	void Model::Render(const Renderer& renderer) const
 	{
 		if (m_Meshes.size() <= 0)
 		{
@@ -32,7 +32,7 @@ namespace Bennett
 
 		for (size_t i = 0; i < m_Meshes.size(); i++)
 		{
-			m_Meshes[i]->Bind(renderer);
+			m_Meshes[i]->Bind();
 			m_Meshes[i]->Render(renderer);
 		}
 	}

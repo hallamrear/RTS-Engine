@@ -5,11 +5,15 @@ namespace Bennett
 {
 	class Renderer;
 	class Entity;
+	class Terrain;
 
 	class World
 	{
 	private:
+		friend class LevelManager;
+
 		bool m_IsLoaded;
+		Terrain* m_Terrain;
 		std::unordered_map<std::string, Entity*> m_Entities;
 
 	protected:

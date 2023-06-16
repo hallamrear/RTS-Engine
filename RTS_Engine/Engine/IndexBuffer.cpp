@@ -1,16 +1,18 @@
 #include "BennettPCH.h"
 #include "IndexBuffer.h"
-#include "Renderer.h"
+#include "ServiceLocator.h"
 
 namespace Bennett
 {
-    void IndexBuffer::Bind(const Renderer& renderer)
+    void IndexBuffer::Bind()
     {
-        vkCmdBindIndexBuffer(renderer.GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
     }
 
-    bool IndexBuffer::CreateBuffer(const Renderer& renderer, IndexBuffer& buffer, const std::vector<unsigned int>& indices)
+    bool IndexBuffer::Create(IndexBuffer& buffer, const std::vector<unsigned int>& indices)
     {
+        Renderer& renderer = ServiceLocator::GetRenderer();
+
         if (indices.size() <= 0)
         {
             Log("No indices passed into create buffer.", LOG_MINIMAL);
@@ -35,7 +37,7 @@ namespace Bennett
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = FindMemoryType(renderer, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
         if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &buffer.m_BufferMemory) != VK_SUCCESS)
         {
@@ -55,8 +57,9 @@ namespace Bennett
         return true;
 	}
 
-	void IndexBuffer::DestroyBuffer(const Renderer& renderer, IndexBuffer& buffer)
+	void IndexBuffer::Destroy(IndexBuffer& buffer)
 	{
+        Renderer& renderer = ServiceLocator::GetRenderer();
 		vkDestroyBuffer(renderer.GetDevice(), buffer.m_Buffer, nullptr);
 		vkFreeMemory(renderer.GetDevice(), buffer.m_BufferMemory, nullptr);
 	}

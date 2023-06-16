@@ -1,177 +1,139 @@
-#include <GLFW/glfw3.h>
 #include "BennettPCH.h"
 #include "Application.h"
+#include "ServiceLocator.h"
 #include "AssetManager.h"
+#include "InputMonitor.h"
 #include "LevelManager.h"
 #include "Model.h"
 #include "World.h"
 
-namespace Bennett
+using namespace Bennett;
+
+bool Application::InitialiseServices()
 {
-	bool Application::InitialiseWindow(const WindowDetails& details)
+	return ServiceLocator::Initialise();
+}
+
+void Application::ShutdownServices()
+{
+	ServiceLocator::Shutdown();
+}
+
+Application::Application() : m_CameraController(CameraController::Get())
+{
+	srand(time(NULL));
+	Log("Application created.", LOG_SAFE);
+	m_IsRunning = true;
+	m_ApplicationControls = nullptr;
+}
+
+Application::~Application()
+{
+	Log("Destroying application", LOG_MINIMAL);
+	Destroy();
+}
+	
+void Application::Update(float DeltaTime)
+{
+	m_World.Update(DeltaTime);
+}
+
+void Application::Render()
+{
+	Renderer& renderer = ServiceLocator::GetRenderer();
+	renderer.UniformMatrixBuffer.View = m_CameraController.GetCurrentCamera().GetViewMatrix();
+	renderer.UniformMatrixBuffer.Projection = m_CameraController.GetCurrentCamera().GetProjectionMatrix();
+	renderer.StartFrame();
+	m_World.Render(renderer);
+	renderer.EndFrame();
+}
+
+bool Application::Initialise(int argc, char** argv, const WindowDetails& details)
+{
+	if (InitialiseServices())
 	{
-		if (m_Window)
+		ServiceLocator::GetWindow().SetWindowDetails(details);
+
+		Log("Initialised application successfully.", LOG_SAFE);
+
+		std::vector<int> applicationControls =
 		{
-			DestroyWindow();
-		}
+			GLFW_KEY_F1,
+			GLFW_KEY_F2,
+			GLFW_KEY_F3,
+			GLFW_KEY_F6
+		};
+		m_ApplicationControls = new InputMonitor(applicationControls);
 
-		//Initialise GLFW.
-		glfwInit();
-
-		//Create an empty window.
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-		m_Window = glfwCreateWindow(details.Width, details.Height, details.Title.c_str(), nullptr, nullptr);
-
-		if (!m_Window)
-		{
-			Log("Failed to create window.", LOG_CRITICAL);
-			return false;
-		}
-		
+		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
+		m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
+		LevelManager::LoadLevel("Assets/testLevel.xml", m_World);
+			
 		return true;
 	}
-
-	void Application::DestroyWindow()
+	else
 	{
-		glfwDestroyWindow(m_Window);
-		glfwTerminate();
+		Log("Failed to initialise application.", LOG_CRITICAL);
+		return false;
 	}
+}
 
-	bool Application::InitialiseRenderer()
+void Application::Destroy()
+{
+	ShutdownServices();
+}
+
+void Application::GameLoop()
+{
+	float lTime = glfwGetTime();
+	float cTime = lTime;
+	float dTime = cTime;
+
+	while (m_IsRunning && !ServiceLocator::GetWindow().ShouldClose())
 	{
-		return m_Renderer.Initialise(*m_Window);
+		glfwPollEvents();
+
+		cTime = (float)glfwGetTime();
+		dTime = cTime - lTime;
+
+		if (dTime > TIMESTEP_CAP)
+			dTime = TIMESTEP_CAP;
+
+		ProcessInput(dTime);
+		Update(dTime);
+		Render();
+
+		lTime = cTime;
 	}
+}
 
-	void Application::DestroyRenderer()
+void Application::ProcessInput(const float& DeltaTime)
+{
+	m_CameraController.GetCurrentCamera().ProcessInput(DeltaTime);
+
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F1))
+		m_CameraController.SetCamera(FREE_CAM);
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F2))
+		m_CameraController.SetCamera(STANDARD_CAM);
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F3))
+		m_CameraController.SetCamera(SCRIPTED_CAMERA);
+
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F6))
 	{
-		m_Renderer.Shutdown();
+		LevelManager::UnloadLevel(m_World);
+		LevelManager::LoadLevel("Assets/testLevel.xml", m_World);
 	}
+}
 
-	Application::Application()
-	{
-		srand(time(NULL));
-		Log("Application created.", LOG_SAFE);
-		m_Window = nullptr;
-		m_IsRunning = true;
-	}
-
-	Application::~Application()
-	{
-		Log("Destroying application", LOG_MINIMAL);
-		Destroy();
-	}
-	
-	void Application::Update(float DeltaTime)
-	{
-		m_World.Update(DeltaTime);
-	}
-
-	void Application::Render()
-	{
-		m_Renderer.UniformMatrixBuffer.View = m_Camera.GetViewMatrix();
-		m_Renderer.UniformMatrixBuffer.Projection = m_Camera.GetProjectionMatrix();
-
-		//m_Renderer.Render();
-		m_Renderer.StartFrame();
+Application* CreateApplication(int argc, char** argv, const WindowDetails& details)
+{
+	Application* app = new Application();
 		
-		m_World.Render(m_Renderer);
-
-		m_Renderer.EndFrame();
-	}
-
-	bool Application::Initialise(int argc, char** argv, const WindowDetails& details)
+	if (!app->Initialise(argc, argv, details))
 	{
-		if (InitialiseWindow(details) && InitialiseRenderer())
-		{
-			Log("Initialised application successfully.", LOG_SAFE);
-
-			LevelManager::LoadLevel(m_Renderer, "Assets/testLevel.xml", m_World);
-
-			return true;
-		}
-		else
-		{
-			Log("Failed to initialise application.", LOG_CRITICAL);
-			return false;
-		}
+		delete app;
+		app = nullptr;
 	}
 
-	void Application::Destroy()
-	{
-		DestroyRenderer();
-		DestroyWindow();
-	}
-
-	void Application::GameLoop()
-	{
-		float lTime = glfwGetTime();
-		float cTime = glfwGetTime();
-		float dTime = glfwGetTime();
-
-		while (m_IsRunning && !glfwWindowShouldClose(m_Window))
-		{
-			glfwPollEvents();
-
-			cTime = glfwGetTime();
-			dTime = cTime - lTime;
-
-			if (dTime > TIMESTEP_CAP)
-				dTime = TIMESTEP_CAP;
-
-			ProcessInput(dTime);
-			Update(dTime);
-			Render();
-
-			lTime = cTime;
-		}
-	}
-
-	void Application::ProcessInput(const float& DeltaTime)
-	{
-		float speed = 5;
-
-		if (glfwGetKey(m_Window, GLFW_KEY_W))
-		{
-			m_Camera.Translate(glm::vec3(speed * DeltaTime, 0.0f, speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_S))
-		{
-			m_Camera.Translate(glm::vec3(-speed * DeltaTime, 0.0f, -speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_A))
-		{
-			m_Camera.Translate(glm::vec3(speed * DeltaTime, 0.0f, -speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_D))
-		{
-			m_Camera.Translate(glm::vec3(-speed * DeltaTime, 0.0f, speed * DeltaTime));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_R))
-		{
-			m_Camera.Translate(glm::vec3(0.0f, speed * DeltaTime, 0.0f));
-		}
-
-		if (glfwGetKey(m_Window, GLFW_KEY_F))
-		{
-			m_Camera.Translate(glm::vec3(0.0f, -speed * DeltaTime, 0.0f));
-		}
-	}
-
-	Application* CreateApplication(int argc, char** argv, const WindowDetails& details)
-	{
-		Application* app = new Application();
-		
-		if (!app->Initialise(argc, argv, details))
-		{
-			delete app;
-			app = nullptr;
-		}
-
-		return app;
-	}
+	return app;
 }

@@ -13,14 +13,14 @@ namespace Bennett
 		VertexBuffer m_VertexBuffer;
 		IndexBuffer m_IndexBuffer;
 
-		void CreateBuffers(const Renderer& renderer, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
-		void DestroyBuffers(const Renderer& renderer);
+		void CreateBuffers(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+		void DestroyBuffers();
 
 	public:
-		Mesh(const Renderer& renderer, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 		~Mesh();
 
-		void Bind(const Renderer& renderer);
+		void Bind();
 		void Render(const Renderer& renderer);
 	};
 }

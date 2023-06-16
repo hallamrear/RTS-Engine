@@ -1,21 +1,22 @@
+#include "BennettPCH.h"
 #define TINYOBJLOADER_IMPLEMENTATION  
 #include <tiny_obj_loader.h>
 #include <istream>
-
-#include "BennettPCH.h"
+#include "ServiceLocator.h"
 #include "ModelLoader.h"
 #include "Model.h"
-#include "Renderer.h"
 
 namespace Bennett
 {
-    Model* ModelLoader::Load(const Renderer& renderer, const std::string& filepath)
+    Model* ModelLoader::Load(const std::string& filepath)
     {
-        return Load(renderer, filepath.c_str());
+        return Load(filepath.c_str());
     }
 
-    Model* ModelLoader::Load(const Renderer& renderer, const char* filepath)
+    Model* ModelLoader::Load(const char* filepath)
     {
+        Renderer& renderer = ServiceLocator::GetRenderer();
+
         std::string error, warning;
         tinyobj::ObjReaderConfig reader_config;
         tinyobj::ObjReader reader;
@@ -79,7 +80,7 @@ namespace Bennett
                 indices.push_back(indices.size());
             }
 
-            model->m_Meshes.push_back(new Mesh(renderer, verts, indices));
+            model->m_Meshes.push_back(new Mesh(verts, indices));
         }
 
         return model;
