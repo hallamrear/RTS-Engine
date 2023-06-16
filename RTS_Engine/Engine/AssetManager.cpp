@@ -10,7 +10,15 @@ namespace Bennett
     std::unordered_map<std::string, Model*> AssetManager::m_ModelMap = std::unordered_map<std::string, Model*>();
     std::unordered_map<std::string, Texture*> AssetManager::m_TextureMap = std::unordered_map<std::string, Texture*>();
 
-    Model* AssetManager::GetModel(const Renderer& renderer, const std::string& modelName)
+    AssetManager::AssetManager()
+    {
+    }
+
+    AssetManager::~AssetManager()
+    {
+    }
+
+    Model* AssetManager::GetModel(const std::string& modelName)
     {
         auto found = m_ModelMap.find(modelName);
 
@@ -21,7 +29,7 @@ namespace Bennett
 
         std::string filepath = "Assets//" + modelName + ".obj";
 
-        Model* model = ModelLoader::Load(renderer, filepath.c_str());
+        Model* model = ModelLoader::Load(filepath.c_str());
         if (!model)
         {
             Log("Failed to load model", LOG_SERIOUS);
@@ -33,10 +41,8 @@ namespace Bennett
         return model;
     }
 
-    Texture* AssetManager::GetTexture(Renderer& renderer, const std::string& textureName)
+    Texture* AssetManager::GetTexture(const std::string& textureName)
     {
-        return TextureLoader::Load(renderer, textureName);
-
-        return nullptr;
+        return TextureLoader::Load(textureName);
     }
 }

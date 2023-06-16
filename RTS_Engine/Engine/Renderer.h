@@ -2,7 +2,7 @@
 #include <optional>
 #include <vulkan/vulkan.h>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace Bennett
 {

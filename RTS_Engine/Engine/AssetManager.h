@@ -6,17 +6,24 @@ namespace Bennett
 {
 	class Model;
 	class Texture;
-	class Renderer;
+	class ServiceLocator;
 
 	class AssetManager
 	{
+		friend ServiceLocator;
+
 	private:
 		static std::unordered_map<std::string, Model*> m_ModelMap;
 		static std::unordered_map<std::string, Texture*> m_TextureMap;
 
+	protected:
+		AssetManager();
+
 	public:
-		static Model* GetModel(const Renderer& renderer, const std::string& modelName);
-		static Texture* GetTexture(Renderer& renderer, const std::string& textureName);
+		~AssetManager();
+
+		static Model* GetModel(const std::string& modelName);
+		static Texture* GetTexture(const std::string& textureName);
 	};
 }
 

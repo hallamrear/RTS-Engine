@@ -26,9 +26,11 @@ namespace Bennett
 		bool CreateImageView(const Renderer& renderer, VkImageView& imageView, const VkImage& image, const VkFormat& format);
 		void TransitionImageLayout(Renderer& renderer, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 		void CopyBufferToImage(Renderer& renderer, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
-		
+
+	protected:
+
 	public:
-		static void Create(Texture& texture, Renderer& renderer, const std::string& filepath);
+		static void Create(Texture& texture, const std::string& filepath);
 
 		const VkImage& GetImage() const;
 		const VkDeviceMemory& GetImageMemory() const;

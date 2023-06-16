@@ -2,7 +2,7 @@
 #include <vector>
 #include <map>
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace Bennett
 {

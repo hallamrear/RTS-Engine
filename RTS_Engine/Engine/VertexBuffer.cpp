@@ -1,6 +1,7 @@
 #include "BennettPCH.h"
-#include "Renderer.h"
+#include "ServiceLocator.h"
 #include "VertexBuffer.h"
+
 
 namespace Bennett
 {
@@ -14,14 +15,16 @@ namespace Bennett
 		
 	}
 
-	void VertexBuffer::Bind(const Renderer& renderer)
+	void VertexBuffer::Bind()
 	{
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindVertexBuffers(renderer.GetCommandBuffer(), 0, 1, &m_Buffer, offsets);
+		vkCmdBindVertexBuffers(ServiceLocator::GetRenderer().GetCommandBuffer(), 0, 1, &m_Buffer, offsets);
 	}
 
-	bool VertexBuffer::CreateBuffer(const Renderer& renderer, VertexBuffer& buffer, const std::vector<Vertex>& vertices)
+	bool VertexBuffer::Create(VertexBuffer& buffer, const std::vector<Vertex>& vertices)
 	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
+
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = sizeof(vertices[0]) * vertices.size();
@@ -40,7 +43,7 @@ namespace Bennett
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = FindMemoryType(renderer, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &buffer.m_BufferMemory) != VK_SUCCESS)
 		{
@@ -61,8 +64,9 @@ namespace Bennett
 		return true;
 	}
 
-	void VertexBuffer::DestroyBuffer(const Renderer& renderer, VertexBuffer& buffer)
+	void VertexBuffer::Destroy(VertexBuffer& buffer)
 	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
 		vkDestroyBuffer(renderer.GetDevice(), buffer.m_Buffer, nullptr);
 		vkFreeMemory(renderer.GetDevice(), buffer.m_BufferMemory, nullptr);
 		buffer.m_Count = -1;

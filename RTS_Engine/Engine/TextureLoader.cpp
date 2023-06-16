@@ -6,17 +6,15 @@
 
 namespace Bennett
 {
-	Texture* TextureLoader::Load(Renderer& renderer, const std::string& filepath)
+	Texture* TextureLoader::Load(const std::string& filepath)
 	{
-		return Load(renderer, filepath.c_str());
+		return Load(filepath.c_str());
 	}
 
-	Texture* TextureLoader::Load(Renderer& renderer, const char* filepath)
+	Texture* TextureLoader::Load(const char* filepath)
 	{
 		Texture* texture = new Texture();
-		Texture::Create(*texture, renderer, filepath);
+		Texture::Create(*texture, filepath);
 		return texture;
-
-		return nullptr;
 	}
 }

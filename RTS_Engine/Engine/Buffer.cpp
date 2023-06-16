@@ -1,14 +1,14 @@
 #include "BennettPCH.h"
+#include "ServiceLocator.h"
 #include "Buffer.h"
-#include "Renderer.h"
 #include "Vertex.h"
 
 namespace Bennett
 {
-	uint32_t Buffer::FindMemoryType(const Renderer& renderer, uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags)
+	uint32_t Buffer::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags)
 	{
 		VkPhysicalDeviceMemoryProperties memoryProperties;
-		vkGetPhysicalDeviceMemoryProperties(renderer.GetPhysicalDevice(), &memoryProperties);
+		vkGetPhysicalDeviceMemoryProperties(ServiceLocator::GetRenderer().GetPhysicalDevice(), &memoryProperties);
 
 		for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++)
 		{
@@ -23,12 +23,12 @@ namespace Bennett
 	}
 
 	bool Buffer::CreateGenericBuffer(
-		const Renderer& renderer,
 		const VkDeviceSize& deviceSize,
 		const VkBufferUsageFlags& usageFlags, 
 		const VkMemoryPropertyFlags& properties, 
 		VkBuffer& buffer, VkDeviceMemory& bufferMemory)
 	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
 		//Create buffer object
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -49,7 +49,7 @@ namespace Bennett
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memoryRequirements.size;
-		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(renderer, memoryRequirements.memoryTypeBits, properties);
+		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(memoryRequirements.memoryTypeBits, properties);
 
 		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
 		{
@@ -62,8 +62,10 @@ namespace Bennett
 		return true; 
 	}
 
-	void Buffer::CopyBuffers(Renderer& renderer, VkBuffer src, VkBuffer dst, size_t size)
+	void Buffer::CopyBuffers(VkBuffer src, VkBuffer dst, size_t size)
 	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
+
 		VkCommandBuffer cmd = renderer.BeginSingleTimeCommands();
 
 		VkBufferCopy copyRegion{};

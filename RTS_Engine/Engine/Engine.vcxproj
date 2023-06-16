@@ -146,7 +146,7 @@
     <ClCompile Include="ModelLoader.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ScriptedCamera.cpp" />
-    <ClCompile Include="Services.cpp" />
+    <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="StandardCamera.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -177,7 +177,7 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ScriptedCamera.h" />
-    <ClInclude Include="Services.h" />
+    <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="StandardCamera.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />

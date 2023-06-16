@@ -1,10 +1,9 @@
 #pragma once
-#include "Renderer.h"
 #include "Entity.h"
 #include "World.h"
 #include "CameraController.h"
 
-class GLFWwindow;
+struct GLFWwindow;
 
 namespace Bennett
 {
@@ -31,15 +30,15 @@ namespace Bennett
 
 		bool m_IsRunning;
 		GLFWwindow* m_Window;
-		Renderer m_Renderer;
+
 		CameraController& m_CameraController;
 		InputMonitor* m_ApplicationControls;
 
 		bool InitialiseWindow(const WindowDetails& details);
-		bool InitialiseRenderer();
+		bool InitialiseServices();
 
 		void DestroyWindow();
-		void DestroyRenderer();
+		void ShutdownServices();
 
 		void ProcessInput(const float& DeltaTime);
 		void Update(float DeltaTime);

@@ -62,7 +62,7 @@ namespace Bennett
 		INIT_CHECK(AllocateDescriptorSets())
 
 		Texture texture;
-		Texture::Create(texture, *this, "Assets/cat.png");
+		Texture::Create(texture, "Assets/cat.png");
 
 		INIT_CHECK(UpdateDescriptorSets(texture))
 		INIT_CHECK(CreateFrameBuffers())
@@ -355,7 +355,7 @@ namespace Bennett
 			VkMemoryAllocateInfo allocInfo{};
 			allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 			allocInfo.allocationSize = memRequirements.size;
-			allocInfo.memoryTypeIndex = Bennett::Buffer::FindMemoryType(*this, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			allocInfo.memoryTypeIndex = Bennett::Buffer::FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 			if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &m_UniformBuffersMemory[i]) != VK_SUCCESS)
 			{
@@ -1188,7 +1188,7 @@ return true;
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(*this, memRequirements.memoryTypeBits, properties);
+		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(memRequirements.memoryTypeBits, properties);
 
 		if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
 			Log("Failed to allocate image memory", LOG_SERIOUS);

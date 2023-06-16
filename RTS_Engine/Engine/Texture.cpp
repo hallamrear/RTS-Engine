@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <vulkan/vulkan.h>
-#include "Renderer.h"
+#include "ServiceLocator.h"
 #include "Texture.h"
 #include "Buffer.h"
 
@@ -28,7 +28,7 @@ namespace Bennett
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(renderer, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
 		{
@@ -71,7 +71,7 @@ namespace Bennett
 		VkMemoryAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(renderer, memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &m_ImageMemory) != VK_SUCCESS) 
 		{
@@ -193,8 +193,10 @@ namespace Bennett
 		renderer.EndSingleTimeCommands(cmdBuffer);
 	}
 
-	void Texture::Create(Texture& texture, Renderer& renderer, const std::string& filepath)
+	void Texture::Create(Texture& texture, const std::string& filepath)
 	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
+
 		//Creating texture image
 		int width, height, channels;
 		stbi_uc* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);

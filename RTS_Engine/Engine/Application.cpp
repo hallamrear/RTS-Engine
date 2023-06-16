@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Application.h"
+#include "ServiceLocator.h"
 #include "AssetManager.h"
 #include "InputMonitor.h"
 #include "LevelManager.h"
@@ -40,14 +41,20 @@ namespace Bennett
 		glfwTerminate();
 	}
 
-	bool Application::InitialiseRenderer()
+	bool Application::InitialiseServices()
 	{
-		return m_Renderer.Initialise(*m_Window);
+		bool result = false;
+		ServiceLocator::Initialise();
+
+		result = ServiceLocator::GetRenderer().Initialise(*m_Window);
+
+		return result;
 	}
 
-	void Application::DestroyRenderer()
+	void Application::ShutdownServices()
 	{
-		m_Renderer.Shutdown();
+		ServiceLocator::GetRenderer().Shutdown();
+		ServiceLocator::Shutdown();
 	}
 
 	Application::Application() : m_CameraController(CameraController::Get())
@@ -56,6 +63,7 @@ namespace Bennett
 		Log("Application created.", LOG_SAFE);
 		m_Window = nullptr;
 		m_IsRunning = true;
+		m_ApplicationControls = nullptr;
 	}
 
 	Application::~Application()
@@ -71,20 +79,17 @@ namespace Bennett
 
 	void Application::Render()
 	{
-		m_Renderer.UniformMatrixBuffer.View = m_CameraController.GetCurrentCamera().GetViewMatrix();
-		m_Renderer.UniformMatrixBuffer.Projection = m_CameraController.GetCurrentCamera().GetProjectionMatrix();
-
-		//m_Renderer.Render();
-		m_Renderer.StartFrame();
-		
-		m_World.Render(m_Renderer);
-
-		m_Renderer.EndFrame();
+		Renderer& renderer = ServiceLocator::GetRenderer();
+		renderer.UniformMatrixBuffer.View = m_CameraController.GetCurrentCamera().GetViewMatrix();
+		renderer.UniformMatrixBuffer.Projection = m_CameraController.GetCurrentCamera().GetProjectionMatrix();
+		renderer.StartFrame();
+		m_World.Render(renderer);
+		renderer.EndFrame();
 	}
 
 	bool Application::Initialise(int argc, char** argv, const WindowDetails& details)
 	{
-		if (InitialiseWindow(details) && InitialiseRenderer())
+		if (InitialiseWindow(details) && InitialiseServices())
 		{
 			Log("Initialised application successfully.", LOG_SAFE);
 
@@ -99,7 +104,7 @@ namespace Bennett
 
 			InputMonitor::AttachToWindow(*m_Window);
 			m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
-			LevelManager::LoadLevel(m_Renderer, "Assets/testLevel.xml", m_World);
+			LevelManager::LoadLevel("Assets/testLevel.xml", m_World);
 			
 			return true;
 		}
@@ -112,7 +117,7 @@ namespace Bennett
 
 	void Application::Destroy()
 	{
-		DestroyRenderer();
+		ShutdownServices();
 		DestroyWindow();
 	}
 
@@ -154,7 +159,7 @@ namespace Bennett
 		if (m_ApplicationControls->GetKeyState(GLFW_KEY_F6))
 		{
 			LevelManager::UnloadLevel(m_World);
-			LevelManager::LoadLevel(m_Renderer, "Assets/testLevel.xml", m_World);
+			LevelManager::LoadLevel("Assets/testLevel.xml", m_World);
 		}
 	}
 

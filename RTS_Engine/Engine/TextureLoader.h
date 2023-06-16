@@ -10,8 +10,8 @@ namespace Bennett
 		friend class AssetManager;
 
 	protected:
-		static Texture* Load(Renderer& renderer, const std::string& filepath);
-		static Texture* Load(Renderer& renderer, const char* filepath);
+		static Texture* Load(const std::string& filepath);
+		static Texture* Load(const char* filepath);
 	};
 }
 

@@ -4,8 +4,6 @@
 
 namespace Bennett
 {
-	class Renderer;
-
 	class VertexBuffer : public Buffer
 	{
 	private:
@@ -14,9 +12,9 @@ namespace Bennett
 		VertexBuffer();
 		~VertexBuffer();
 
-		void Bind(const Renderer& renderer) override;
+		void Bind() override;
 
-		static bool CreateBuffer(const Renderer& renderer, VertexBuffer& buffer, const std::vector<Vertex>& vertices);
-		static void DestroyBuffer(const Renderer& renderer, VertexBuffer& buffer);
+		static bool Create(VertexBuffer& buffer, const std::vector<Vertex>& vertices);
+		static void Destroy(VertexBuffer& buffer);
 	};
 }

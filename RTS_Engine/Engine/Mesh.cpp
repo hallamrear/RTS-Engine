@@ -3,9 +3,9 @@
 
 namespace Bennett
 {
-	Mesh::Mesh(const Renderer& renderer, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 	{
-		CreateBuffers(renderer, vertices, indices);
+		CreateBuffers(vertices, indices);
 	}
 
 	Mesh::~Mesh()
@@ -13,29 +13,29 @@ namespace Bennett
 
 	}
 
-	void Mesh::Bind(const Renderer& renderer)
+	void Mesh::Bind()
 	{
 		if(m_VertexBuffer.Count() > 0)
-			m_VertexBuffer.Bind(renderer);
+			m_VertexBuffer.Bind();
 
 		if(m_IndexBuffer.Count() > 0)
-			m_IndexBuffer.Bind(renderer);
+			m_IndexBuffer.Bind();
 	}
 
-	void Mesh::CreateBuffers(const Renderer& renderer, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+	void Mesh::CreateBuffers(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 	{
-		if (VertexBuffer::CreateBuffer(renderer, m_VertexBuffer, vertices) == false)
+		if (VertexBuffer::Create(m_VertexBuffer, vertices) == false)
 			Log("Failed to create a vertex buffer.", LOG_STATUS::LOG_SERIOUS);
 
-		if (IndexBuffer::CreateBuffer(renderer, m_IndexBuffer, indices) == false)
+		if (IndexBuffer::Create(m_IndexBuffer, indices) == false)
 			Log("Failed to create a index buffer.", LOG_STATUS::LOG_SERIOUS);
 		
 	}
 
-	void Mesh::DestroyBuffers(const Renderer& renderer)
+	void Mesh::DestroyBuffers()
 	{
-		VertexBuffer::DestroyBuffer(renderer, m_VertexBuffer);
-		IndexBuffer::DestroyBuffer(renderer, m_IndexBuffer);
+		VertexBuffer::Destroy(m_VertexBuffer);
+		IndexBuffer::Destroy(m_IndexBuffer);
 	}
 
 	void Mesh::Render(const Renderer& renderer)
