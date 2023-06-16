@@ -10,17 +10,18 @@
 
 #include "BennettPCH.h"
 #include "Application.h"
+#include "WindowDetails.h"
 
 using namespace Bennett;
 
-extern Application* CreateApplication(int, char**, WindowDetails);
+extern Application* CreateApplication(int, char**, const WindowDetails& details);
 
 int main(int argc, char **argv)
 {
 	WindowDetails details = WindowDetails();
 	details.Title = "Yet another engine but in Vulkan!";
 
-	auto app = Bennett::CreateApplication(argc, argv, details);
+	Application* app = CreateApplication(argc, argv, details);
 
 	if (!app)
 	{

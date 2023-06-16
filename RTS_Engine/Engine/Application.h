@@ -2,57 +2,33 @@
 #include "Entity.h"
 #include "World.h"
 #include "CameraController.h"
+#include "WindowDetails.h"
 
-struct GLFWwindow;
-
-namespace Bennett
+class Application
 {
-	struct WindowDetails
-	{
-		std::string Title;
-		unsigned int Width;
-		unsigned int Height;
+private:
+	Bennett::World m_World;
+	Bennett::CameraController& m_CameraController;
+	Bennett::InputMonitor* m_ApplicationControls;
 
-		WindowDetails(
-			const std::string& title = "Bennett Engine",
-			unsigned int width = WINDOW_WIDTH,
-			unsigned int height = WINDOW_HEIGHT)
-			: Title(title), Width(width), Height(height)
-		{
+	bool m_IsRunning;
 
-		}
-	};
 
-	class Application
-	{
-	private:
-		World m_World;
+	bool InitialiseServices();
+	void ShutdownServices();
 
-		bool m_IsRunning;
-		GLFWwindow* m_Window;
+	void ProcessInput(const float& DeltaTime);
+	void Update(float DeltaTime);
+	void Render();
 
-		CameraController& m_CameraController;
-		InputMonitor* m_ApplicationControls;
+public:
+	Application();
+	~Application();
 
-		bool InitialiseWindow(const WindowDetails& details);
-		bool InitialiseServices();
+	void GameLoop();
 
-		void DestroyWindow();
-		void ShutdownServices();
+	bool Initialise(int argc, char** argv, const Bennett::WindowDetails& details);
+	void Destroy();
+};
 
-		void ProcessInput(const float& DeltaTime);
-		void Update(float DeltaTime);
-		void Render();
-
-	public:
-		Application();
-		~Application();
-
-		void GameLoop();
-
-		bool Initialise(int argc, char** argv, const WindowDetails& details);
-		void Destroy();
-	};
-
-	Application* CreateApplication(int argc, char** argv, const WindowDetails& details);
-}
+Application* CreateApplication(int argc, char** argv, const Bennett::WindowDetails& details);

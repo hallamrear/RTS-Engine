@@ -20,6 +20,7 @@ namespace Bennett
 
     CameraController::CameraController()
     {
+        m_Cameras = nullptr;
         m_CurrentMode = FREE_CAM;
     }
 

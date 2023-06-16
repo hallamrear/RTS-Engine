@@ -12,10 +12,12 @@ namespace Bennett
 
     AssetManager::AssetManager()
     {
+
     }
 
     AssetManager::~AssetManager()
     {
+
     }
 
     Model* AssetManager::GetModel(const std::string& modelName)

@@ -154,6 +154,8 @@
     <ClCompile Include="tinyxml2.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="WindowDetails.cpp" />
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -185,6 +187,8 @@
     <ClInclude Include="tinyxml2.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowDetails.h" />
     <ClInclude Include="World.h" />
   </ItemGroup>
   <ItemGroup>

@@ -1,16 +1,17 @@
 #include "BennettPCH.h"
+#include "Renderer.h"
+#include <fstream>
+#include <set>
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-#include "Renderer.h"
-#include "Vertex.h"
-#include <fstream>
-#include <set>
 #include "Buffer.h"
 #include "Texture.h"
+#include "Window.h"
+#include "Vertex.h"
 
 #define INIT_CHECK(func) if(func != true) return false;
 
@@ -34,11 +35,11 @@ namespace Bennett
 		}
 	}
 
-	bool Renderer::Initialise(GLFWwindow& window)
+	bool Renderer::Initialise(Window& window)
 	{
 		Shutdown();
 
-		m_IsInitialised = InitialiseCoreVulkanSystem(window) && InitialiseGraphicsPipeline();
+		m_IsInitialised = InitialiseCoreVulkanSystem(window.GetGLFWWindow()) && InitialiseGraphicsPipeline();
 		return m_IsInitialised;
 	}
 

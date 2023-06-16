@@ -7,6 +7,7 @@ struct GLFWwindow;
 namespace Bennett
 {
 	class Texture;
+	class Window;
 
 	struct UniformBufferObject
 	{
@@ -264,7 +265,7 @@ namespace Bennett
 
 		Renderer();
 
-		bool Initialise(GLFWwindow& window);
+		bool Initialise(Window& window);
 		void Shutdown();
 
 		void SetViewport(int x, int y, int w, int h, float maxDepth, float minDepth);

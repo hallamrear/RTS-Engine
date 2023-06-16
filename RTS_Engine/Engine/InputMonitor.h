@@ -6,10 +6,12 @@ struct GLFWwindow;
 
 namespace Bennett
 {
+	class Window;
+
 	class InputMonitor
 	{
 	private:
-		static GLFWwindow* m_AttachedWindow;
+		static Window* m_AttachedWindow;
 		static bool m_IsAttached;
 		static std::vector<InputMonitor*> m_Instances;
 		static void GLFWInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -34,6 +36,6 @@ namespace Bennett
 		/// Only needs to be done once using the window.
 		/// </summary>
 		/// <param name="window"></param>
-		static void AttachToWindow(GLFWwindow& window);
+		static void AttachToWindow(Window& window);
 	};
 }

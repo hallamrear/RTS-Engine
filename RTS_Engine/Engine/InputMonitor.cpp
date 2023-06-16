@@ -1,10 +1,11 @@
 #include "BennettPCH.h"
-#include <GLFW/glfw3.h>
 #include "InputMonitor.h"
+#include <GLFW/glfw3.h>
+#include "Window.h"
 
 namespace Bennett
 {
-	GLFWwindow* InputMonitor::m_AttachedWindow = nullptr;
+	Window* InputMonitor::m_AttachedWindow = nullptr;
 	bool InputMonitor::m_IsAttached = false;
 	std::vector<InputMonitor*> InputMonitor::m_Instances = std::vector<InputMonitor*>();
 
@@ -37,7 +38,7 @@ namespace Bennett
 		{
 			double x = 0.0f;
 			double y = 0.0f;
-			glfwGetCursorPos(m_AttachedWindow, &x, &y);
+			glfwGetCursorPos(&m_AttachedWindow->GetGLFWWindow(), &x, &y);
 			position = glm::vec2(x, y);
 		}
 
@@ -48,7 +49,7 @@ namespace Bennett
 	{
 		double x = WINDOW_WIDTH / 2;
 		double y = WINDOW_HEIGHT / 2;
-		glfwSetCursorPos(m_AttachedWindow, x, y);
+		glfwSetCursorPos(&m_AttachedWindow->GetGLFWWindow(), x, y);
 	}
 
 	bool InputMonitor::GetKeyState(int key)
@@ -89,11 +90,11 @@ namespace Bennett
 		m_Instances.erase(std::find(m_Instances.begin(), m_Instances.end(), this));
 	}
 
-	void InputMonitor::AttachToWindow(GLFWwindow& window)
+	void InputMonitor::AttachToWindow(Window& window)
 	{
 		if (m_IsAttached == false)
 		{
-			glfwSetKeyCallback(&window, InputMonitor::GLFWInputCallback);
+			glfwSetKeyCallback(&window.GetGLFWWindow(), InputMonitor::GLFWInputCallback);
 			m_AttachedWindow = &window;
 			m_IsAttached = true;
 		}
