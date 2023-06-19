@@ -38,7 +38,6 @@ namespace Bennett
 	bool Renderer::Initialise(Window& window)
 	{
 		Shutdown();
-
 		m_IsInitialised = InitialiseCoreVulkanSystem(window.GetGLFWWindow()) && InitialiseGraphicsPipeline();
 		return m_IsInitialised;
 	}
@@ -62,10 +61,14 @@ namespace Bennett
 		INIT_CHECK(CreateDepthResources())
 		INIT_CHECK(AllocateDescriptorSets())
 
-		Texture texture;
-		Texture::Create(texture, "Assets/cat.png");
+		Texture texture, texture2;
+		Texture::Create(texture,  "Assets/debug.png");
+		Texture::Create(texture2, "Assets/cat.png");
+		std::vector<Texture*> list;
+		list.push_back(&texture);
+		list.push_back(&texture2);
 
-		INIT_CHECK(UpdateDescriptorSets(texture))
+		INIT_CHECK(UpdateDescriptorSets(list))
 		INIT_CHECK(CreateFrameBuffers())
 		INIT_CHECK(CreateCommandBuffer())
 		INIT_CHECK(CreateSyncObjects())
@@ -257,12 +260,10 @@ namespace Bennett
 		{
 			std::string rebuildShadersCommand = "call buildShaders.bat";
 			system(rebuildShadersCommand.c_str());
-		}
-	}
 
-	void Renderer::BindTexture(const Texture& texture)
-	{
-		UpdateDescriptorSets(texture);
+			//todo : load the new vulkan shaders into the pipeline.
+			//Will need to recreate the pipeline using the new objects.
+		}
 	}
 
 	void Renderer::AquireSwapchainImageIndex()
@@ -285,6 +286,13 @@ namespace Bennett
 	{
 		m_PushConstantBuffer.ModelMatrix = modelMatrix;
 		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
+	}
+
+	void Renderer::PushTextureID(const int& texID) const
+	{
+		m_PushConstantBuffer.TextureID = texID;
+		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
+
 	}
 
 	void Renderer::SubmitCommandData()
@@ -724,14 +732,21 @@ namespace Bennett
 		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
 		samplerLayoutBinding.binding = 1;
 		samplerLayoutBinding.descriptorCount = 1;
-		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 		samplerLayoutBinding.pImmutableSamplers = nullptr;
 		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
-		std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+		VkDescriptorSetLayoutBinding textureArrayLayoutBinding = {};
+		textureArrayLayoutBinding.descriptorCount = MAX_LOADED_TEXTURES;
+		textureArrayLayoutBinding.binding = 2;
+		textureArrayLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		textureArrayLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		textureArrayLayoutBinding.pImmutableSamplers = nullptr;
+
+		std::array<VkDescriptorSetLayoutBinding, 3> bindings = { uboLayoutBinding, samplerLayoutBinding, textureArrayLayoutBinding };
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = 2;
+		layoutInfo.bindingCount = bindings.size();
 		layoutInfo.pBindings = bindings.data();
 
 		if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
@@ -745,11 +760,13 @@ namespace Bennett
 
 	bool Renderer::CreateDescriptorPool()
 	{
-		std::array<VkDescriptorPoolSize, 2> poolSize{};
+		std::array<VkDescriptorPoolSize, 3> poolSize{};
 		poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		poolSize[0].descriptorCount = MAX_FRAMES_IN_FLIGHT;
-		poolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSize[1].type = VK_DESCRIPTOR_TYPE_SAMPLER;
 		poolSize[1].descriptorCount = MAX_FRAMES_IN_FLIGHT;
+		poolSize[2].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		poolSize[2].descriptorCount = MAX_FRAMES_IN_FLIGHT;
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -789,9 +806,31 @@ namespace Bennett
 		return true;
 	}
 
-
-	bool Renderer::UpdateDescriptorSets(const Texture & textureForSampler)
+	bool Renderer::UpdateDescriptorSets(const std::vector<Texture*>& textureList)
 	{		
+		if (textureList.size() < 1)
+		{
+			Log("Not enough textures in the list to load, please add at least one default list.", LOG_SERIOUS);
+			return false;
+		}
+
+		VkDescriptorImageInfo descriptorTextureInfo[MAX_LOADED_TEXTURES] = {};
+
+		for (size_t i = 0; i < MAX_LOADED_TEXTURES; i++)
+		{
+			descriptorTextureInfo[i].sampler = nullptr;
+			descriptorTextureInfo[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+			if (i < textureList.size())
+			{
+				descriptorTextureInfo[i].imageView = textureList[i]->GetImageView();
+			}
+			else
+			{
+				descriptorTextureInfo[i].imageView = textureList[0]->GetImageView();
+			}
+		}
+
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorBufferInfo bufferInfo{};
@@ -800,11 +839,9 @@ namespace Bennett
 			bufferInfo.range = sizeof(UniformBufferObject);
 
 			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = textureForSampler.GetImageView();
 			imageInfo.sampler = m_TextureSampler;
 
-			std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};
+			std::array<VkWriteDescriptorSet, 3> descriptorWrites = {};
 			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrites[0].dstSet = m_DescriptorSets[i];
 			descriptorWrites[0].dstBinding = 0;
@@ -817,9 +854,18 @@ namespace Bennett
 			descriptorWrites[1].dstSet = m_DescriptorSets[i];
 			descriptorWrites[1].dstBinding = 1;
 			descriptorWrites[1].dstArrayElement = 0;
-			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
 			descriptorWrites[1].descriptorCount = 1;
 			descriptorWrites[1].pImageInfo = &imageInfo;
+
+			descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[2].dstSet = m_DescriptorSets[i];
+			descriptorWrites[2].dstBinding = 2;
+			descriptorWrites[2].dstArrayElement = 0;
+			descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+			descriptorWrites[2].descriptorCount = MAX_LOADED_TEXTURES;
+			descriptorWrites[2].pBufferInfo = 0;
+			descriptorWrites[2].pImageInfo = descriptorTextureInfo;
 
 			vkUpdateDescriptorSets(m_Device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 		}

@@ -6,8 +6,10 @@ namespace Bennett
 
 	class TextureLoader
 	{
+	private:
 		friend class Texture;
 		friend class AssetManager;
+		static int m_TextureIDCounter;
 
 	protected:
 		static Texture* Load(const std::string& filepath);

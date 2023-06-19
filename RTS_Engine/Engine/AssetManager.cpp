@@ -1,4 +1,5 @@
 #include "BennettPCH.h"
+#include "ServiceLocator.h"
 #include "AssetManager.h"
 #include "Model.h"
 #include "ModelLoader.h"
@@ -45,6 +46,38 @@ namespace Bennett
 
     Texture* AssetManager::GetTexture(const std::string& textureName)
     {
-        return TextureLoader::Load(textureName);
+        auto found = m_TextureMap.find(textureName);
+
+        if (found != m_TextureMap.end())
+        {
+            return found->second;
+        }
+
+        std::string filepath = "Assets//" + textureName + ".png";
+
+        Texture* texture = TextureLoader::Load(filepath.c_str());
+        if (!texture)
+        {
+            Log("Failed to load ", LOG_SERIOUS);
+            return nullptr;
+        }
+
+        m_TextureMap.insert(std::make_pair(textureName, texture));
+
+        std::vector<Texture*> textures;
+        int loadedCount = 0;
+        for (auto& tex : m_TextureMap)
+        {
+            if (loadedCount > MAX_LOADED_TEXTURES)
+            {
+                break;
+            }
+            
+            textures.push_back(tex.second);
+        }
+
+        ServiceLocator::GetRenderer().UpdateDescriptorSets(textures);
+
+        return texture;
     }
 }

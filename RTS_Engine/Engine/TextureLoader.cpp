@@ -6,6 +6,8 @@
 
 namespace Bennett
 {
+	int TextureLoader::m_TextureIDCounter = -1;
+
 	Texture* TextureLoader::Load(const std::string& filepath)
 	{
 		return Load(filepath.c_str());
@@ -15,6 +17,7 @@ namespace Bennett
 	{
 		Texture* texture = new Texture();
 		Texture::Create(*texture, filepath);
+		m_TextureIDCounter++;
 		return texture;
 	}
 }

@@ -15,6 +15,7 @@ namespace Bennett
 	class Texture
 	{
 	private:
+		uint32_t m_TextureID;
 		uint32_t m_Width;
 		uint32_t m_Height;
 		VkImage m_Image;
@@ -40,5 +41,6 @@ namespace Bennett
 		~Texture();
 		const uint32_t& GetWidth() const;
 		const uint32_t& GetHeight() const;
+		const uint32_t& GetID() const;
 	};
 }

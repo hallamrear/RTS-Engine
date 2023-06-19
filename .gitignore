@@ -328,3 +328,7 @@ ASALocalRun/
 .mfractor/
 /RTS_Engine/Engine/FragmentShader.spv
 /RTS_Engine/Engine/VertexShader.spv
+/RTS_Engine/Engine/Assets/glitch.png
+/RTS_Engine/Engine/Assets/glitch.mtl
+/RTS_Engine/Engine/Assets/Tools.mtl
+/RTS_Engine/Engine/Assets/tools.png

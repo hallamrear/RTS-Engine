@@ -251,6 +251,7 @@ namespace Bennett
 
 		texture.m_Width = width;
 		texture.m_Height = height;
+		texture.m_TextureID = TextureLoader::m_TextureIDCounter + 1;
 	}
 
 	const VkImage& Texture::GetImage() const
@@ -290,5 +291,10 @@ namespace Bennett
 	const uint32_t& Texture::GetHeight() const
 	{
 		return m_Height;
+	}
+
+	const uint32_t& Texture::GetID() const
+	{
+		return m_TextureID;
 	}
 }

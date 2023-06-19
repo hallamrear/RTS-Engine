@@ -25,7 +25,7 @@ namespace Bennett
 		virtual ~Entity();
 
 		virtual void Update(const float& deltaTime);
-		virtual void Render(Renderer& renderer);
+		virtual void Render(const Renderer& renderer);
 
 		inline const glm::vec3& GetPosition()      const { return m_Position; };
 		inline const glm::quat& GetRotation()      const { return m_Rotation; };

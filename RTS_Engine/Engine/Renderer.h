@@ -18,6 +18,8 @@ namespace Bennett
 	struct PushConstantBuffer
 	{
 		glm::mat4 ModelMatrix;
+		int TextureID;
+		int Padding[3];
 	};
 
 	class Renderer
@@ -212,7 +214,6 @@ namespace Bennett
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		bool CreateFrameBuffers();
-		bool UpdateDescriptorSets(const Texture& textureForSampler);
 
 		//Command Queue
 		VkCommandPool m_CommandPool;
@@ -274,18 +275,16 @@ namespace Bennett
 		void StartFrame();
 		void BindDescriptorSet() const;
 		void UpdateUniformBuffers() const;
+		bool UpdateDescriptorSets(const std::vector<Texture*>& textureList);
 		void PushModelMatrix(const glm::mat4& modelMatrix) const;
+		void PushTextureID(const int& texID) const;
 		void EndFrame();
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 		void RebuildDefaultShaders();
-		void BindTexture(const Texture& texture);
 		
 		~Renderer();
-
-		static bool CreateImage(const uint32_t& width, const uint32_t& height);
-		static bool CreateImageView(VkImageView& imageView, const VkImage& image, const VkFormat& format);
 	};
 }
