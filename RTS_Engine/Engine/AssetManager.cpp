@@ -21,6 +21,28 @@ namespace Bennett
 
     }
 
+    Model* AssetManager::CreateModel(const std::string& modelName, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+    {
+        auto found = m_ModelMap.find(modelName);
+
+        if (found != m_ModelMap.end())
+        {
+            Log("Attempted to create a model from scratch using a name of a model already loaded. Returning existing model.", LOG_MINIMAL);
+            return found->second;
+        }
+
+        Model* model = ModelLoader::Create(vertices, indices);
+        if (!model)
+        {
+            Log("Failed to create model from scratch.", LOG_SERIOUS);
+            return nullptr;
+        }
+
+        m_ModelMap.insert(std::make_pair(modelName, model));
+
+        return model;
+    }
+
     Model* AssetManager::GetModel(const std::string& modelName)
     {
         auto found = m_ModelMap.find(modelName);

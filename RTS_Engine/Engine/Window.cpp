@@ -30,7 +30,10 @@ namespace Bennett
 		}
 
 		//Initialise GLFW.
-		glfwInit();
+		if (!glfwInit())
+			Log("Failed to initialise GLFW.", LOG_SERIOUS);
+
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 		//Create an empty window.
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);

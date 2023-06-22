@@ -3,6 +3,7 @@
 namespace Bennett
 {
 	class Renderer;
+	class Vertex;
 
 	class ModelLoader
 	{
@@ -12,5 +13,6 @@ namespace Bennett
 	protected:
 		static Model* Load(const std::string& filepath);
 		static Model* Load(const char* filepath);
+		static Model* Create(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
 	};
 }

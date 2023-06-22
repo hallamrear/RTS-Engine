@@ -85,4 +85,11 @@ namespace Bennett
 
         return model;
     }
+
+    Model* ModelLoader::Create(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+    {
+        Model* model = new Model();
+        model->m_Meshes.push_back(new Mesh(vertices, indices));
+        return model;
+    }
 }

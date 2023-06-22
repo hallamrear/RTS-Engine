@@ -29,14 +29,13 @@ namespace Bennett
             Entity* floor = world.SpawnEntity("Terrain");
             floor->SetModel(AssetManager::GetModel("tools"));
             floor->SetTexture(AssetManager::GetTexture("tools"));
-            floor->Translate(glm::vec3(-5.0f, 0.0f, -5.0f));
+            floor->Translate(glm::vec3(-15.0f, 0.0f, 15.0f));
          
             
             Entity* altFloor = world.SpawnEntity("Terrain2");
             altFloor->SetModel(AssetManager::GetModel("glitch"));
             altFloor->SetTexture(AssetManager::GetTexture("glitch"));
-            altFloor->Translate(glm::vec3(5.0f, 0.0f, 5.0f));
-            altFloor->Rotate(glm::vec3(0.0f, -90.0f, 0.0f));
+            altFloor->Translate(glm::vec3(15.0f, 0.0f, 15.0f));
         }
 
         world.m_IsLoaded = true;

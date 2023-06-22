@@ -5,7 +5,16 @@ namespace Bennett
 {
 	class Terrain : public Entity
 	{
-		Terrain();
+	private:
+		static int s_TerrainIDCount;
+
+		Terrain(int size);
+		void Generate();
+
+	public:
 		~Terrain();
+
+
+		Entity* Create(int size);
 	};
 };

@@ -14,7 +14,7 @@ namespace Bennett
 		m_FarPlaneDistance = 1000.0f;
 		m_AspectRatio = (1280.0f / 720.0f);
 		m_FOVAngle = glm::radians(60.0f);
-		m_Position = glm::vec3(0.0f, 5.0f, -10.0f);
+		m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
 		m_Rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 		m_MovementSpeed = 20.0f;
 		m_RotationSpeed = 80.0f;

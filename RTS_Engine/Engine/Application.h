@@ -13,7 +13,6 @@ private:
 
 	bool m_IsRunning;
 
-
 	bool InitialiseServices();
 	void ShutdownServices();
 

@@ -23,7 +23,6 @@ namespace Bennett
 		World();
 		~World();
 
-
 		Entity* SpawnEntity(const std::string& name);
 		void DestroyEntity(Entity* entity);
 

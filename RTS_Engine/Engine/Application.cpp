@@ -77,7 +77,7 @@ bool Application::Initialise(int argc, char** argv, const WindowDetails& details
 		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
 		m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
 		LevelManager::LoadLevel("Assets/testLevel.xml", m_World);
-			
+
 		return true;
 	}
 	else

@@ -62,4 +62,15 @@ namespace Bennett
 	{
 		return m_Name;
 	}
+
+	void Entity::UpdateBasisVectors()
+	{
+		glm::vec3 euler = glm::eulerAngles(m_Rotation);
+		m_ForwardVector.x = cos(glm::radians(euler.y)) * cos(glm::radians(euler.x));
+		m_ForwardVector.y = sin(glm::radians(euler.x));
+		m_ForwardVector.z = sin(glm::radians(euler.y)) * cos(glm::radians(euler.x));
+		m_ForwardVector = glm::normalize(m_ForwardVector);
+		m_RightVector = glm::normalize(glm::cross(m_ForwardVector, glm::vec3(0.0f, 1.0f, 0.0f)));
+		m_UpVector = glm::normalize(glm::cross(m_RightVector, m_ForwardVector));
+	}
 }

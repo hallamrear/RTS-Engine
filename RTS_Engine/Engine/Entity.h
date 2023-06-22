@@ -10,14 +10,17 @@ namespace Bennett
 	{
 	private:
 		std::string m_Name;
-
 		glm::vec3 m_Scale;
 		glm::vec3 m_Position;
 		glm::quat m_Rotation;
+		glm::vec3 m_ForwardVector;
+		glm::vec3 m_RightVector;
+		glm::vec3 m_UpVector;
 		const Model* m_Model;
 		const Texture* m_Texture;
 
 	protected:
+		void UpdateBasisVectors();
 
 	public:
 		Entity(const std::string& name = "");
@@ -42,15 +45,28 @@ namespace Bennett
 		void SetModel(const Model* modelName);
 		void SetTexture(const Texture* texture);
 
-		inline void Translate(const glm::vec3& positionAdjustment) { m_Position += positionAdjustment; };
+		inline void Translate(const glm::vec3& positionAdjustment)
+		{ 
+			m_Position += positionAdjustment; 
+			UpdateBasisVectors();
+		};
 
 		inline void Rotate(const glm::vec3& rotationAdjustmentEuler)
 		{
-			m_Rotation = m_Rotation * glm::quat(glm::radians(rotationAdjustmentEuler));
+			Rotate(glm::quat(glm::radians(rotationAdjustmentEuler)));
+			UpdateBasisVectors();
 		};
 
-		inline void Rotate(const glm::quat& rotationAdjustmentQuat) { m_Rotation *= rotationAdjustmentQuat; };
-		inline void Scale(const glm::vec3& scaleAdjustment) { m_Scale += scaleAdjustment; };
+		inline void Rotate(const glm::quat& rotationAdjustmentQuat)
+		{ 
+			m_Rotation *= rotationAdjustmentQuat; 
+			UpdateBasisVectors();
+		};
+
+		inline void Scale(const glm::vec3& scaleAdjustment) 
+		{
+			m_Scale += scaleAdjustment;
+		};
 
 		const std::string& GetName() const;
 	};
