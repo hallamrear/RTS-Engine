@@ -7,6 +7,8 @@
 #include "Model.h"
 #include "World.h"
 
+#include "TerrainChunk.h"
+
 using namespace Bennett;
 
 bool Application::InitialiseServices()
@@ -127,15 +129,35 @@ void Application::ProcessInput(const float& DeltaTime)
 	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F3))
 		m_CameraController.SetCamera(SCRIPTED_CAMERA);
 
-	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F6))
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F4))
 	{
 		LevelManager::UnloadLevel(m_World);
 		LevelManager::LoadLevel("Assets/testLevel.xml", m_World);
 	}
 	
-	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F7))
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F9))
 	{
 		ServiceLocator::GetRenderer().RebuildDefaultShaders();
+	}
+
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F5))
+	{
+
+	}
+
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F6))
+	{
+
+	}
+
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F7))
+	{
+
+	}
+
+	if (m_ApplicationControls->GetKeyState(GLFW_KEY_F8))
+	{
+
 	}
 }
 

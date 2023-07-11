@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "World.h"
 #include "Entity.h"
+#include "Terrain.h"
 
 namespace Bennett
 {
@@ -47,6 +48,21 @@ namespace Bennett
                 itr = m_Entities.erase(itr);
             }
         }
+    }
+
+    Entity* World::CreateTerrain()
+    {
+        auto itr = m_Entities.find("Terrain");
+
+        if (itr != m_Entities.end())
+        {
+            Log("Tried to create an entity with a name that already exists.", LOG_MINIMAL);
+            DestroyEntity(itr->second);
+        }
+
+        Entity* terrain = Terrain::Create(32);
+        m_Entities.insert(std::make_pair("Terrain", terrain));
+        return terrain;
     }
 
     Entity* World::SpawnEntity(const std::string& name)

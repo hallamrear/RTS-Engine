@@ -3,10 +3,13 @@
 
 namespace Bennett
 {
+	class TerrainChunk;
+
 	class Terrain : public Entity
 	{
 	private:
-		static int s_TerrainIDCount;
+		int m_ChunkCountXZ;
+		std::vector<TerrainChunk*> m_Chunks;
 
 		Terrain(int size);
 		void Generate();
@@ -14,7 +17,8 @@ namespace Bennett
 	public:
 		~Terrain();
 
+		static Terrain* Create(int size);
 
-		Entity* Create(int size);
+		void Render(const Renderer& renderer) override;
 	};
 };

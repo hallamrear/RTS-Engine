@@ -8,6 +8,7 @@ namespace Bennett
 	FreeCamera::FreeCamera()
 	{
 		m_MouseSensitivity = 10.0f;
+		m_MovementSpeed = 50.0f;
 	}
 
 	FreeCamera::~FreeCamera()

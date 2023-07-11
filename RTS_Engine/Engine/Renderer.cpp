@@ -568,11 +568,13 @@ namespace Bennett
 		* Using any other mode than fill requires enabling a GPU feature.
 		*/
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
 
 		//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
-		rasterizer.lineWidth = 1.0f;
+		rasterizer.lineWidth = 2.0f;
 
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+		//rasterizer.cullMode = VK_CULL_MODE_NONE;
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 		//Altering depth values and biasing.

@@ -3,20 +3,13 @@
 
 namespace Bennett
 {
+
 	Vertex::Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& uv, const glm::vec4& colour)
 	{
 		Position = position;
 		Normal = normal;
 		UV = uv;
 		Colour = colour;
-	}
-
-	Vertex::Vertex()
-	{
-		Position = glm::vec3(0.0f, 0.0f, 0.0f);
-		Normal = glm::vec3(0.0f, 0.0f, 0.0f);
-		Colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		UV = glm::vec2(0.0f, 0.0f);
 	}
 
 	Vertex::~Vertex()

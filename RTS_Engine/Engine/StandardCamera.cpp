@@ -6,7 +6,7 @@ namespace Bennett
 {
 	StandardCamera::StandardCamera()
 	{
-
+		m_MovementSpeed = 15.0f;
 	}
 
 	StandardCamera::~StandardCamera()
@@ -16,7 +16,7 @@ namespace Bennett
 
 	glm::mat4 StandardCamera::GetViewMatrix()
 	{
-		glm::mat4 view = glm::lookAt(m_Position, m_Position + glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 view = glm::lookAt(m_Position, m_Position + glm::vec3(0.0f, -1.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		return view;
 	}
 
@@ -33,36 +33,36 @@ namespace Bennett
 		if (!m_InputMonitor)
 			return;
 
-		float speed = 5;
+		float movementScale = m_MovementSpeed * deltaTime;
 
 		if (m_InputMonitor->GetKeyState(GLFW_KEY_W))
 		{
-			Translate(glm::vec3(speed * deltaTime, 0.0f, speed * deltaTime));
+			Translate(glm::vec3(0.0f, 0.0f, movementScale));
 		}
 
 		if (m_InputMonitor->GetKeyState(GLFW_KEY_S))
 		{
-			Translate(glm::vec3(-speed * deltaTime, 0.0f, -speed * deltaTime));
+			Translate(glm::vec3(0.0f, 0.0f, -movementScale));
 		}
 
 		if (m_InputMonitor->GetKeyState(GLFW_KEY_A))
 		{
-			Translate(glm::vec3(speed * deltaTime, 0.0f, -speed * deltaTime));
+			Translate(glm::vec3(movementScale, 0.0f, 0.0f));
 		}
 
 		if (m_InputMonitor->GetKeyState(GLFW_KEY_D))
 		{
-			Translate(glm::vec3(-speed * deltaTime, 0.0f, speed * deltaTime));
+			Translate(glm::vec3(-movementScale, 0.0f, 0.0f));
 		}
 
 		if (m_InputMonitor->GetKeyState(GLFW_KEY_R))
 		{
-			Translate(glm::vec3(0.0f, speed * deltaTime, 0.0f));
+			Translate(glm::vec3(0.0f, movementScale, 0.0f));
 		}
 
 		if (m_InputMonitor->GetKeyState(GLFW_KEY_F))
 		{
-			Translate(glm::vec3(0.0f, -speed * deltaTime, 0.0f));
+			Translate(glm::vec3(0.0f, -movementScale, 0.0f));
 		}
 	}
 }

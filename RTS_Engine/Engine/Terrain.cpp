@@ -1,10 +1,53 @@
 #include "BennettPCH.h"
 #include "Terrain.h"
+#include "TerrainChunk.h"
+#include "MarchingCubesTriangulationTable.h"
 
-Bennett::Terrain::Terrain(int size)
+namespace Bennett
 {
-}
+	Terrain::Terrain(int size)
+	{
+		m_ChunkCountXZ = size;
+	}
 
-Bennett::Terrain::~Terrain()
-{
+	Terrain::~Terrain()
+	{
+		m_ChunkCountXZ = -1;
+	}
+
+	void Terrain::Generate()
+	{
+		const float offset = TriangulationData::CELL_SIZE / TriangulationData::GRID_RESOLUTION;
+
+		for (int i = 0; i < m_ChunkCountXZ; i++)
+		{
+			for (int k = 0; k < m_ChunkCountXZ; k++)
+			{
+				TerrainChunk* chunk = new TerrainChunk();
+				m_Chunks.push_back(chunk);
+				m_Chunks.back()->SetPosition(
+					glm::vec3(
+						i * offset,
+						0.0f,
+						k * offset));
+				m_Chunks.back()->BuildChunk();
+			}
+		}
+	}
+
+	Terrain* Terrain::Create(int size)
+	{
+		Terrain* terrain = new Terrain(size);
+		terrain->Generate();
+		return terrain;
+	}
+
+	void Terrain::Render(const Renderer& renderer)
+	{
+		size_t chunkCount = m_Chunks.size();
+		for (size_t i = 0; i < chunkCount; i++)
+		{
+			m_Chunks[i]->Render(renderer);
+		}
+	}
 }

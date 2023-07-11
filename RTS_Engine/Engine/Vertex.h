@@ -11,8 +11,13 @@ namespace Bennett
 		glm::vec2 UV;
 		glm::vec4 Colour;
 
-		Vertex(const glm::vec3& position, const glm::vec3& normal, const glm::vec2& uv, const glm::vec4& colour);
-		Vertex();
+		Vertex(
+			const glm::vec3& position = glm::vec3(0.0f, 0.0f, 0.0f),
+			const glm::vec3& normal = glm::vec3(0.0f, 0.0f, 0.0f),
+			const glm::vec2& uv = glm::vec2(0.0f, 0.0f),
+			const glm::vec4& colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
+		);
+
 		~Vertex();
 
 		static VkVertexInputBindingDescription GetBindingDescription();

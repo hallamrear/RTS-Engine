@@ -13,7 +13,6 @@ namespace Bennett
 		friend class LevelManager;
 
 		bool m_IsLoaded;
-		Terrain* m_Terrain;
 		std::unordered_map<std::string, Entity*> m_Entities;
 
 	protected:
@@ -22,6 +21,8 @@ namespace Bennett
 	public:
 		World();
 		~World();
+
+		Entity* CreateTerrain();
 
 		Entity* SpawnEntity(const std::string& name);
 		void DestroyEntity(Entity* entity);
