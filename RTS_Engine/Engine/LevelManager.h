@@ -5,7 +5,7 @@ namespace Bennett
 {
 	class Renderer;
 
-	class LevelManager
+	class BENNETT_ENGINE LevelManager
 	{
 	private:
 

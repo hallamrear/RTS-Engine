@@ -3,7 +3,7 @@
 
 namespace Bennett
 {
-	class Vertex
+	class BENNETT_ENGINE Vertex
 	{
 	public:
 		glm::vec3 Position;

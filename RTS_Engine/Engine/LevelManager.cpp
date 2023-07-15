@@ -27,8 +27,8 @@ namespace Bennett
         if (terrainName != "")
         {
             Entity* floor = world.SpawnEntity("tools");
-            floor->SetModel(AssetManager::GetModel("tools"));
-            floor->SetTexture(AssetManager::GetTexture("tools"));
+            //floor->SetModel(AssetManager::GetModel("tools"));
+            //floor->SetTexture(AssetManager::GetTexture("tools"));
         }
 
         Entity* Terrain = world.CreateTerrain();

@@ -1,5 +1,6 @@
 #include "BennettPCH.h"
 #include "ServiceLocator.h"
+#include "Renderer.h"
 #include "Buffer.h"
 #include "Vertex.h"
 
@@ -20,6 +21,7 @@ namespace Bennett
 		}
 
 		Log("Failed to find a suitable memory type", LOG_CRITICAL);
+		return 0;
 	}
 
 	bool Buffer::CreateGenericBuffer(

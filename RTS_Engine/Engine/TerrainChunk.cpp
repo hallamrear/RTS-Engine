@@ -1,5 +1,6 @@
 #include "BennettPCH.h"
 #include "TerrainChunk.h"
+#include "AssetManager.h"
 #include "MarchingCubesTriangulationTable.h"
 #include "ServiceLocator.h"
 
@@ -25,14 +26,14 @@ namespace Bennett
 		std::vector<unsigned int> indices;
 
 		glm::vec3 position = GetPosition();
-		int index = 0;
+		unsigned int index = 0;
 		Vertex v1, v2, v3;
 		glm::vec3 normal;
 
 		for (size_t i = 0; i < GRID_RESOLUTION * GRID_RESOLUTION; i++)
 		{
-			int x = (i / GRID_RESOLUTION);
-			int z = (i % GRID_RESOLUTION);
+			int x = ((int)i / GRID_RESOLUTION);
+			int z = ((int)i % GRID_RESOLUTION);
 
 			v1 = Vertex(glm::vec3(position.x + x + Vertices[0].Position.x, position.y, position.z + z + Vertices[0].Position.z));
 			v2 = Vertex(glm::vec3(position.x + x + Vertices[1].Position.x, position.y, position.z + z + Vertices[1].Position.z));
@@ -40,7 +41,7 @@ namespace Bennett
 			normal = glm::cross(v2.Position - v1.Position, v3.Position - v1.Position);
 			v1.Normal = normal; v2.Normal = normal; v3.Normal = normal;
 			triangleVertices.push_back(v1); triangleVertices.push_back(v2); triangleVertices.push_back(v3);
-			index = indices.size();
+			index = (unsigned int)indices.size();
 			indices.push_back(index + 0);
 			indices.push_back(index + 1);
 			indices.push_back(index + 2);
@@ -51,7 +52,7 @@ namespace Bennett
 			normal = glm::cross(v2.Position - v1.Position, v3.Position - v1.Position);
 			v1.Normal = normal; v2.Normal = normal; v3.Normal = normal;
 			triangleVertices.push_back(v1); triangleVertices.push_back(v2); triangleVertices.push_back(v3);
-			index = indices.size();
+			index = (unsigned int)indices.size();
 			indices.push_back(index + 0);
 			indices.push_back(index + 1);
 			indices.push_back(index + 2);

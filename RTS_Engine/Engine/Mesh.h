@@ -7,7 +7,7 @@ namespace Bennett
 {
 	class Renderer;
 
-	class Mesh
+	class BENNETT_ENGINE Mesh
 	{
 	private:
 		VertexBuffer m_VertexBuffer;

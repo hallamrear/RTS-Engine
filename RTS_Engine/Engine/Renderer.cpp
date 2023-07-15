@@ -1,17 +1,13 @@
 #include "BennettPCH.h"
+#include "ServiceLocator.h"
 #include "Renderer.h"
-#include <fstream>
-#include <set>
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-
 #include "Buffer.h"
 #include "Texture.h"
 #include "Window.h"
 #include "Vertex.h"
+
+#include <fstream>
+#include <set>
 
 #define INIT_CHECK(func) if(func != true) return false;
 
@@ -22,6 +18,9 @@ namespace Bennett
 
 	Renderer::Renderer()
 	{
+		m_CommandPool = VkCommandPool();
+		m_CurrentImageIndex = -1;
+		m_DebugMessenger = VkDebugUtilsMessengerEXT();
 		m_PhysicalDevice = VK_NULL_HANDLE;
 		m_IsInitialised = false;
 		m_Instance = nullptr;
@@ -35,21 +34,21 @@ namespace Bennett
 		}
 	}
 
-	bool Renderer::Initialise(Window& window)
+	bool Renderer::Initialise(const Window& renderWindow)
 	{
 		Shutdown();
-		m_IsInitialised = InitialiseCoreVulkanSystem(window.GetGLFWWindow()) && InitialiseGraphicsPipeline();
+		m_IsInitialised = InitialiseCoreVulkanSystem(renderWindow.GetWindowHandle(), GetModuleHandle(NULL)) && InitialiseGraphicsPipeline();
 		return m_IsInitialised;
 	}
 
-	bool Renderer::InitialiseCoreVulkanSystem(GLFWwindow& window)
+	bool Renderer::InitialiseCoreVulkanSystem(HWND hWnd, HINSTANCE hInstance)
 	{
 		INIT_CHECK(CreateVulkanInstance())
 		CreateDebugMessenger();
-		INIT_CHECK(CreateWindowSurface(window))
+		INIT_CHECK(CreateWindowSurface(hWnd, hInstance))
 		INIT_CHECK(PickPhysicalDevice())
 		INIT_CHECK(CreateLogicalDevice())
-		INIT_CHECK(CreateSwapChain(window))
+		INIT_CHECK(CreateSwapChain(hWnd))
 		INIT_CHECK(CreateSwapChainImageViews())
 		INIT_CHECK(CreateCommandPool())
 		INIT_CHECK(CreateRenderPass())
@@ -62,8 +61,8 @@ namespace Bennett
 		INIT_CHECK(AllocateDescriptorSets())
 
 		Texture texture, texture2;
-		Texture::Create(texture,  "Assets/debug.png");
-		Texture::Create(texture2, "Assets/cat.png");
+		Texture::Create(texture,  "Required/debug.png");
+		Texture::Create(texture2, "Required/cat.png");
 		std::vector<Texture*> list;
 		list.push_back(&texture);
 		list.push_back(&texture2);
@@ -81,7 +80,7 @@ namespace Bennett
 		m_CommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.commandBufferCount = m_CommandBuffers.size();
+		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandPool = m_CommandPool;
@@ -121,6 +120,7 @@ namespace Bennett
 		vkCmdSetViewport(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_Viewport);
 		vkCmdSetScissor(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_ScissorRect);
 
+		return true;
 	}
 
 	void Renderer::BindDescriptorSet() const
@@ -258,7 +258,8 @@ namespace Bennett
 	{
 		if (m_BuildShadersAtRuntime)
 		{
-			std::string rebuildShadersCommand = "call buildShaders.bat";
+			const std::string& location = ServiceLocator::GetResourceFolderLocation();
+			std::string rebuildShadersCommand = "call " + location + "buildShaders.bat";
 			system(rebuildShadersCommand.c_str());
 
 			//todo : load the new vulkan shaders into the pipeline.
@@ -406,10 +407,10 @@ namespace Bennett
 
 	void Renderer::SetViewport(int x, int y, int w, int h, float maxDepth = 1.0f, float minDepth = 0.0f)
 	{
-		m_Viewport.height = h;
-		m_Viewport.width = w;
-		m_Viewport.x = x;
-		m_Viewport.y = y;
+		m_Viewport.height = (float)h;
+		m_Viewport.width = (float)w;
+		m_Viewport.x = (float)x;
+		m_Viewport.y = (float)y;
 		m_Viewport.maxDepth = maxDepth;
 		m_Viewport.minDepth = minDepth;
 	}
@@ -506,8 +507,11 @@ namespace Bennett
 	bool Renderer::InitialiseGraphicsPipeline()
 	{
 #pragma region SHADER SETUP
-		RebuildDefaultShaders();
 
+		//Get resource folder location.
+		const std::string& resourceLocation = ServiceLocator::GetResourceFolderLocation();
+
+		RebuildDefaultShaders();
 		m_FragShaderModule = CreateShaderModule("FragmentShader.spv");
 		m_VertShaderModule = CreateShaderModule("VertexShader.spv");
 
@@ -543,7 +547,7 @@ namespace Bennett
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.pVertexAttributeDescriptions = vertexAttributes.data();
-		vertexInputInfo.vertexAttributeDescriptionCount = vertexAttributes.size();
+		vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)vertexAttributes.size();
 		vertexInputInfo.pVertexBindingDescriptions = &vertexBindings;
 		vertexInputInfo.vertexBindingDescriptionCount = 1;
 
@@ -594,11 +598,11 @@ namespace Bennett
 		//When opting for dynamic viewports, you need to enable resepectic states for the pipeline.
 		VkPipelineDynamicStateCreateInfo dynamicState{};
 		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamicState.dynamicStateCount = dynamicStates.size();
+		dynamicState.dynamicStateCount = (uint32_t)dynamicStates.size();
 		dynamicState.pDynamicStates = dynamicStates.data();
 
-		m_Viewport.width = m_SwapChainExtent.width;
-		m_Viewport.height = m_SwapChainExtent.height;
+		m_Viewport.width = (float)m_SwapChainExtent.width;
+		m_Viewport.height = (float)m_SwapChainExtent.height;
 		m_Viewport.minDepth = 0.0f;
 		m_Viewport.maxDepth = 1.0f;
 		m_Viewport.x = 0.0f;
@@ -748,7 +752,7 @@ namespace Bennett
 		std::array<VkDescriptorSetLayoutBinding, 3> bindings = { uboLayoutBinding, samplerLayoutBinding, textureArrayLayoutBinding };
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = bindings.size();
+		layoutInfo.bindingCount = (uint32_t)bindings.size();
 		layoutInfo.pBindings = bindings.data();
 
 		if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
@@ -773,7 +777,7 @@ namespace Bennett
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
-		poolInfo.poolSizeCount = poolSize.size();
+		poolInfo.poolSizeCount = (uint32_t)poolSize.size();
 		poolInfo.pPoolSizes = poolSize.data();
 		poolInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
 
@@ -869,7 +873,7 @@ namespace Bennett
 			descriptorWrites[2].pBufferInfo = 0;
 			descriptorWrites[2].pImageInfo = descriptorTextureInfo;
 
-			vkUpdateDescriptorSets(m_Device, descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+			vkUpdateDescriptorSets(m_Device, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 		}
 
 
@@ -971,7 +975,7 @@ namespace Bennett
 
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-		renderPassInfo.attachmentCount = attachments.size();
+		renderPassInfo.attachmentCount = (uint32_t)attachments.size();
 		renderPassInfo.pAttachments = attachments.data();
 		renderPassInfo.subpassCount = 1;
 		renderPassInfo.pSubpasses = &subpass;
@@ -1119,48 +1123,48 @@ namespace Bennett
 		* that we want to use. Global in this context means they apply to the entire program rather than
 		* a specific device.
 		*/
-VkInstanceCreateInfo createInfo{};
-createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-createInfo.pApplicationInfo = &appInfo;
-
-/*
-* The next two parameters specify the desired global extensions.
-* As vulkan is platform agnostic, we need to use an extension to interface
-* with the window system. We use glfw's built in funcitons to find these.
-*/
-
-std::vector<const char*> requiredExtensions = GetRequiredExtensions();
-createInfo.enabledExtensionCount = requiredExtensions.size();
-createInfo.ppEnabledExtensionNames = requiredExtensions.data();
-
-/*
-* The last two struct members determine the global validation layers to enable.
-*/
-
-if (m_EnableValidationLayers && !CheckValidationLayerSupport())
-{
-	Log("Validation layers are enabled but failed to support them.", LOG_SERIOUS);
-	createInfo.enabledLayerCount = 0;
-}
-
-if (m_EnableValidationLayers)
-{
-	createInfo.enabledLayerCount = m_ValidationLayers.size();
-	createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
-}
-else
-{
-	createInfo.enabledLayerCount = 0;
-}
-
-//We can now create the instance.
-if (vkCreateInstance(&createInfo, nullptr, &m_Instance) != VK_SUCCESS)
-{
-	Log("Failed to create vulkan instance.", LOG_CRITICAL);
-	return false;
-}
-
-return true;
+		VkInstanceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		createInfo.pApplicationInfo = &appInfo;
+		
+		/*
+		* The next two parameters specify the desired global extensions.
+		* As vulkan is platform agnostic, we need to use an extension to interface
+		* with the window system. We use glfw's built in funcitons to find these.
+		*/
+		
+		std::vector<const char*> requiredExtensions = GetRequiredExtensions();
+		createInfo.enabledExtensionCount = (uint32_t)requiredExtensions.size();
+		createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+		
+		/*
+		* The last two struct members determine the global validation layers to enable.
+		*/
+		
+		if (m_EnableValidationLayers && !CheckValidationLayerSupport())
+		{
+			Log("Validation layers are enabled but failed to support them.", LOG_SERIOUS);
+			createInfo.enabledLayerCount = 0;
+		}
+		
+		if (m_EnableValidationLayers)
+		{
+			createInfo.enabledLayerCount = (uint32_t)m_ValidationLayers.size();
+			createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
+		}
+		else
+		{
+			createInfo.enabledLayerCount = 0;
+		}
+		
+		//We can now create the instance.
+		if (vkCreateInstance(&createInfo, nullptr, &m_Instance) != VK_SUCCESS)
+		{
+			Log("Failed to create vulkan instance.", LOG_CRITICAL);
+			return false;
+		}
+		
+		return true;
 	}
 
 	void Renderer::DestroyVulkanInstance()
@@ -1320,10 +1324,15 @@ return true;
 	std::vector<const char*> Renderer::GetRequiredExtensions()
 	{
 		uint32_t glfwExtensionCount = 0;
-		const char** glfwExtensions;
-		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+		const char* glfwExtensions = "";
+		//const char** glfwExtensions = "";
+		//glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 		
-		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+		//std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+		std::vector<const char*> extensions = std::vector<const char*>();
+		//Required for creating a surface in win32.
+		extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
+		extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 
 		if (m_EnableValidationLayers)
 		{
@@ -1514,7 +1523,7 @@ return true;
 		createInfo.pEnabledFeatures = nullptr;
 
 		//Enabling swapchain as a device extension/
-		createInfo.enabledExtensionCount = m_DeviceExtensions.size();
+		createInfo.enabledExtensionCount = (uint32_t)m_DeviceExtensions.size();
 		createInfo.ppEnabledExtensionNames = m_DeviceExtensions.data();
 
 		indexing_features.descriptorBindingPartiallyBound = VK_TRUE;
@@ -1523,7 +1532,7 @@ return true;
 
 		if (m_EnableValidationLayers)
 		{
-			createInfo.enabledLayerCount = m_ValidationLayers.size();
+			createInfo.enabledLayerCount = (uint32_t)m_ValidationLayers.size();
 			createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
 		}
 		else
@@ -1549,26 +1558,14 @@ return true;
 		Log("Got graphics queue.", LOG_SAFE);
 	}
 
-	bool Renderer::CreateWindowSurface(GLFWwindow& window)
+	bool Renderer::CreateWindowSurface(const HWND& hWnd, const HINSTANCE& hInstance)
 	{
-		//Platform agnostic for no reason.
-		//VkWin32SurfaceCreateInfoKHR info{};
-		//info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-		//info.hwnd = glfwGetWin32Window(&window);
-		//info.hinstance = GetModuleHandle(nullptr);
-		//
-		//if (vkCreateWin32SurfaceKHR(m_Instance, &info, nullptr, &m_Surface) != VK_SUCCESS)
-		//{
-		//	Log("Failed to create window surface", LOG_CRITICAL);
-		//	return false;
-		//}
-		//else
-		//{
-		//	Log("Created window surface successfully.", LOG_SAFE);
-		//	return true;
-		//}
-
-		if (glfwCreateWindowSurface(m_Instance, &window, nullptr, &m_Surface) != VK_SUCCESS)
+		VkWin32SurfaceCreateInfoKHR info{};
+		info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+		info.hwnd = hWnd;
+		info.hinstance = hInstance;
+		
+		if (vkCreateWin32SurfaceKHR(m_Instance, &info, nullptr, &m_Surface) != VK_SUCCESS)
 		{
 			Log("Failed to create window surface", LOG_CRITICAL);
 			return false;
@@ -1627,6 +1624,8 @@ return true;
 			Log("Failed to find format using B8G8R8A8_SRGB AND COLOR_SPACE_SRGB, returning first available format.", LOG_MINIMAL);
 			return formats[0];
 		}
+
+		return formats[0];
 	}
 
 	/*
@@ -1668,7 +1667,7 @@ return true;
 		return VK_PRESENT_MODE_IMMEDIATE_KHR;
 	}
 
-	VkExtent2D Renderer::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow& window)
+	VkExtent2D Renderer::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, HWND hWnd)
 	{
 		//This is a check to see if the window manager allows us to differ the resolution
 		//of the window between pixels and screenspace.
@@ -1678,23 +1677,23 @@ return true;
 		}
 		else
 		{
-			//if vulkan does not fix the extent, we can just use glfw to query the fame buyffer
+			//if vulkan does not fix the extent, we can just use glfw/win32 to query the frame buffer
 			//and create an image extent matched against it.
-			int w, h;
-			glfwGetFramebufferSize(&window, &w, &h);
-			VkExtent2D actualExtent = { static_cast<uint32_t>(w), static_cast<uint32_t>(h) };
+			RECT rect{};
+			GetClientRect(hWnd, &rect);
+			VkExtent2D actualExtent = { static_cast<uint32_t>(rect.right), static_cast<uint32_t>(rect.bottom) };
 			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 			return actualExtent;
 		}
 	}
 
-	bool Renderer::CreateSwapChain(GLFWwindow& window)
+	bool Renderer::CreateSwapChain(HWND hWnd)
 	{
 		SwapChainSupportDetails details = QuerySwapChainSupport(m_PhysicalDevice);
 		VkSurfaceFormatKHR format = ChooseSwapChainSurfaceFormat(details.Formats);
 		VkPresentModeKHR presentMode = ChooseSwapChainPresentMode(details.PresentModes);
-		VkExtent2D extent = ChooseSwapExtent(details.Capabilities, window);
+		VkExtent2D extent = ChooseSwapExtent(details.Capabilities, hWnd);
 
 		//specifying how many images wanted in the swap chain.
 		//there is a +1 to avoid waiting for the driver to aquire another image

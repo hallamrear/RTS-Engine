@@ -13,7 +13,7 @@ enum LOG_STATUS
 
 #ifdef _DEBUG
 template<typename T>
-inline void Log(T var, int statusLevel)
+inline BENNETT_ENGINE void Log(T var, int statusLevel)
 {
 	//Changing debug colour then back to original.
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (int)statusLevel);
@@ -23,10 +23,30 @@ inline void Log(T var, int statusLevel)
 	if (statusLevel == LOG_CRITICAL)
 		DebugBreak();
 };
+
+inline BENNETT_ENGINE std::string GetLastWin32Error()
+{
+	char s[255] = "";
+
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL, GetLastError(),
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPSTR)&s, 0, NULL);
+
+	return std::string(s);
+};
+
 #else
 template<class T>
-inline void Log(T var, int statusLevel) 
+inline void BENNETT_ENGINE Log(T var, int statusLevel)
 {
 
 };
+
+inline BENNETT_ENGINE std::string BENNETT_ENGINE GetLastWin32Error()
+{
+	return "";
+};
+
 #endif

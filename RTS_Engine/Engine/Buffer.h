@@ -3,7 +3,7 @@
 
 namespace Bennett
 {	 
-	class Buffer
+	class BENNETT_ENGINE Buffer
 	{
 	private:
 

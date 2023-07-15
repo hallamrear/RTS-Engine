@@ -13,7 +13,7 @@ namespace Bennett
 		EVENT_MOUSE_PRESSED, EVENT_MOUSE_BUTTON_RELEASED, EVENT_MOUSE_MOVED, EVENT_MOUSE_SCROLLED
 	};
 
-	class Event
+	class BENNETT_ENGINE Event
 	{
 
 	protected:
@@ -27,7 +27,7 @@ namespace Bennett
 	};
 
 
-	class EventDispatcher
+	class BENNETT_ENGINE EventDispatcher
 	{
 		//Using EventFunction as the callback for the event.
 		template<typename T>

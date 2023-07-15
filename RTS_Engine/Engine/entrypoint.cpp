@@ -1,37 +1,117 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
-#include <iostream>
-
 #include "BennettPCH.h"
-#include "Application.h"
-#include "WindowDetails.h"
+#include "Engine.h"
+#include "Window.h"
+#include <iostream>
+#include <chrono>
 
 using namespace Bennett;
 
-extern Application* CreateApplication(int, char**, const WindowDetails& details);
+LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+int GenericMain(HINSTANCE hInstance, int argc, char** argv);
 
-int main(int argc, char **argv)
+#ifdef _DEBUG
+
+int main(int argc, char** argv)
+{
+	HINSTANCE hInstance = GetModuleHandle(NULL);
+	return GenericMain(hInstance, argc, argv);
+}
+
+#else
+
+int APIENTRY WinMain(_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR    lpCmdLine,
+	_In_ int       nCmdShow)
+{
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
+	return GenericMain(hInstance, __argc, __argv);
+}
+
+#endif
+
+
+int GenericMain(HINSTANCE hInstance, int argc, char** argv)
 {
 	WindowDetails details = WindowDetails();
-	details.Title = "Yet another engine but in Vulkan!";
+	strcpy_s(details.Title, "Yet another engine but in Vulkan!");
+	strcpy_s(details.ClassDetails.ClassName, "GameWindow");
+	details.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
+	details.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
+	details.ClassDetails.WndProcCallback = WndProc;
+	Window* mainWindow = Window::CreateWin32Window(details);
 
-	Application* app = CreateApplication(argc, argv, details);
+	Engine* engine = CreateEngine(*mainWindow);
 
-	if (!app)
+	if (!engine)
 	{
-		Log("Application Run finished. Application deleting.", LOG_CRITICAL);
+		Log("Engine Run finished. Engine deleting.", LOG_CRITICAL);
 		return 0;
 	}
+	
+	auto lTime = std::chrono::steady_clock::now();
+	auto cTime = lTime;
+	float dTime = 0.0f;
 
-	app->GameLoop();
+	MSG msg;
+	while (engine->IsRunning())
+	{
+		if (PeekMessage(&msg, mainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else
+		{
+			cTime = std::chrono::steady_clock::now();
+			dTime = (cTime - lTime).count();
 
-	Log("Application has finished running, it is now closing.", LOG_SAFE);
-	delete app;
-	app = nullptr;
+			if (dTime > TIMESTEP_CAP)
+				dTime = TIMESTEP_CAP;
+
+			engine->ProcessInput(dTime);
+			engine->Update(dTime);
+			engine->Render();
+
+			lTime = cTime;
+		}
+	}
+
+	Log("Engine has finished running, it is now closing.", LOG_SAFE);
+	delete engine;
+	engine = nullptr;
+}
+
+
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_COMMAND:
+	{
+		int wmId = LOWORD(wParam);
+		// Parse the menu selections:
+		switch (wmId)
+		{
+		default:
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+	}
+	break;
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
+		// TODO: Add any drawing code that uses hdc here...
+		EndPaint(hWnd, &ps);
+	}
+	break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
 }

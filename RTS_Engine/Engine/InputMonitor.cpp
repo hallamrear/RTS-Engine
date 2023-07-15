@@ -9,7 +9,7 @@ namespace Bennett
 	bool InputMonitor::m_IsAttached = false;
 	std::vector<InputMonitor*> InputMonitor::m_Instances = std::vector<InputMonitor*>();
 
-	void InputMonitor::GLFWInputCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	void InputMonitor::Win32InputCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		for (size_t i = 0; i < m_Instances.size(); i++)
 		{
@@ -27,19 +27,48 @@ namespace Bennett
 		}
 	}
 
+	void InputMonitor::LockCursor()
+	{
+
+		//TODO : FINISH this rect should define the outline of the render window.
+		RECT rect{};
+		ClipCursor(&rect);
+	}
+
+	void InputMonitor::UnlockCursor()
+	{
+		ClipCursor(NULL);
+	}
+
+	void InputMonitor::ToggleCursorLock()
+	{
+		if (m_IsCursorLocked)
+		{
+			UnlockCursor();
+		}
+		else
+		{
+			LockCursor();
+		}
+	}
+
 	glm::vec2 InputMonitor::GetMousePosition() const
 	{
-		glm::vec2 position;
+		glm::vec2 position = glm::vec2();
 		if (!m_IsAttached)
 		{
 			Log("Tried to get mouse position but InputMonitor has not been attached to a window. Returning 0,0.", LOG_MINIMAL);
 		}
 		else
 		{
-			double x = 0.0f;
-			double y = 0.0f;
-			glfwGetCursorPos(&m_AttachedWindow->GetGLFWWindow(), &x, &y);
-			position = glm::vec2(x, y);
+			std::string s = "";
+			POINT p;
+			GetCursorPos(&p);
+			s = "SC X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
+			Log(s, LOG_SAFE);
+			ScreenToClient(m_AttachedWindow->GetWindowHandle(), &p);
+			s = "cc X " + std::to_string(p.x) + ", Y " + std::to_string(p.y) + "\n";
+			position = glm::vec2(p.x, p.y);
 		}
 
 		return position;
@@ -47,9 +76,13 @@ namespace Bennett
 
 	void InputMonitor::SetMousePositionToCentre() const
 	{
-		double x = WINDOW_WIDTH / 2;
-		double y = WINDOW_HEIGHT / 2;
-		glfwSetCursorPos(&m_AttachedWindow->GetGLFWWindow(), x, y);
+		glm::vec2 winSize = m_AttachedWindow->GetSize();
+		POINT p;
+		p.x = winSize.x / 2.0f;
+		p.y = winSize.y / 2.0f;
+
+
+		SetCursorPos(p.x, p.y);
 	}
 
 	bool InputMonitor::GetKeyState(int key)
@@ -80,6 +113,8 @@ namespace Bennett
 		{
 			m_TrackedKeys.insert(std::make_pair(keyIdsToTrack[i], false));
 		}
+		m_IsCursorLocked = false;
+		UnlockCursor();
 
 		m_Instances.push_back(this);
 	}
@@ -94,7 +129,8 @@ namespace Bennett
 	{
 		if (m_IsAttached == false)
 		{
-			glfwSetKeyCallback(&window.GetGLFWWindow(), InputMonitor::GLFWInputCallback);
+			//todo : setup input callback
+			//glfwSetKeyCallback(&window.GetGLFWWindow(), InputMonitor::Win32InputCallback);
 			m_AttachedWindow = &window;
 			m_IsAttached = true;
 		}

@@ -23,26 +23,10 @@ namespace Bennett
 
 		static float ISO_VALUE = 0.5f;
 		const float CELL_SIZE = 16.0f;
-		const int GRID_RESOLUTION = 8.0f;
+		const int GRID_RESOLUTION = 8;
 
 		const Vertex Vertices[8]
 		{
-			//Vertex(glm::vec3(CUBE_SIZE,-CUBE_SIZE, CUBE_SIZE)),
-			//Vertex(glm::vec3(CUBE_SIZE,-CUBE_SIZE,-CUBE_SIZE)),
-			//Vertex(glm::vec3(-CUBE_SIZE,-CUBE_SIZE,-CUBE_SIZE)),
-			//Vertex(glm::vec3(-CUBE_SIZE,-CUBE_SIZE, CUBE_SIZE)),
-			//Vertex(glm::vec3(CUBE_SIZE, CUBE_SIZE, CUBE_SIZE)),
-			//Vertex(glm::vec3(CUBE_SIZE, CUBE_SIZE,-CUBE_SIZE)),
-			//Vertex(glm::vec3(-CUBE_SIZE, CUBE_SIZE,-CUBE_SIZE)),
-			//Vertex(glm::vec3(-CUBE_SIZE, CUBE_SIZE, CUBE_SIZE))
-
-			/*
-			Vertex(glm::vec3(0.0f, 0.0f,  0.0f)),
-			Vertex(glm::vec3(+CELL_SIZE, 0.0f,  0.0f)),
-			Vertex(glm::vec3(+CELL_SIZE, 0.0f, +CELL_SIZE)),
-			Vertex(glm::vec3(0.0f, 0.0f, +CELL_SIZE)),			
-			*/
-
 			Vertex(glm::vec3(0.0f, 0.0f,  0.0f)),
 			Vertex(glm::vec3(0.0f, 0.0f, +1.0f)),
 			Vertex(glm::vec3(+1.0f, 0.0f, +1.0f)),

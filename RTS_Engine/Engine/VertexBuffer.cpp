@@ -1,5 +1,6 @@
 #include "BennettPCH.h"
 #include "ServiceLocator.h"
+#include "Renderer.h"
 #include "VertexBuffer.h"
 
 

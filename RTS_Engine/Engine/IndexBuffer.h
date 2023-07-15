@@ -4,7 +4,7 @@
 
 namespace Bennett
 {
-	class IndexBuffer : public Buffer
+	class BENNETT_ENGINE IndexBuffer : public Buffer
 	{
 	private:
 

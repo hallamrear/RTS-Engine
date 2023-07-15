@@ -5,7 +5,7 @@ namespace Bennett
 {
 	class TerrainChunk;
 
-	class Terrain : public Entity
+	class BENNETT_ENGINE Terrain : public Entity
 	{
 	private:
 		int m_ChunkCountXZ;

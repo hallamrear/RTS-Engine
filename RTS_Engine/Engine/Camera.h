@@ -8,7 +8,7 @@ namespace Bennett
 	class CameraController;
 	class InputMonitor;
 
-	class Camera
+	class BENNETT_ENGINE Camera
 	{
 	protected:
 		const CameraController& m_Controller;

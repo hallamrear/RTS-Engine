@@ -8,7 +8,7 @@ namespace Bennett
 	class Texture;
 	class ServiceLocator;
 
-	class AssetManager
+	class BENNETT_ENGINE AssetManager
 	{
 		friend ServiceLocator;
 

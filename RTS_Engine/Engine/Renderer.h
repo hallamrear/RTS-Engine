@@ -1,28 +1,27 @@
 #pragma once
-#include <optional>
+#define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.h>
-
-struct GLFWwindow;
+#include <optional>
 
 namespace Bennett
 {
 	class Texture;
 	class Window;
 
-	struct UniformBufferObject
+	struct BENNETT_ENGINE UniformBufferObject
 	{
 		glm::mat4 View;
 		glm::mat4 Projection;
 	};
 
-	struct PushConstantBuffer
+	struct BENNETT_ENGINE PushConstantBuffer
 	{
 		glm::mat4 ModelMatrix;
 		int TextureID;
 		int Padding[3];
 	};
 
-	class Renderer
+	class BENNETT_ENGINE Renderer
 	{
 	private:
 		struct SwapChainSupportDetails
@@ -117,7 +116,7 @@ namespace Bennett
 
 		bool m_IsInitialised;
 
-		bool InitialiseCoreVulkanSystem(GLFWwindow& window);
+		bool InitialiseCoreVulkanSystem(HWND hWnd, HINSTANCE hInstance);
 
 		VkViewport m_Viewport;
 		VkRect2D m_ScissorRect;
@@ -169,7 +168,7 @@ namespace Bennett
 
 		//Creating Surface
 		VkSurfaceKHR m_Surface;
-		bool CreateWindowSurface(GLFWwindow& window);
+		bool CreateWindowSurface(const HWND& hWnd, const HINSTANCE& hInstance);
 		void DestroyWindowSurface();
 
 		//Swapchain
@@ -181,8 +180,8 @@ namespace Bennett
 		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 		VkSurfaceFormatKHR ChooseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
 		VkPresentModeKHR ChooseSwapChainPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
-		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow& window);
-		bool CreateSwapChain(GLFWwindow& window);
+		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, HWND hWnd);
+		bool CreateSwapChain(HWND hWnd);
 		bool CreateSwapChainImageViews();
 
 		//Shaders
@@ -267,7 +266,7 @@ namespace Bennett
 
 		Renderer();
 
-		bool Initialise(Window& window);
+		bool Initialise(const Window& renderWindow);
 		void Shutdown();
 
 		void SetViewport(int x, int y, int w, int h, float maxDepth, float minDepth);

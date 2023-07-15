@@ -1,10 +1,15 @@
 #include "BennettPCH.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-#include <vulkan/vulkan.h>
 #include "ServiceLocator.h"
 #include "Texture.h"
+#include "TextureLoader.h"
+#include "Renderer.h"
 #include "Buffer.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#define VK_USE_PLATFORM_WIN32_KHR
+#include <vulkan/vulkan.h>
 
 namespace Bennett
 {
@@ -135,8 +140,8 @@ namespace Bennett
 		barrier.dstAccessMask = 0; //todo
 		barrier.srcAccessMask = 0; //todo;
 
-		VkPipelineStageFlags sourceStage;
-		VkPipelineStageFlags destinationStage;
+		VkPipelineStageFlags sourceStage{};
+		VkPipelineStageFlags destinationStage{};
 
 		if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) 
 		{
@@ -196,16 +201,17 @@ namespace Bennett
 	void Texture::Create(Texture& texture, const std::string& filepath)
 	{
 		Renderer& renderer = ServiceLocator::GetRenderer();
+		const std::string& assetLocation = ServiceLocator::GetResourceFolderLocation() + filepath;
 
 		//Creating texture image
 		int width, height, channels;
-		stbi_uc* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load(assetLocation.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
 		VkDeviceSize imageSize = width * height * 4;
 
 		if (!pixels)
 		{
-			Log("Failed to load texture image", LOG_SERIOUS);
+			Log("Failed to load texture image" + assetLocation, LOG_SERIOUS);
 			return;
 		}
 

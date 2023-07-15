@@ -5,6 +5,7 @@
 #include "ModelLoader.h"
 #include "Renderer.h"
 #include "TextureLoader.h"
+#include "BennettDefines.h"
 
 namespace Bennett
 {

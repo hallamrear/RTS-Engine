@@ -5,7 +5,7 @@ namespace Bennett
 	class Renderer;
 	class Vertex;
 
-	class ModelLoader
+	class BENNETT_ENGINE ModelLoader
 	{
 		friend class Model;
 		friend class AssetManager;

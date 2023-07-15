@@ -3,7 +3,7 @@
 
 namespace Bennett
 {
-    class FreeCamera :
+    class BENNETT_ENGINE FreeCamera :
         public Camera
     {
 	private:

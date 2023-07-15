@@ -3,7 +3,7 @@
 
 namespace Bennett
 {
-	class WindowResizeEvent : public Event
+	class BENNETT_ENGINE WindowResizeEvent : public Event
 	{
 	public:
 		WindowResizeEvent(unsigned int width, unsigned int height)
@@ -25,7 +25,7 @@ namespace Bennett
 		unsigned int m_Height;
 	};
 
-	class WindowCloseEvent : public Event
+	class BENNETT_ENGINE WindowCloseEvent : public Event
 	{
 	public:
 		WindowCloseEvent()

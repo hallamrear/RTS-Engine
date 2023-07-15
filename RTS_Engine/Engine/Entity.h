@@ -1,4 +1,7 @@
 #pragma once
+#define BENNETT_ENGINE __declspec(dllexport)
+#include <string>
+#include <glm/gtx/quaternion.hpp>
 
 namespace Bennett
 {
@@ -6,7 +9,7 @@ namespace Bennett
 	class Texture;
 	class Renderer;
 
-	class Entity
+	class BENNETT_ENGINE Entity
 	{
 	private:
 		std::string m_Name;

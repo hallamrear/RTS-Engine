@@ -6,14 +6,6 @@
 
 namespace Bennett
 {
-	Entity::Entity(const std::string& name)
-	{
-		m_Name = name;
-		m_Scale = glm::vec3(1.0f, 1.0f, 1.0f);
-		m_Position = glm::vec3(0.0f, 0.0f, 0.0f);
-		m_Rotation = glm::identity<glm::quat>();
-	}
-
 	Entity::Entity(const std::string& name, glm::vec3 scale, glm::vec3 position, glm::vec3 rotation)
 	{
 		m_Name = name;
@@ -73,4 +65,9 @@ namespace Bennett
 		m_RightVector = glm::normalize(glm::cross(m_ForwardVector, glm::vec3(0.0f, 1.0f, 0.0f)));
 		m_UpVector = glm::normalize(glm::cross(m_RightVector, m_ForwardVector));
 	}
+}
+
+Bennett::Entity::Entity(const std::string& m_Name)
+	: m_Name(m_Name)
+{
 }

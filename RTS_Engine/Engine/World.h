@@ -7,7 +7,7 @@ namespace Bennett
 	class Entity;
 	class Terrain;
 
-	class World
+	class BENNETT_ENGINE World
 	{
 	private:
 		friend class LevelManager;

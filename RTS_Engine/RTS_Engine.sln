@@ -3,9 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33513.286
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{CB2448FA-8870-4524-B073-5B64A30EE8B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor\Editor.vcxproj", "{D0527640-378E-4C7D-A97B-65293E1E29C4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{686D4968-4586-4463-85A4-D6E503591CEA} = {686D4968-4586-4463-85A4-D6E503591CEA}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor\Editor.vcxproj", "{EFBCBFEA-7734-4433-AD63-97B24AFA0F90}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{DD3F697F-EF48-40B7-8C19-75455F32107C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{686D4968-4586-4463-85A4-D6E503591CEA} = {686D4968-4586-4463-85A4-D6E503591CEA}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine\Engine.vcxproj", "{686D4968-4586-4463-85A4-D6E503591CEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +21,18 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CB2448FA-8870-4524-B073-5B64A30EE8B7}.Debug|x64.ActiveCfg = Debug|x64
-		{CB2448FA-8870-4524-B073-5B64A30EE8B7}.Debug|x64.Build.0 = Debug|x64
-		{CB2448FA-8870-4524-B073-5B64A30EE8B7}.Release|x64.ActiveCfg = Release|x64
-		{CB2448FA-8870-4524-B073-5B64A30EE8B7}.Release|x64.Build.0 = Release|x64
-		{EFBCBFEA-7734-4433-AD63-97B24AFA0F90}.Debug|x64.ActiveCfg = Debug|x64
-		{EFBCBFEA-7734-4433-AD63-97B24AFA0F90}.Debug|x64.Build.0 = Debug|x64
-		{EFBCBFEA-7734-4433-AD63-97B24AFA0F90}.Release|x64.ActiveCfg = Release|x64
-		{EFBCBFEA-7734-4433-AD63-97B24AFA0F90}.Release|x64.Build.0 = Release|x64
+		{D0527640-378E-4C7D-A97B-65293E1E29C4}.Debug|x64.ActiveCfg = Debug|x64
+		{D0527640-378E-4C7D-A97B-65293E1E29C4}.Debug|x64.Build.0 = Debug|x64
+		{D0527640-378E-4C7D-A97B-65293E1E29C4}.Release|x64.ActiveCfg = Release|x64
+		{D0527640-378E-4C7D-A97B-65293E1E29C4}.Release|x64.Build.0 = Release|x64
+		{DD3F697F-EF48-40B7-8C19-75455F32107C}.Debug|x64.ActiveCfg = Debug|x64
+		{DD3F697F-EF48-40B7-8C19-75455F32107C}.Debug|x64.Build.0 = Debug|x64
+		{DD3F697F-EF48-40B7-8C19-75455F32107C}.Release|x64.ActiveCfg = Release|x64
+		{DD3F697F-EF48-40B7-8C19-75455F32107C}.Release|x64.Build.0 = Release|x64
+		{686D4968-4586-4463-85A4-D6E503591CEA}.Debug|x64.ActiveCfg = Debug|x64
+		{686D4968-4586-4463-85A4-D6E503591CEA}.Debug|x64.Build.0 = Debug|x64
+		{686D4968-4586-4463-85A4-D6E503591CEA}.Release|x64.ActiveCfg = Release|x64
+		{686D4968-4586-4463-85A4-D6E503591CEA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

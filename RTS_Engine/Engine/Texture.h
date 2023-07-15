@@ -1,10 +1,10 @@
 #pragma once
 
 typedef uint64_t VkDeviceSize;
-class VkImage_T; typedef VkImage_T* VkImage;
-class VkDeviceMemory_T; typedef VkDeviceMemory_T* VkDeviceMemory;
-class VkBuffer_T; typedef VkBuffer_T* VkBuffer;
-class VkImageView_T; typedef VkImageView_T* VkImageView;
+struct VkImage_T; typedef VkImage_T* VkImage;
+struct VkDeviceMemory_T; typedef VkDeviceMemory_T* VkDeviceMemory;
+struct VkBuffer_T; typedef VkBuffer_T* VkBuffer;
+struct VkImageView_T; typedef VkImageView_T* VkImageView;
 enum VkFormat;
 enum VkImageLayout;
 
@@ -12,7 +12,7 @@ namespace Bennett
 {
 	class Renderer;
 
-	class Texture
+	class BENNETT_ENGINE Texture
 	{
 	private:
 		uint32_t m_TextureID;

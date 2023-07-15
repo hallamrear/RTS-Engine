@@ -7,7 +7,7 @@ namespace Bennett
 {
 	class Renderer;
 
-	class Model
+	class BENNETT_ENGINE Model
 	{
 	friend class ModelLoader;
 

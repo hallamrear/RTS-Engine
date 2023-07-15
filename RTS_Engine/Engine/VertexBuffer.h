@@ -4,7 +4,7 @@
 
 namespace Bennett
 {
-	class VertexBuffer : public Buffer
+	class BENNETT_ENGINE VertexBuffer : public Buffer
 	{
 	private:
 

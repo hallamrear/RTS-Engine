@@ -3,7 +3,7 @@
 
 namespace Bennett
 {
-	class TerrainChunk : public Entity
+	class BENNETT_ENGINE TerrainChunk : public Entity
 	{
 	private:
 		static int s_TerrainIDCount;
@@ -14,7 +14,7 @@ namespace Bennett
 
 		static inline const int GetIndexFromPosition(const glm::vec3& position)
 		{
-			return position.x + CHUNK_SIZE * position.z + CHUNK_AREA * position.y;
+			return (int)floor(position.x) + CHUNK_SIZE * (int)floor(position.z) + CHUNK_AREA * (int)floor(position.y);
 		};
 
 	public:

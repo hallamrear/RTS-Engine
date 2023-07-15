@@ -6,7 +6,7 @@ namespace Bennett
 {
 	class InputMonitor;
 
-	enum CAMERA_MODE
+	enum BENNETT_ENGINE CAMERA_MODE
 	{
 		FREE_CAM = 0,
 		STANDARD_CAM = 1,
@@ -14,7 +14,7 @@ namespace Bennett
 		_COUNT = 3
 	};
 
-	class CameraController
+	class BENNETT_ENGINE CameraController
 	{
 	private:
 		friend Camera;

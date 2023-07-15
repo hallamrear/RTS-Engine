@@ -4,7 +4,7 @@ namespace Bennett
 {
 	class Renderer;
 
-	class TextureLoader
+	class BENNETT_ENGINE TextureLoader
 	{
 	private:
 		friend class Texture;

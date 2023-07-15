@@ -3,7 +3,7 @@
 
 namespace Bennett
 {
-	class StandardCamera
+	class BENNETT_ENGINE StandardCamera
 		: public Camera
 	{
 	public:
