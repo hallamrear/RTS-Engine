@@ -1,6 +1,6 @@
 #include "BennettPCH.h"
 #include "InputMonitor.h"
-#include <GLFW/glfw3.h>
+#include "Engine.h"
 #include "Window.h"
 
 namespace Bennett
@@ -9,11 +9,11 @@ namespace Bennett
 	bool InputMonitor::m_IsAttached = false;
 	std::vector<InputMonitor*> InputMonitor::m_Instances = std::vector<InputMonitor*>();
 
-	void InputMonitor::Win32InputCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	void InputMonitor::Win32InputCallback(int vkKey, bool state, bool repeat)
 	{
 		for (size_t i = 0; i < m_Instances.size(); i++)
 		{
-			m_Instances[i]->SetKeyState(key, action != GLFW_RELEASE);
+			m_Instances[i]->SetKeyState(vkKey, state != GLFW_RELEASE);
 		}
 	}
 
@@ -125,13 +125,11 @@ namespace Bennett
 		m_Instances.erase(std::find(m_Instances.begin(), m_Instances.end(), this));
 	}
 
-	void InputMonitor::AttachToWindow(Window& window)
+	void InputMonitor::AttachToWindow(Window& engine)
 	{
 		if (m_IsAttached == false)
 		{
-			//todo : setup input callback
-			//glfwSetKeyCallback(&window.GetGLFWWindow(), InputMonitor::Win32InputCallback);
-			m_AttachedWindow = &window;
+			m_AttachedWindow = &engine;
 			m_IsAttached = true;
 		}
 	}

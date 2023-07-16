@@ -58,7 +58,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAME));
 
-    Engine* engine = CreateEngine(*mainWindow);
+    Engine* engine = Engine::CreateEngine(*mainWindow);
 
     if (!engine)
     {

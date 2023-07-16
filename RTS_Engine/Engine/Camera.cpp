@@ -19,6 +19,21 @@ namespace Bennett
 		m_MovementSpeed = 20.0f;
 		m_RotationSpeed = 80.0f;
 
+		m_CameraControlKeys =
+		{
+			VK_W,			 //Translate Forward
+			VK_S,			 //Translate Backward
+			VK_A,			 //Translate Left
+			VK_D,			 //Translate Right
+			VK_SPACE,		 //Translate Up
+			VK_LSHIFT,   //Translate Down
+			VK_R,			 //Rotate Up
+			VK_F,			 //Rotate Down
+			VK_Q,			 //Rotate Left
+			VK_E,			 //Rotate Right
+			VK_TAB,		     //Toggle Mouse Lock
+		};
+
 		m_InputMonitor = new InputMonitor(m_CameraControlKeys);
 	}
 

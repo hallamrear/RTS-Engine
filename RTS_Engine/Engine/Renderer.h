@@ -24,6 +24,8 @@ namespace Bennett
 	class BENNETT_ENGINE Renderer
 	{
 	private:
+		HWND m_AttachedWindow;
+
 		struct SwapChainSupportDetails
 		{
 			VkSurfaceCapabilitiesKHR Capabilities;
@@ -254,6 +256,10 @@ namespace Bennett
 
 		bool CreateTextureSampler();
 		VkSampler m_TextureSampler;
+
+		//Recreating SwapChain
+		void CleanupSwapChain();
+		bool RecreateSwapChain();
 
 	public:
 		static UniformBufferObject UniformMatrixBuffer;

@@ -45,6 +45,7 @@ namespace Bennett
             if (settings.has("ResourceSrcFolder"))
             {
                 m_ResourceFolderLocation = settings["ResourceSrcFolder"];
+                Log("Resource Folder set to \"" + m_ResourceFolderLocation + "\"", LOG_SAFE);
                 configOk = true;
             }
         }

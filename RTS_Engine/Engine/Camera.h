@@ -13,20 +13,7 @@ namespace Bennett
 	protected:
 		const CameraController& m_Controller;
 		InputMonitor* m_InputMonitor;
-		std::vector<int> m_CameraControlKeys =
-		{
-			GLFW_KEY_W,			 //Translate Forward
-			GLFW_KEY_S,			 //Translate Backward
-			GLFW_KEY_A,			 //Translate Left
-			GLFW_KEY_D,			 //Translate Right
-			GLFW_KEY_SPACE,		 //Translate Up
-			GLFW_KEY_LEFT_SHIFT, //Translate Down
-			GLFW_KEY_R,			 //Rotate Up
-			GLFW_KEY_F,			 //Rotate Down
-			GLFW_KEY_Q,			 //Rotate Left
-			GLFW_KEY_E,			 //Rotate Right
-			GLFW_KEY_TAB,		 //Toggle Mouse Lock
-		};
+		std::vector<int> m_CameraControlKeys;
 
 		glm::vec3 m_ForwardVector;
 		glm::vec3 m_RightVector;

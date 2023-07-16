@@ -38,12 +38,12 @@ namespace Bennett
 		if (!m_InputMonitor)
 			return;
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_W)) { Translate(glm::vec3(m_ForwardVector * m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_S)) { Translate(glm::vec3(m_ForwardVector * -m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_A)) { Translate(glm::vec3(m_RightVector * -m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_D)) { Translate(glm::vec3(m_RightVector * m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_SPACE)) { Translate(glm::vec3(m_UpVector * m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_LEFT_SHIFT)) { Translate(glm::vec3(m_UpVector * -m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(VK_W))		{ Translate(glm::vec3(m_ForwardVector *  m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(VK_S))	    { Translate(glm::vec3(m_ForwardVector * -m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(VK_A))	    { Translate(glm::vec3(m_RightVector   * -m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(VK_D))	    { Translate(glm::vec3(m_RightVector   *  m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(VK_SPACE))  { Translate(glm::vec3(m_UpVector      *  m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(VK_LSHIFT)) { Translate(glm::vec3(m_UpVector	  * -m_MovementSpeed * deltaTime)); }
 
 		if (m_IsMouseLocked)
 		{
@@ -61,13 +61,13 @@ namespace Bennett
 		}
 		else
 		{
-			if (m_InputMonitor->GetKeyState(GLFW_KEY_R)) { Rotate(glm::vec3(m_RotationSpeed * deltaTime, 0.0f, 0.0f)); }
-			if (m_InputMonitor->GetKeyState(GLFW_KEY_F)) { Rotate(glm::vec3(-m_RotationSpeed * deltaTime, 0.0f, 0.0f)); }
-			if (m_InputMonitor->GetKeyState(GLFW_KEY_Q)) { Rotate(glm::vec3(0.0f, -m_RotationSpeed * deltaTime, 0.0f)); }
-			if (m_InputMonitor->GetKeyState(GLFW_KEY_E)) { Rotate(glm::vec3(0.0f, m_RotationSpeed * deltaTime, 0.0f)); }
+			if (m_InputMonitor->GetKeyState(VK_R)) { Rotate(glm::vec3(m_RotationSpeed * deltaTime, 0.0f, 0.0f)); }
+			if (m_InputMonitor->GetKeyState(VK_F)) { Rotate(glm::vec3(-m_RotationSpeed * deltaTime, 0.0f, 0.0f)); }
+			if (m_InputMonitor->GetKeyState(VK_Q)) { Rotate(glm::vec3(0.0f, -m_RotationSpeed * deltaTime, 0.0f)); }
+			if (m_InputMonitor->GetKeyState(VK_E)) { Rotate(glm::vec3(0.0f, m_RotationSpeed * deltaTime, 0.0f)); }
 		}
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_TAB))
+		if (m_InputMonitor->GetKeyState(VK_TAB))
 		{
 			m_IsMouseLocked = !m_IsMouseLocked;
 			if (m_IsMouseLocked)

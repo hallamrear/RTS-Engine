@@ -7,14 +7,15 @@
 #include <Logger.h>
 #include <chrono>
 
+using namespace Bennett;
+
 HINSTANCE g_Instance = NULL;
+Engine* g_Engine = nullptr;
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK MainWindowWndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK ChildWindowWndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
-
-using namespace Bennett;
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -28,8 +29,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     char** argv = __argv;
 
 #ifdef _DEBUG
-    if (!AttachConsole(ATTACH_PARENT_PROCESS))   // try to hijack existing console of command line
-        AllocConsole();                           // or create your own.
+    if (!AttachConsole(ATTACH_PARENT_PROCESS))
+        AllocConsole();
 
     FILE* file = nullptr;
     freopen_s(&file, "CONIN$", "r", stdin);
@@ -45,6 +46,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
     mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
     mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
+    mainWindowDetails.ClassDetails.WndProcCallback = Engine::WindowsCallbackProcedure;
     mainWindowDetails.ClassDetails.Icon = IDI_ICON1;
     mainWindowDetails.ClassDetails.SmallIcon = IDI_ICON1;
     mainWindowDetails.ClassDetails.MenuName = IDI_EDITOR;
@@ -95,9 +97,9 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_EDITOR));
     
-    Engine* engine = CreateEngine(*childWindow);
+    g_Engine = Engine::CreateEngine(*childWindow);
 
-    if (!engine)
+    if (!g_Engine)
     {
         Log("Engine Run finished. Engine deleting.", LOG_CRITICAL);
         return 0;
@@ -107,8 +109,8 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     auto cTime = lTime;
     float dTime = 0.0f;
 
-    MSG msg;
-    while (engine->IsRunning()) 
+    MSG msg{};
+    while (g_Engine->IsRunning())
     {
         if (PeekMessage(&msg, mainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
         {
@@ -123,31 +125,17 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
             if (dTime > TIMESTEP_CAP)
                 dTime = TIMESTEP_CAP;
 
-            engine->ProcessInput(dTime);
-            engine->Update(dTime);
-            engine->Render();
-
-            engine->GetWorld();
+            g_Engine->ProcessInput(dTime);
+            g_Engine->Update(dTime);
+            g_Engine->Render();
 
             lTime = cTime;
         }
     }
 
-    // Main message loop:
-    /*
-    while (GetMessage(&msg, nullptr, 0, 0))
-    {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
-    */
-
     Log("Engine has finished running, it is now closing.", LOG_SAFE);
-    delete engine;
-    engine = nullptr;
+    delete g_Engine;
+    g_Engine = nullptr;
 
     return (int)msg.wParam;
 }

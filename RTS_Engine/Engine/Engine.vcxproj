@@ -107,7 +107,6 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="entrypoint.cpp" />
     <ClCompile Include="FreeCamera.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="InputMonitor.cpp" />

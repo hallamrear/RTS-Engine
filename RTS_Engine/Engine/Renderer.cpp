@@ -9,7 +9,7 @@
 #include <fstream>
 #include <set>
 
-#define INIT_CHECK(func) if(func != true) return false;
+#define INIT_CHECK(func) if(func != true) { m_AttachedWindow = NULL; return false; } 
 
 namespace Bennett
 {
@@ -43,21 +43,23 @@ namespace Bennett
 
 	bool Renderer::InitialiseCoreVulkanSystem(HWND hWnd, HINSTANCE hInstance)
 	{
+		m_AttachedWindow = hWnd;
+
 		INIT_CHECK(CreateVulkanInstance())
 		CreateDebugMessenger();
 		INIT_CHECK(CreateWindowSurface(hWnd, hInstance))
 		INIT_CHECK(PickPhysicalDevice())
 		INIT_CHECK(CreateLogicalDevice())
-		INIT_CHECK(CreateSwapChain(hWnd))
-		INIT_CHECK(CreateSwapChainImageViews())
+		INIT_CHECK(RecreateSwapChain())
+		//INIT_CHECK(CreateSwapChain(hWnd))
+		//INIT_CHECK(CreateSwapChainImageViews())
+		//INIT_CHECK(CreateFrameBuffers())
 		INIT_CHECK(CreateCommandPool())
-		INIT_CHECK(CreateRenderPass())
 		INIT_CHECK(CreateTextureSampler())
 		INIT_CHECK(CreateDescriptorLayout())
 		INIT_CHECK(CreateDescriptorPool())
 		INIT_CHECK(InitialiseGraphicsPipeline())
 		INIT_CHECK(CreateUniformBuffers())
-		INIT_CHECK(CreateDepthResources())
 		INIT_CHECK(AllocateDescriptorSets())
 
 		Texture texture, texture2;
@@ -68,7 +70,6 @@ namespace Bennett
 		list.push_back(&texture2);
 
 		INIT_CHECK(UpdateDescriptorSets(list))
-		INIT_CHECK(CreateFrameBuffers())
 		INIT_CHECK(CreateCommandBuffer())
 		INIT_CHECK(CreateSyncObjects())
 
@@ -149,6 +150,42 @@ namespace Bennett
 	void Renderer::EndRenderPass()
 	{
 		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentRenderFrame]);
+	}
+
+	void Renderer::CleanupSwapChain()
+	{
+		vkDestroyImage(m_Device, m_DepthImage, nullptr);
+		vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
+		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
+
+		for (size_t i = 0; i < m_Framebuffers.size(); i++)
+		{
+			vkDestroyFramebuffer(m_Device, m_Framebuffers[i], nullptr);
+		}
+
+		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
+		{
+			vkDestroyImageView(m_Device, m_SwapChainImageViews[i], nullptr);
+		}
+
+		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
+
+		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+	}
+
+	bool Renderer::RecreateSwapChain()
+	{
+		vkDeviceWaitIdle(m_Device);
+
+		CleanupSwapChain();
+
+		INIT_CHECK(CreateSwapChain(m_AttachedWindow))
+		INIT_CHECK(CreateRenderPass())
+		INIT_CHECK(CreateSwapChainImageViews())
+		INIT_CHECK(CreateDepthResources())
+		INIT_CHECK(CreateFrameBuffers())
+
+		return true;
 	}
 
 	bool Renderer::CreateTextureSampler()
@@ -264,12 +301,24 @@ namespace Bennett
 
 			//todo : load the new vulkan shaders into the pipeline.
 			//Will need to recreate the pipeline using the new objects.
+
+
 		}
 	}
 
 	void Renderer::AquireSwapchainImageIndex()
 	{
-		vkAcquireNextImageKHR(m_Device, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentRenderFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+		VkResult result = vkAcquireNextImageKHR(m_Device, m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentRenderFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			RecreateSwapChain();
+			return;
+		}
+		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) 
+		{
+			Log("failed to acquire swap chain image!", LOG_CRITICAL);
+		}
 	}
 
 	void Renderer::WaitForFrame()
@@ -334,7 +383,16 @@ namespace Bennett
 		presentInfo.pImageIndices = &imageIndex;
 		presentInfo.pResults = nullptr;
 
-		vkQueuePresentKHR(m_GraphicsQueue, &presentInfo);
+		VkResult result = vkQueuePresentKHR(m_GraphicsQueue, &presentInfo);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+		{
+			RecreateSwapChain();
+		}
+		else if (result != VK_SUCCESS)
+		{
+			Log("failed to present swap chain image!", LOG_CRITICAL);
+		}
 	}
 
 	bool Renderer::CreateUniformBuffers()
@@ -453,7 +511,7 @@ namespace Bennett
 			VkFramebufferCreateInfo framebufferInfo{};
 			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferInfo.renderPass = m_RenderPass;
-			framebufferInfo.attachmentCount = 2;
+			framebufferInfo.attachmentCount = attachments.size();
 			framebufferInfo.pAttachments = attachments.data();
 			framebufferInfo.width = m_SwapChainExtent.width;
 			framebufferInfo.height = m_SwapChainExtent.height;
@@ -578,7 +636,7 @@ namespace Bennett
 		rasterizer.lineWidth = 2.0f;
 
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		//rasterizer.cullMode = VK_CULL_MODE_NONE;
+		rasterizer.cullMode = VK_CULL_MODE_NONE;
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 		//Altering depth values and biasing.
@@ -954,9 +1012,6 @@ namespace Bennett
 		depthAttachmentRef.attachment = 1;
 		depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-
-
-
 		VkSubpassDescription subpass{};
 		subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
 		subpass.pColorAttachments = &colorAttachmentRef;
@@ -1015,22 +1070,10 @@ namespace Bennett
 
 			vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
 
-			for (auto framebuffer : m_Framebuffers)
-			{
-				vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
-			}
-
 			vkDestroyShaderModule(m_Device, m_FragShaderModule, nullptr);
 			vkDestroyShaderModule(m_Device, m_VertShaderModule, nullptr);
 
-			for (auto imageView : m_SwapChainImageViews)
-			{
-				vkDestroyImageView(m_Device, imageView, nullptr);
-			}
-
-			vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
-
-			vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+			CleanupSwapChain();
 
 			DestroyWindowSurface();
 

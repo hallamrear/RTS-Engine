@@ -9,10 +9,15 @@ namespace Bennett
 	class BENNETT_ENGINE Engine
 	{
 	private:
+		static Engine* m_Instance;
+
 		World m_World;
 		CameraController& m_CameraController;
 		InputMonitor* m_EngineControls;
 		bool m_IsRunning;
+		bool m_InFocus;
+
+		static Engine* GetEngineInstance();
 
 	public:
 		Engine();
@@ -22,23 +27,18 @@ namespace Bennett
 		void Update(float DeltaTime);
 		void Render();
 		inline bool IsRunning() const { return m_IsRunning; };
+		inline void SetIsRunning(bool state) { m_IsRunning = state; };
+		inline void SetInFocus(bool state) { m_InFocus = state; };
 
 		bool Initialise(Window& renderWindow);
 		void Destroy();
 
+		static LRESULT CALLBACK WindowsCallbackProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+		void ProcessKeyboardInput(int vkKey, bool state, bool repeat);
+
 		World& GetWorld();
+
+		static Engine* CreateEngine(Window& renderWindow);
 	};
-
-	inline Engine* CreateEngine(Window& renderWindow)
-	{
-		Engine* app = new Engine();
-
-		if (!app->Initialise(renderWindow))
-		{
-			delete app;
-			app = nullptr;
-		}
-
-		return app;
-	}
 }

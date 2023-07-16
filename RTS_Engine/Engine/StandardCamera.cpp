@@ -35,32 +35,32 @@ namespace Bennett
 
 		float movementScale = m_MovementSpeed * deltaTime;
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_W))
+		if (m_InputMonitor->GetKeyState(VK_W))
 		{
 			Translate(glm::vec3(0.0f, 0.0f, movementScale));
 		}
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_S))
+		if (m_InputMonitor->GetKeyState(VK_S))
 		{
 			Translate(glm::vec3(0.0f, 0.0f, -movementScale));
 		}
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_A))
+		if (m_InputMonitor->GetKeyState(VK_A))
 		{
 			Translate(glm::vec3(movementScale, 0.0f, 0.0f));
 		}
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_D))
+		if (m_InputMonitor->GetKeyState(VK_D))
 		{
 			Translate(glm::vec3(-movementScale, 0.0f, 0.0f));
 		}
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_R))
+		if (m_InputMonitor->GetKeyState(VK_R))
 		{
 			Translate(glm::vec3(0.0f, movementScale, 0.0f));
 		}
 
-		if (m_InputMonitor->GetKeyState(GLFW_KEY_F))
+		if (m_InputMonitor->GetKeyState(VK_F))
 		{
 			Translate(glm::vec3(0.0f, -movementScale, 0.0f));
 		}
