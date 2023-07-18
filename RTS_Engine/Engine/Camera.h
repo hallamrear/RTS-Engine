@@ -1,6 +1,5 @@
 #pragma once
 #include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
 #include <vector>
 
 namespace Bennett
@@ -38,7 +37,7 @@ namespace Bennett
 		virtual ~Camera() = 0;
 
 		virtual glm::mat4 GetViewMatrix() = 0;
-		virtual glm::mat4 GetProjectionMatrix() = 0;
+		virtual glm::mat4 GetProjectionMatrix();
 
 		float GetNearPlaneDistance() const;
 		float GetFarPlaneDistance() const;

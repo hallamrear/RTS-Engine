@@ -2,6 +2,8 @@
 #include "Camera.h"
 #include "CameraController.h"
 #include "InputMonitor.h"
+#include "ServiceLocator.h"
+#include "Window.h"
 
 namespace Bennett
 {
@@ -21,17 +23,17 @@ namespace Bennett
 
 		m_CameraControlKeys =
 		{
-			VK_W,			 //Translate Forward
-			VK_S,			 //Translate Backward
-			VK_A,			 //Translate Left
-			VK_D,			 //Translate Right
-			VK_SPACE,		 //Translate Up
-			VK_LSHIFT,   //Translate Down
-			VK_R,			 //Rotate Up
-			VK_F,			 //Rotate Down
-			VK_Q,			 //Rotate Left
-			VK_E,			 //Rotate Right
-			VK_TAB,		     //Toggle Mouse Lock
+			BENNETT_KEY_W,			 //Translate Forward
+			BENNETT_KEY_S,			 //Translate Backward
+			BENNETT_KEY_A,			 //Translate Left
+			BENNETT_KEY_D,			 //Translate Right
+			BENNETT_KEY_SPACE,		 //Translate Up
+			BENNETT_KEY_LSHIFT,		 //Translate Down
+			BENNETT_KEY_R,			 //Rotate Up
+			BENNETT_KEY_F,			 //Rotate Down
+			BENNETT_KEY_Q,			 //Rotate Left
+			BENNETT_KEY_E,			 //Rotate Right
+			BENNETT_KEY_TAB,		 //Toggle Mouse Lock
 		};
 
 		m_InputMonitor = new InputMonitor(m_CameraControlKeys);
@@ -165,5 +167,22 @@ namespace Bennett
 			m_Rotation.x =  89.0f;
 		if (m_Rotation.x < -90.0f)
 			m_Rotation.x = -89.0f;
+	}
+
+	glm::mat4 Camera::GetProjectionMatrix()
+	{
+		glm::vec2 size = ServiceLocator::GetWindow().GetSize();
+		m_AspectRatio = size.x / size.y;
+
+		/*
+		Vulkan clip space has [1, -1] for the y axis where OpenGL has [-1, 1] 
+		so just multiplying the perspective matrix [1][1] value by -1 will "correct"
+		the OpenGL matrix to work with Vulkan.
+		
+		All it really does is flip the y axis. (or you can also use gl_Postion.y *= -1)
+		*/
+		glm::mat4 projection = glm::perspective(m_FOVAngle, m_AspectRatio, m_NearPlaneDistance, m_FarPlaneDistance);
+		projection[1][1] *= -1;
+		return projection;
 	}
 }

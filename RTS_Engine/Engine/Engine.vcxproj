@@ -47,13 +47,13 @@
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\bin\</IntDir>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
-    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\bin\</IntDir>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
-    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\glfw\$(LibrariesArchitecture)\include;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(ExternalIncludePath)</ExternalIncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -69,8 +69,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\lib;$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -91,8 +91,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalLibraryDirectories>$(SolutionDir)External\glfw\$(LibrariesArchitecture)\lib;$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VULKAN_SDK)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -143,6 +143,7 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
+    <ClInclude Include="BennettInputDefines.h" />
     <ClInclude Include="BennettPCH.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>

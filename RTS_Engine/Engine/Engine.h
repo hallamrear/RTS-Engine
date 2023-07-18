@@ -35,8 +35,6 @@ namespace Bennett
 
 		static LRESULT CALLBACK WindowsCallbackProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
-		void ProcessKeyboardInput(int vkKey, bool state, bool repeat);
-
 		World& GetWorld();
 
 		static Engine* CreateEngine(Window& renderWindow);

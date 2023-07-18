@@ -2,6 +2,8 @@
 #include "Terrain.h"
 #include "TerrainChunk.h"
 #include "MarchingCubesTriangulationTable.h"
+#include "ServiceLocator.h"
+#include "AssetManager.h"
 
 namespace Bennett
 {
@@ -31,6 +33,7 @@ namespace Bennett
 						0.0f,
 						k * offset));
 				m_Chunks.back()->BuildChunk();
+				m_Chunks.back()->SetTexture(ServiceLocator::GetAssetManager().GetTexture("Floor"));
 			}
 		}
 	}

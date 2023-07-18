@@ -8,4 +8,6 @@
 #define MAX_LOADED_TEXTURES 64
 #define MAX_LOADSTRING 100
 
+//Custom Defines
 #define BENNETT_ENGINE __declspec(dllexport)
+#define WIN32MSG UINT

@@ -15,14 +15,11 @@ namespace Bennett
 
     Model* ModelLoader::Load(const char* filepath)
     {
-        Renderer& renderer = ServiceLocator::GetRenderer();
-        const std::string& assetLocation = ServiceLocator::GetResourceFolderLocation() + filepath;
-
         std::string error, warning;
         tinyobj::ObjReaderConfig reader_config;
         tinyobj::ObjReader reader;
 
-        if (!reader.ParseFromFile(assetLocation, reader_config))
+        if (!reader.ParseFromFile(filepath, reader_config))
         {
             Log("Failed to parse obj file correctly.", LOG_SERIOUS);
             if (!reader.Error().empty())

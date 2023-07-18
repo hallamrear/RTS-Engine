@@ -37,23 +37,20 @@ namespace Bennett
 	bool Renderer::Initialise(const Window& renderWindow)
 	{
 		Shutdown();
-		m_IsInitialised = InitialiseCoreVulkanSystem(renderWindow.GetWindowHandle(), GetModuleHandle(NULL)) && InitialiseGraphicsPipeline();
+		m_IsInitialised = InitialiseCoreVulkanSystem(renderWindow, GetModuleHandle(NULL));
 		return m_IsInitialised;
 	}
 
-	bool Renderer::InitialiseCoreVulkanSystem(HWND hWnd, HINSTANCE hInstance)
+	bool Renderer::InitialiseCoreVulkanSystem(const Window& window, HINSTANCE hInstance)
 	{
-		m_AttachedWindow = hWnd;
+		m_AttachedWindow = &window;
 
 		INIT_CHECK(CreateVulkanInstance())
 		CreateDebugMessenger();
-		INIT_CHECK(CreateWindowSurface(hWnd, hInstance))
+		INIT_CHECK(CreateWindowSurface(m_AttachedWindow->GetWindowHandle(), hInstance))
 		INIT_CHECK(PickPhysicalDevice())
 		INIT_CHECK(CreateLogicalDevice())
 		INIT_CHECK(RecreateSwapChain())
-		//INIT_CHECK(CreateSwapChain(hWnd))
-		//INIT_CHECK(CreateSwapChainImageViews())
-		//INIT_CHECK(CreateFrameBuffers())
 		INIT_CHECK(CreateCommandPool())
 		INIT_CHECK(CreateTextureSampler())
 		INIT_CHECK(CreateDescriptorLayout())
@@ -63,8 +60,8 @@ namespace Bennett
 		INIT_CHECK(AllocateDescriptorSets())
 
 		Texture texture, texture2;
-		Texture::Create(texture,  "Required/debug.png");
-		Texture::Create(texture2, "Required/cat.png");
+		Texture::Create(texture,  ServiceLocator::GetResourceFolderLocation() + "Required/debug.png");
+		Texture::Create(texture2, ServiceLocator::GetResourceFolderLocation() + "Required/cat.png");
 		std::vector<Texture*> list;
 		list.push_back(&texture);
 		list.push_back(&texture2);
@@ -169,6 +166,11 @@ namespace Bennett
 		}
 
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
+		vkDestroyShaderModule(m_Device, m_FragShaderModule, nullptr);
+		vkDestroyShaderModule(m_Device, m_VertShaderModule, nullptr);
+
+		m_FragShaderModule = VK_NULL_HANDLE;
+		m_VertShaderModule = VK_NULL_HANDLE;
 
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
 	}
@@ -179,11 +181,14 @@ namespace Bennett
 
 		CleanupSwapChain();
 
-		INIT_CHECK(CreateSwapChain(m_AttachedWindow))
+		INIT_CHECK(CreateSwapChain())
 		INIT_CHECK(CreateRenderPass())
 		INIT_CHECK(CreateSwapChainImageViews())
 		INIT_CHECK(CreateDepthResources())
 		INIT_CHECK(CreateFrameBuffers())
+
+		SetScissorRect(0, 0, m_SwapChainExtent.width, m_SwapChainExtent.height);
+		SetViewport(0, 0, m_SwapChainExtent.width, m_SwapChainExtent.height, 1.0f, 0.0f);
 
 		return true;
 	}
@@ -342,7 +347,6 @@ namespace Bennett
 	{
 		m_PushConstantBuffer.TextureID = texID;
 		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
-
 	}
 
 	void Renderer::SubmitCommandData()
@@ -630,7 +634,7 @@ namespace Bennett
 		* Using any other mode than fill requires enabling a GPU feature.
 		*/
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+		//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
 
 		//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
 		rasterizer.lineWidth = 2.0f;
@@ -1710,7 +1714,7 @@ namespace Bennett
 		return VK_PRESENT_MODE_IMMEDIATE_KHR;
 	}
 
-	VkExtent2D Renderer::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, HWND hWnd)
+	VkExtent2D Renderer::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	{
 		//This is a check to see if the window manager allows us to differ the resolution
 		//of the window between pixels and screenspace.
@@ -1722,21 +1726,20 @@ namespace Bennett
 		{
 			//if vulkan does not fix the extent, we can just use glfw/win32 to query the frame buffer
 			//and create an image extent matched against it.
-			RECT rect{};
-			GetClientRect(hWnd, &rect);
-			VkExtent2D actualExtent = { static_cast<uint32_t>(rect.right), static_cast<uint32_t>(rect.bottom) };
+			glm::vec2 size = m_AttachedWindow->GetSize();
+			VkExtent2D actualExtent = { static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y) };
 			actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
 			actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
 			return actualExtent;
 		}
 	}
 
-	bool Renderer::CreateSwapChain(HWND hWnd)
+	bool Renderer::CreateSwapChain()
 	{
 		SwapChainSupportDetails details = QuerySwapChainSupport(m_PhysicalDevice);
 		VkSurfaceFormatKHR format = ChooseSwapChainSurfaceFormat(details.Formats);
 		VkPresentModeKHR presentMode = ChooseSwapChainPresentMode(details.PresentModes);
-		VkExtent2D extent = ChooseSwapExtent(details.Capabilities, hWnd);
+		VkExtent2D extent = ChooseSwapExtent(details.Capabilities);
 
 		//specifying how many images wanted in the swap chain.
 		//there is a +1 to avoid waiting for the driver to aquire another image

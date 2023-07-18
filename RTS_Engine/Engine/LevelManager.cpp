@@ -26,9 +26,10 @@ namespace Bennett
         terrainName = document.FirstChildElement("Level")->FirstChildElement("TerrainName")->GetText();
         if (terrainName != "")
         {
-            Entity* floor = world.SpawnEntity("tools");
-            //floor->SetModel(AssetManager::GetModel("tools"));
-            //floor->SetTexture(AssetManager::GetTexture("tools"));
+            Entity* floor = world.SpawnEntity("Bender");
+            floor->SetModel(AssetManager::GetModel("Bender"));
+            floor->SetTexture(AssetManager::GetTexture("Bender"));
+            floor->SetPosition(glm::vec3(5.0f, 0.0f, 5.0f));
         }
 
         Entity* Terrain = world.CreateTerrain();
