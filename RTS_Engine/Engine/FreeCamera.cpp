@@ -25,25 +25,17 @@ namespace Bennett
 		return view;
 	}
 
-	glm::mat4 FreeCamera::GetProjectionMatrix()
-	{
-		glm::mat4 projection = glm::perspective(m_FOVAngle, m_AspectRatio, m_NearPlaneDistance, m_FarPlaneDistance);
-		//vulkan uses weird coordinates so multiply by -1.
-		projection[1][1] *= -1;
-		return projection;
-	}
-
 	void FreeCamera::ProcessInput(const float& deltaTime)
 	{
 		if (!m_InputMonitor)
 			return;
 
-		if (m_InputMonitor->GetKeyState(VK_W))		{ Translate(glm::vec3(m_ForwardVector *  m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(VK_S))	    { Translate(glm::vec3(m_ForwardVector * -m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(VK_A))	    { Translate(glm::vec3(m_RightVector   * -m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(VK_D))	    { Translate(glm::vec3(m_RightVector   *  m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(VK_SPACE))  { Translate(glm::vec3(m_UpVector      *  m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(VK_LSHIFT)) { Translate(glm::vec3(m_UpVector	  * -m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_W))		{ Translate(glm::vec3(m_ForwardVector *  m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_S))	    { Translate(glm::vec3(m_ForwardVector * -m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_A))	    { Translate(glm::vec3(m_RightVector   * -m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_D))	    { Translate(glm::vec3(m_RightVector   *  m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_SPACE))  { Translate(glm::vec3(m_UpVector      *  m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_LSHIFT)) { Translate(glm::vec3(m_UpVector	  * -m_MovementSpeed * deltaTime)); }
 
 		if (m_IsMouseLocked)
 		{
@@ -61,10 +53,11 @@ namespace Bennett
 		}
 		else
 		{
-			if (m_InputMonitor->GetKeyState(VK_R)) { Rotate(glm::vec3(m_RotationSpeed * deltaTime, 0.0f, 0.0f)); }
-			if (m_InputMonitor->GetKeyState(VK_F)) { Rotate(glm::vec3(-m_RotationSpeed * deltaTime, 0.0f, 0.0f)); }
-			if (m_InputMonitor->GetKeyState(VK_Q)) { Rotate(glm::vec3(0.0f, -m_RotationSpeed * deltaTime, 0.0f)); }
-			if (m_InputMonitor->GetKeyState(VK_E)) { Rotate(glm::vec3(0.0f, m_RotationSpeed * deltaTime, 0.0f)); }
+			float slowerRotationSpeed = m_RotationSpeed / 4.0f;
+			if (m_InputMonitor->GetKeyState(BENNETT_KEY_R)) { Rotate(glm::vec3( slowerRotationSpeed * deltaTime, 0.0f, 0.0f)); }
+			if (m_InputMonitor->GetKeyState(BENNETT_KEY_F)) { Rotate(glm::vec3(-slowerRotationSpeed * deltaTime, 0.0f, 0.0f)); }
+			if (m_InputMonitor->GetKeyState(BENNETT_KEY_Q)) { Rotate(glm::vec3(0.0f, -slowerRotationSpeed * deltaTime, 0.0f)); }
+			if (m_InputMonitor->GetKeyState(BENNETT_KEY_E)) { Rotate(glm::vec3(0.0f,  slowerRotationSpeed * deltaTime, 0.0f)); }
 		}
 
 		if (m_InputMonitor->GetKeyState(VK_TAB))

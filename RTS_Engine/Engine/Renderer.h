@@ -24,7 +24,7 @@ namespace Bennett
 	class BENNETT_ENGINE Renderer
 	{
 	private:
-		HWND m_AttachedWindow;
+		const Window* m_AttachedWindow;
 
 		struct SwapChainSupportDetails
 		{
@@ -118,7 +118,7 @@ namespace Bennett
 
 		bool m_IsInitialised;
 
-		bool InitialiseCoreVulkanSystem(HWND hWnd, HINSTANCE hInstance);
+		bool InitialiseCoreVulkanSystem(const Window& window, HINSTANCE hInstance);
 
 		VkViewport m_Viewport;
 		VkRect2D m_ScissorRect;
@@ -182,8 +182,8 @@ namespace Bennett
 		SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device);
 		VkSurfaceFormatKHR ChooseSwapChainSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
 		VkPresentModeKHR ChooseSwapChainPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
-		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, HWND hWnd);
-		bool CreateSwapChain(HWND hWnd);
+		VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+		bool CreateSwapChain();
 		bool CreateSwapChainImageViews();
 
 		//Shaders
@@ -259,7 +259,6 @@ namespace Bennett
 
 		//Recreating SwapChain
 		void CleanupSwapChain();
-		bool RecreateSwapChain();
 
 	public:
 		static UniformBufferObject UniformMatrixBuffer;
@@ -277,6 +276,8 @@ namespace Bennett
 
 		void SetViewport(int x, int y, int w, int h, float maxDepth, float minDepth);
 		void SetScissorRect(int x, int y, int w, int h);
+
+		bool RecreateSwapChain();
 
 		void StartFrame();
 		void BindDescriptorSet() const;

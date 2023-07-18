@@ -53,18 +53,18 @@ namespace Bennett
 
 		std::vector<int> EngineControls =
 		{
-			VK_F1,
-			VK_F2,
-			VK_F3,
-			VK_F4,
-			VK_F5,
-			VK_F6,
-			VK_F7,
-			VK_F8,
-			VK_F9,
-			VK_F10,
-			VK_F11,
-			VK_F12
+			BENNETT_KEY_F1,
+			BENNETT_KEY_F2,
+			BENNETT_KEY_F3,
+			BENNETT_KEY_F4,
+			BENNETT_KEY_F5,
+			BENNETT_KEY_F6,
+			BENNETT_KEY_F7,
+			BENNETT_KEY_F8,
+			BENNETT_KEY_F9,
+			BENNETT_KEY_F10,
+			BENNETT_KEY_F11,
+			BENNETT_KEY_F12
 
 		};
 		m_EngineControls = new InputMonitor(EngineControls);
@@ -72,7 +72,6 @@ namespace Bennett
 		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
 		m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
 		m_CameraController.GetCurrentCamera().SetPosition(glm::vec3(10.0f, 10.0f, 10.0f));
-		m_CameraController.GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 90.0f));
 		LevelManager::LoadLevel(ServiceLocator::GetResourceFolderLocation() + "testLevel.xml", m_World);
 
 		return true;
@@ -87,28 +86,23 @@ namespace Bennett
 	{
 		m_CameraController.GetCurrentCamera().ProcessInput(DeltaTime);
 
-		if (m_EngineControls->GetKeyState(VK_F1))
+		if (m_EngineControls->GetKeyState(BENNETT_KEY_F1))
 			m_CameraController.SetCamera(FREE_CAM);
-		if (m_EngineControls->GetKeyState(VK_F2))
+		if (m_EngineControls->GetKeyState(BENNETT_KEY_F2))
 			m_CameraController.SetCamera(STANDARD_CAM);
-		if (m_EngineControls->GetKeyState(VK_F3))
+		if (m_EngineControls->GetKeyState(BENNETT_KEY_F3))
 			m_CameraController.SetCamera(SCRIPTED_CAMERA);
 
-		if (m_EngineControls->GetKeyState(VK_F4))
+		if (m_EngineControls->GetKeyState(BENNETT_KEY_F4))
 		{
 			LevelManager::UnloadLevel(m_World);
 			LevelManager::LoadLevel("testLevel.xml", m_World);
 		}
 	
-		if (m_EngineControls->GetKeyState(VK_F9))
+		if (m_EngineControls->GetKeyState(BENNETT_KEY_F9))
 		{
-			ServiceLocator::GetRenderer().RebuildDefaultShaders();
+			ServiceLocator::GetRenderer().RecreateSwapChain();
 		}	
-	}
-
-	void Engine::ProcessKeyboardInput(int vkKey, bool state, bool repeat)
-	{
-		InputMonitor::Win32InputCallback(vkKey, state, repeat);
 	}
 
 	World& Engine::GetWorld()
@@ -140,24 +134,22 @@ namespace Bennett
 			break;
 		}
 
-		case WM_INPUT:
+		case WM_XBUTTONDOWN:
+		case WM_XBUTTONUP:
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
 		case WM_MOUSEMOVE:
 		case WM_MOUSEHOVER:
-		{
-			//engine->ProcessMouseInput(msg);
-		}
-		break;
-
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:
 		case WM_KEYUP:
 		case WM_SYSKEYUP:
 		{
-			WORD vkCode = LOWORD(wParam);
-			WORD keyFlags = HIWORD(lParam);
-			BOOL isKeyRepeated = (keyFlags & KF_REPEAT) == KF_REPEAT;
-			bool isKeyDown = message == WM_KEYDOWN || message == WM_SYSKEYDOWN;
-			engine->ProcessKeyboardInput(vkCode, isKeyDown, isKeyRepeated);
+			InputMonitor::Win32InputCallback(message, lParam, wParam);
 		}
 			break;
 

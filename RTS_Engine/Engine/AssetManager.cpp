@@ -53,7 +53,7 @@ namespace Bennett
             return found->second;
         }
 
-        std::string filepath = "Assets//" + modelName + ".obj";
+        std::string filepath = ServiceLocator::GetResourceFolderLocation() + modelName + ".obj";
 
         Model* model = ModelLoader::Load(filepath.c_str());
         if (!model)
@@ -76,7 +76,7 @@ namespace Bennett
             return found->second;
         }
 
-        std::string filepath = "Assets//" + textureName + ".png";
+        std::string filepath = ServiceLocator::GetResourceFolderLocation() + textureName + ".png";
 
         Texture* texture = TextureLoader::Load(filepath.c_str());
         if (!texture)

@@ -96,15 +96,15 @@ namespace Bennett
 
 	glm::vec2 Window::GetSize() const
 	{
-		RECT rect;
-		GetWindowRect(m_WindowHandle, &rect);
+		RECT rect{};
+		GetClientRect(m_WindowHandle, &rect);
 		return glm::vec2(rect.right, rect.bottom);
 	}
 
 	glm::vec2 Window::GetPosition() const
 	{
-		RECT rect;
-		GetWindowRect(m_WindowHandle, &rect);
+		RECT rect{};
+		GetClientRect(m_WindowHandle, &rect);
 		MapWindowPoints(HWND_DESKTOP, GetParent(m_WindowHandle), (LPPOINT)&rect, 2);
 		return glm::vec2(rect.right, rect.bottom);
 	}

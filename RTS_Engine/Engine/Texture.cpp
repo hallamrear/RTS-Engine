@@ -201,17 +201,16 @@ namespace Bennett
 	void Texture::Create(Texture& texture, const std::string& filepath)
 	{
 		Renderer& renderer = ServiceLocator::GetRenderer();
-		const std::string& assetLocation = ServiceLocator::GetResourceFolderLocation() + filepath;
 
 		//Creating texture image
 		int width, height, channels;
-		stbi_uc* pixels = stbi_load(assetLocation.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load(filepath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
 		VkDeviceSize imageSize = width * height * 4;
 
 		if (!pixels)
 		{
-			Log("Failed to load texture image" + assetLocation, LOG_SERIOUS);
+			Log("Failed to load texture image" + filepath, LOG_SERIOUS);
 			return;
 		}
 
