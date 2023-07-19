@@ -30,6 +30,7 @@ namespace Bennett
             floor->SetModel(AssetManager::GetModel("Bender"));
             floor->SetTexture(AssetManager::GetTexture("Bender"));
             floor->SetPosition(glm::vec3(5.0f, 0.0f, 5.0f));
+            floor->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
         }
 
         Entity* Terrain = world.CreateTerrain();

@@ -15,7 +15,6 @@ namespace Bennett
 #define BENNETT_KEY_CLEAR 		VK_CLEAR		//CLEAR key
 #define BENNETT_KEY_RETURN 		VK_RETURN		//ENTER key
 #define BENNETT_KEY_CONTROL		VK_CONTROL		//CTRL key
-#define BENNETT_KEY_MENU 		VK_MENU			//ALT key
 #define BENNETT_KEY_PAUSE 		VK_PAUSE		//PAUSE key
 #define BENNETT_KEY_CAPITAL		VK_CAPITAL		//CAPS LOCK key
 #define BENNETT_KEY_SPACE 		VK_SPACE		//SPACEBAR
@@ -129,10 +128,10 @@ namespace Bennett
 #define BENNETT_KEY_SCROLL	    VK_SCROLL 		//SCROLL LOCK key
 #define BENNETT_KEY_LSHIFT	    VK_LSHIFT 		//Left SHIFT key
 #define BENNETT_KEY_RSHIFT	    VK_RSHIFT 		//Right SHIFT key
-#define BENNETT_KEY_CONTROL     VK_LCONTROL 	//Left CONTROL key
-#define BENNETT_KEY_CONTROL     VK_RCONTROL 	//Right CONTROL key
-#define BENNETT_KEY_LMENU 	    VK_LMENU 		//Left ALT key
-#define BENNETT_KEY_RMENU 	    VK_RMENU 		//Right ALT key
+#define BENNETT_KEY_LCONTROL    VK_LCONTROL 	//Left CONTROL key
+#define BENNETT_KEY_RCONTROL    VK_RCONTROL 	//Right CONTROL key
+#define BENNETT_KEY_LALT 	    VK_LMENU 		//Left ALT key
+#define BENNETT_KEY_RALT 	    VK_RMENU 		//Right ALT key
 
 	static std::unordered_map<int, const char*> INPUT_STRINGS =
 	{
@@ -147,7 +146,6 @@ namespace Bennett
 		std::pair<int, const char*>(BENNETT_KEY_CLEAR 		, "CLEAR key"),
 		std::pair<int, const char*>(BENNETT_KEY_RETURN 		, "ENTER key"),
 		std::pair<int, const char*>(BENNETT_KEY_CONTROL		, "CTRL key"),
-		std::pair<int, const char*>(BENNETT_KEY_MENU 		, "ALT key"),
 		std::pair<int, const char*>(BENNETT_KEY_PAUSE 		, "PAUSE key"),
 		std::pair<int, const char*>(BENNETT_KEY_CAPITAL		, "CAPS LOCK key"),
 		std::pair<int, const char*>(BENNETT_KEY_SPACE 		, "SPACEBAR"),
@@ -261,9 +259,9 @@ namespace Bennett
 		std::pair<int, const char*>(BENNETT_KEY_SCROLL	    , "SCROLL LOCK key"),
 		std::pair<int, const char*>(BENNETT_KEY_LSHIFT	    , "Left SHIFT key"),
 		std::pair<int, const char*>(BENNETT_KEY_RSHIFT	    , "Right SHIFT key"),
-		std::pair<int, const char*>(BENNETT_KEY_CONTROL     , "Left CONTROL key"),
-		std::pair<int, const char*>(BENNETT_KEY_CONTROL     , "Right CONTROL key"),
-		std::pair<int, const char*>(BENNETT_KEY_LMENU 	    , "Left ALT key"),
-		std::pair<int, const char*>(BENNETT_KEY_RMENU 	    , "Right ALT key")
+		std::pair<int, const char*>(BENNETT_KEY_LCONTROL    , "Left CONTROL key"),
+		std::pair<int, const char*>(BENNETT_KEY_RCONTROL    , "Right CONTROL key"),
+		std::pair<int, const char*>(BENNETT_KEY_LALT 	    , "Left ALT key"),
+		std::pair<int, const char*>(BENNETT_KEY_RALT 	    , "Right ALT key")
 	};
 }

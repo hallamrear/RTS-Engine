@@ -48,7 +48,7 @@ namespace Bennett
 	bool Engine::Initialise(Window& renderWindow)
 	{
 		ServiceLocator::Initialise(renderWindow);
-
+		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
 		Log("Initialised Engine successfully.", LOG_SAFE);
 
 		std::vector<int> EngineControls =
@@ -69,9 +69,9 @@ namespace Bennett
 		};
 		m_EngineControls = new InputMonitor(EngineControls);
 
-		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
 		m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
 		m_CameraController.GetCurrentCamera().SetPosition(glm::vec3(10.0f, 10.0f, 10.0f));
+
 		LevelManager::LoadLevel(ServiceLocator::GetResourceFolderLocation() + "testLevel.xml", m_World);
 
 		return true;
@@ -119,21 +119,7 @@ namespace Bennett
 
 		switch (message)
 		{
-		case WM_SETFOCUS:
-			engine->SetInFocus(true);
-			break;
-
-		case WM_KILLFOCUS:
-			engine->SetInFocus(false);
-			break;
-
-		//case WM_SIZE:
-		//{
-		//	WORD width = LOWORD(lParam);
-		//	WORD height = HIWORD(lParam);
-		//	break;
-		//}
-
+		case WM_MOUSEMOVE:
 		case WM_XBUTTONDOWN:
 		case WM_XBUTTONUP:
 		case WM_LBUTTONDOWN:
@@ -142,7 +128,6 @@ namespace Bennett
 		case WM_MBUTTONUP:
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONUP:
-		case WM_MOUSEMOVE:
 		case WM_MOUSEHOVER:
 		case WM_MOUSEWHEEL:
 		case WM_KEYDOWN:
@@ -155,7 +140,9 @@ namespace Bennett
 			break;
 
 		case WM_CLOSE:
+		{
 			engine->SetIsRunning(false);
+		}
 			break;
 
 		case WM_PAINT:
@@ -165,12 +152,19 @@ namespace Bennett
 			// TODO: Add any drawing code that uses hdc here...
 			EndPaint(hWnd, &ps);
 		}
-		break;
-		case WM_DESTROY:
-			PostQuitMessage(0);
 			break;
+
+		case WM_DESTROY:
+		{
+			PostQuitMessage(0);
+		}
+			break;
+
 		default:
+		{
 			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
+			break;
 		}
 
 		return 0;

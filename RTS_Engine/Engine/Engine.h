@@ -28,7 +28,7 @@ namespace Bennett
 		void Render();
 		inline bool IsRunning() const { return m_IsRunning; };
 		inline void SetIsRunning(bool state) { m_IsRunning = state; };
-		inline static void SetInFocus(bool state) { m_InFocus = state; };
+		inline static void SetInFocus(bool state) { m_InFocus = state; Log("Focus: " + std::to_string(m_InFocus), LOG_SAFE); };
 		inline static bool GetInFocus() { return m_InFocus; };
 
 		bool Initialise(Window& renderWindow);

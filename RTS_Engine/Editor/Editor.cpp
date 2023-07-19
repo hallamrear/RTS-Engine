@@ -49,7 +49,11 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
     mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
     mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
+#ifdef _DEBUG
+    mainWindowDetails.ShowState = WindowDetails::NORMAL;
+#else
     mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
+#endif
     mainWindowDetails.ClassDetails.Icon = IDI_FACE;
     mainWindowDetails.ClassDetails.SmallIcon = IDI_FACE;
     mainWindowDetails.ClassDetails.MenuName = IDC_EDITOR;

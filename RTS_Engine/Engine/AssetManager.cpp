@@ -19,7 +19,7 @@ namespace Bennett
 
     AssetManager::~AssetManager()
     {
-
+        //TODO : proper cleanup.
     }
 
     Model* AssetManager::CreateModel(const std::string& modelName, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)

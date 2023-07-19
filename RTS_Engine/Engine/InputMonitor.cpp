@@ -35,7 +35,8 @@ namespace Bennett
 			else
 			{
 				Log("Unrecognised XBUTTON input detection.", LOG_MINIMAL);
-			}		}
+			}
+		}
 			break;
 
 		case WM_XBUTTONUP: 
@@ -81,7 +82,8 @@ namespace Bennett
 			BOOL isKeyRepeated = (keyFlags & KF_REPEAT) == KF_REPEAT;
 			bool isKeyDown = msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN;
 
-			if (vkCode == VK_SHIFT)
+			//FIX: Left/Right Ctrl and Alt currently do not work.
+			if (vkCode == VK_SHIFT || vkCode == VK_CONTROL || vkCode == VK_MENU)
 			{
 				WORD scanCode = LOBYTE(keyFlags);
 				vkCode = LOWORD(MapVirtualKeyW(scanCode, MAPVK_VSC_TO_VK_EX));
