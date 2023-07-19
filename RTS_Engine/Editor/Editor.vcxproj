@@ -134,6 +134,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Editor.ico" />
+    <Image Include="Hammer.ico" />
+    <Image Include="Main.ico" />
+    <Image Include="Pickaxe.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>

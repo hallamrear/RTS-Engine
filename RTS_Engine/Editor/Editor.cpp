@@ -11,10 +11,12 @@ using namespace Bennett;
 
 HINSTANCE g_Instance = NULL;
 Engine* g_Engine = nullptr;
+char** g_Argv = nullptr;
+int g_Argc = -1;
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK MainWindowWndProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK ChildWindowWndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK PropertiesWindowWndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance,
@@ -25,8 +27,9 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    int argc = __argc;
-    char** argv = __argv;
+    g_Argc = __argc;
+    g_Argv = __argv;
+    g_Instance = hInstance;
 
 #ifdef _DEBUG
     if (!AttachConsole(ATTACH_PARENT_PROCESS))
@@ -38,7 +41,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     freopen_s(&file, "CONOUT$", "w", stderr);
 #endif
 
-    g_Instance = hInstance;
+    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_EDITOR));
 
     WindowDetails mainWindowDetails;
     LoadString(hInstance, IDS_APP_TITLE, mainWindowDetails.Title, MAX_LOADSTRING);
@@ -46,12 +49,12 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
     mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
     mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
-    mainWindowDetails.ClassDetails.WndProcCallback = Engine::WindowsCallbackProcedure;
-    mainWindowDetails.ClassDetails.Icon = IDI_ICON1;
-    mainWindowDetails.ClassDetails.SmallIcon = IDI_ICON1;
-    mainWindowDetails.ClassDetails.MenuName = IDI_EDITOR;
+    mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
+    mainWindowDetails.ClassDetails.Icon = IDI_FACE;
+    mainWindowDetails.ClassDetails.SmallIcon = IDI_FACE;
+    mainWindowDetails.ClassDetails.MenuName = IDC_EDITOR;
     Window* mainWindow = Window::CreateWin32Window(mainWindowDetails);
-
+ 
     // Perform application initialization:
     if (!mainWindow)
     {
@@ -59,45 +62,47 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-    WindowDetails childWindowDetails;
-    LoadString(hInstance, IDS_CHILDONEWINDOWTITLE, childWindowDetails.Title, MAX_LOADSTRING);
-    LoadString(hInstance, IDC_CHILDONECLASSNAME, childWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
-    childWindowDetails.WindowStyles = WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW;
-    childWindowDetails.X = 100; childWindowDetails.Y = 100;
-    childWindowDetails.Width = 800; childWindowDetails.Height = 600;
-    childWindowDetails.Parent = mainWindow;
-    childWindowDetails.ClassDetails.WndProcCallback = ChildWindowWndProc;
-    childWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_GRADIENTACTIVECAPTION);
-    Window* childWindow = Window::CreateWin32Window(childWindowDetails);
+    WindowDetails gameWindowDetails;
+    LoadString(hInstance, IDS_GAME_WINDOW_TITLE, gameWindowDetails.Title, MAX_LOADSTRING);
+    LoadString(hInstance, IDC_GAME_WINDOW, gameWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
+    gameWindowDetails.WindowStyles = WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW;
+    gameWindowDetails.X = 100; gameWindowDetails.Y = 100;
+    gameWindowDetails.Width = 800; gameWindowDetails.Height = 600;
+    gameWindowDetails.Parent = mainWindow;
+    gameWindowDetails.ClassDetails.Icon = IDI_PICKAXE;
+    gameWindowDetails.ClassDetails.SmallIcon = IDI_PICKAXE;
+    gameWindowDetails.ClassDetails.WndProcCallback = Engine::WindowsCallbackProcedure;
+    gameWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_GRADIENTACTIVECAPTION);
+    Window* gameWindow = Window::CreateWin32Window(gameWindowDetails);
 
     // Perform application initialization:
-    if (!childWindow)
+    if (!gameWindow)
     {
         Log(GetLastWin32Error(), LOG_SERIOUS);
         return FALSE;
     }
 
-    WindowDetails childTwoWindowDetails;
-    LoadString(hInstance, IDS_CHILDTWOWINDOWTITLE, childTwoWindowDetails.Title, MAX_LOADSTRING);
-    LoadString(hInstance, IDC_CHILDTWOCLASSNAME, childTwoWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
-    childTwoWindowDetails.WindowStyles = WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW;
-    childTwoWindowDetails.X = 700; childTwoWindowDetails.Y = 300;
-    childTwoWindowDetails.Width = 300; childTwoWindowDetails.Height = 300;
-    childTwoWindowDetails.Parent = mainWindow;
-    childTwoWindowDetails.ClassDetails.WndProcCallback = ChildWindowWndProc;
-    childTwoWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_GRADIENTACTIVECAPTION);
-    Window* childTwoWindow = Window::CreateWin32Window(childTwoWindowDetails);
+    WindowDetails propertiesWindowDetails;
+    LoadString(hInstance, IDS_PROPS_WINDOW_TITLE, propertiesWindowDetails.Title, MAX_LOADSTRING);
+    LoadString(hInstance, IDC_PROPS_WINDOW, propertiesWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
+    propertiesWindowDetails.WindowStyles = WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW;
+    propertiesWindowDetails.X = 700; propertiesWindowDetails.Y = 300;
+    propertiesWindowDetails.Width = 300; propertiesWindowDetails.Height = 300;
+    propertiesWindowDetails.Parent = mainWindow;
+    propertiesWindowDetails.ClassDetails.Icon = IDI_HAMMER;
+    propertiesWindowDetails.ClassDetails.SmallIcon = IDI_HAMMER;
+    propertiesWindowDetails.ClassDetails.WndProcCallback = PropertiesWindowWndProc;
+    propertiesWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_3DFACE);
+    Window* propertiesWindow = Window::CreateWin32Window(propertiesWindowDetails);
 
     // Perform application initialization:
-    if (!childTwoWindow)
+    if (!propertiesWindow)
     {
         Log(GetLastWin32Error(), LOG_SERIOUS);
         return FALSE;
     }
-
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_EDITOR));
     
-    g_Engine = Engine::CreateEngine(*childWindow);
+    g_Engine = Engine::CreateEngine(*gameWindow);
 
     if (!g_Engine)
     {
@@ -140,14 +145,11 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     return (int)msg.wParam;
 }
 
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
+LRESULT CALLBACK DefaultWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
 LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -186,16 +188,7 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
     return 0;
 }
 
-
-//  FUNCTION: WndProc(HWND, UINT, WPARAM, LPARAM)
-//
-//  PURPOSE: Processes messages for the main window.
-//
-//  WM_COMMAND  - process the application menu
-//  WM_PAINT    - Paint the main window
-//  WM_DESTROY  - post a quit message and return
-//
-LRESULT CALLBACK ChildWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK PropertiesWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {

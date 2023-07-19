@@ -127,12 +127,12 @@ namespace Bennett
 			engine->SetInFocus(false);
 			break;
 
-		case WM_SIZE:
-		{
-			WORD width = LOWORD(lParam);
-			WORD height = HIWORD(lParam);
-			break;
-		}
+		//case WM_SIZE:
+		//{
+		//	WORD width = LOWORD(lParam);
+		//	WORD height = HIWORD(lParam);
+		//	break;
+		//}
 
 		case WM_XBUTTONDOWN:
 		case WM_XBUTTONUP:
@@ -144,6 +144,7 @@ namespace Bennett
 		case WM_RBUTTONUP:
 		case WM_MOUSEMOVE:
 		case WM_MOUSEHOVER:
+		case WM_MOUSEWHEEL:
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:
 		case WM_KEYUP:

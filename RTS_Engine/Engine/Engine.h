@@ -15,7 +15,7 @@ namespace Bennett
 		CameraController& m_CameraController;
 		InputMonitor* m_EngineControls;
 		bool m_IsRunning;
-		bool m_InFocus;
+		inline static bool m_InFocus = false;
 
 		static Engine* GetEngineInstance();
 
@@ -28,7 +28,8 @@ namespace Bennett
 		void Render();
 		inline bool IsRunning() const { return m_IsRunning; };
 		inline void SetIsRunning(bool state) { m_IsRunning = state; };
-		inline void SetInFocus(bool state) { m_InFocus = state; };
+		inline static void SetInFocus(bool state) { m_InFocus = state; };
+		inline static bool GetInFocus() { return m_InFocus; };
 
 		bool Initialise(Window& renderWindow);
 		void Destroy();

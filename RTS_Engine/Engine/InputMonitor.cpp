@@ -56,12 +56,18 @@ namespace Bennett
 		} 
 			break;
 
+		case WM_MOUSEWHEEL:
+		{
+
+		}
+			break;
+
 		case WM_MOUSEMOVE:
 		case WM_MOUSEHOVER:
 		{
-			//POINTS p = MAKEPOINTS(lParam);
-			//glm::vec2 pos = glm::vec2(p.x, p.y);
-			//InputMonitor::MouseMovementInputCallback(pos);
+			POINTS p = MAKEPOINTS(lParam);
+			glm::vec2 pos = glm::vec2(p.x, p.y);
+			InputMonitor::MouseMovementInputCallback(pos);
 		}
 			break;
 

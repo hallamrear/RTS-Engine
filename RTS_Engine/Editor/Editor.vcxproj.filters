@@ -51,6 +51,15 @@
     <Image Include="Editor.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="Main.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Hammer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Pickaxe.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="config.ini">
