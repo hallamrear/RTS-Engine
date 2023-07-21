@@ -25,12 +25,15 @@ namespace Bennett
 
 		HINSTANCE instance = GetModuleHandle(NULL);
 
-		ATOM win32Class = RegisterWin32Class(instance, details);
-
-		if (!win32Class)
+		if (details.ClassDetails.ClassName != "NULL")
 		{
-			Log(GetLastWin32Error(), LOG_SERIOUS);
-			return false;
+			ATOM win32Class = RegisterWin32Class(instance, details);
+
+			if (!win32Class)
+			{
+				Log(GetLastWin32Error(), LOG_SERIOUS);
+				return false;
+			}
 		}
 
 		m_WindowHandle = CreateWin32WindowHandle(instance, details);
@@ -41,6 +44,10 @@ namespace Bennett
 			Destroy();
 			return false;
 		}
+
+		//todo : implement proper window parenting.
+		//m_Parent = details.Parent;
+		//details.Parent.AddChild(this);
 
 		return true;
 	}

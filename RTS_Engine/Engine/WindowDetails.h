@@ -9,7 +9,7 @@ namespace Bennett
 	{
 		struct BENNETT_ENGINE WindowWin32ClassDetails
 		{
-			CHAR ClassName[MAX_LOADSTRING];
+			CHAR ClassName[MAX_LOADSTRING] = "NULL";
 			INT MenuName = NULL;
 			WNDPROC WndProcCallback = NULL;
 			int Icon = NULL;
@@ -18,7 +18,7 @@ namespace Bennett
 			int AdditionalClassStyles = 0;
 		} ClassDetails;
 
-		CHAR Title[MAX_LOADSTRING] = "Title";
+		CHAR Title[MAX_LOADSTRING] = "NULL";
 		DWORD WindowStyles = 0;
 		int X = CW_USEDEFAULT; int Y = CW_USEDEFAULT;
 		int Width = CW_USEDEFAULT; int Height = CW_USEDEFAULT;
@@ -34,4 +34,6 @@ namespace Bennett
 			RESTORE = SW_RESTORE
 		} ShowState = NORMAL;
 	};
+
+
 }

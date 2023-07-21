@@ -7,16 +7,15 @@
 #include <Logger.h>
 #include <chrono>
 
-using namespace Bennett;
+#include "PropertiesWindow.h"
+#include "ToolWindow.h"
+#include "HierarchyWindow.h"
+#include "RenderWindow.h"
 
-HINSTANCE g_Instance = NULL;
-Engine* g_Engine = nullptr;
-char** g_Argv = nullptr;
-int g_Argc = -1;
+using namespace Bennett;
 
 // Forward declarations of functions included in this code module:
 LRESULT CALLBACK MainWindowWndProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK PropertiesWindowWndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance,
@@ -49,11 +48,11 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
     mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
     mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
-#ifdef _DEBUG
+    #ifdef _DEBUG
     mainWindowDetails.ShowState = WindowDetails::NORMAL;
-#else
+    #else
     mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
-#endif
+    #endif
     mainWindowDetails.ClassDetails.Icon = IDI_FACE;
     mainWindowDetails.ClassDetails.SmallIcon = IDI_FACE;
     mainWindowDetails.ClassDetails.MenuName = IDC_EDITOR;
@@ -66,48 +65,21 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
         return FALSE;
     }
 
-    WindowDetails gameWindowDetails;
-    LoadString(hInstance, IDS_GAME_WINDOW_TITLE, gameWindowDetails.Title, MAX_LOADSTRING);
-    LoadString(hInstance, IDC_GAME_WINDOW, gameWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
-    gameWindowDetails.WindowStyles = WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW;
-    gameWindowDetails.X = 100; gameWindowDetails.Y = 100;
-    gameWindowDetails.Width = 800; gameWindowDetails.Height = 600;
-    gameWindowDetails.Parent = mainWindow;
-    gameWindowDetails.ClassDetails.Icon = IDI_PICKAXE;
-    gameWindowDetails.ClassDetails.SmallIcon = IDI_PICKAXE;
-    gameWindowDetails.ClassDetails.WndProcCallback = Engine::WindowsCallbackProcedure;
-    gameWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_GRADIENTACTIVECAPTION);
-    Window* gameWindow = Window::CreateWin32Window(gameWindowDetails);
+    Window* renderWindow = CreateRenderWindow(hInstance, mainWindow);
+    if (!renderWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
 
-    // Perform application initialization:
-    if (!gameWindow)
-    {
-        Log(GetLastWin32Error(), LOG_SERIOUS);
-        return FALSE;
-    }
+    Window* propertiesWindow = CreatePropertiesWindow(hInstance, mainWindow);
+    if (!propertiesWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
 
-    WindowDetails propertiesWindowDetails;
-    LoadString(hInstance, IDS_PROPS_WINDOW_TITLE, propertiesWindowDetails.Title, MAX_LOADSTRING);
-    LoadString(hInstance, IDC_PROPS_WINDOW, propertiesWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
-    propertiesWindowDetails.WindowStyles = WS_CHILDWINDOW | WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW;
-    propertiesWindowDetails.X = 700; propertiesWindowDetails.Y = 300;
-    propertiesWindowDetails.Width = 300; propertiesWindowDetails.Height = 300;
-    propertiesWindowDetails.Parent = mainWindow;
-    propertiesWindowDetails.ClassDetails.Icon = IDI_HAMMER;
-    propertiesWindowDetails.ClassDetails.SmallIcon = IDI_HAMMER;
-    propertiesWindowDetails.ClassDetails.WndProcCallback = PropertiesWindowWndProc;
-    propertiesWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_3DFACE);
-    Window* propertiesWindow = Window::CreateWin32Window(propertiesWindowDetails);
+    Window* toolWindow = CreateToolWindow(hInstance, mainWindow);
+    if (!toolWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
 
-    // Perform application initialization:
-    if (!propertiesWindow)
-    {
-        Log(GetLastWin32Error(), LOG_SERIOUS);
-        return FALSE;
-    }
-    
-    g_Engine = Engine::CreateEngine(*gameWindow);
+    Window* hierarchyWindow = CreateHierarchyWindow(hInstance, mainWindow);
+    if (!hierarchyWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
 
+    TileWindows(mainWindow->GetWindowHandle(), MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
+
+    g_Engine = Engine::CreateEngine(*renderWindow);
     if (!g_Engine)
     {
         Log("Engine Run finished. Engine deleting.", LOG_CRITICAL);
@@ -136,11 +108,13 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 
             g_Engine->ProcessInput(dTime);
             g_Engine->Update(dTime);
-            g_Engine->Render();
+            //g_Engine->Render();
 
             lTime = cTime;
         }
     }
+
+    //Todo : proper cleanup of all windows.
 
     Log("Engine has finished running, it is now closing.", LOG_SAFE);
     delete g_Engine;
@@ -149,15 +123,34 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     return (int)msg.wParam;
 }
 
-LRESULT CALLBACK DefaultWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
 LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
+    case WM_LBUTTONDOWN:
+    {
+        g_Engine->SetInFocus(false);
+    } 
+        break;
+
+    case WM_KEYDOWN:
+    case WM_SYSKEYDOWN:
+    case WM_KEYUP:
+    case WM_SYSKEYUP:
+    {
+        if (g_Engine->GetInFocus())
+        {
+            g_Engine->WindowsCallbackProcedure(hWnd, message, wParam, lParam);
+        }
+        else
+        {
+            Log("Non engine keyboard input", LOG_SAFE);
+            //todo : potentially send the messages to the children rather than handle this way.
+            return DefWindowProc(hWnd, message, wParam, lParam);
+        }
+    }
+        break;
+
     case WM_COMMAND:
         {
             int wmId = LOWORD(wParam);
@@ -167,6 +160,11 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
             case IDM_ABOUT:
                 DialogBox(g_Instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
+
+            case ID_ARRANGEWINDOWS_4SQUARES:
+                TileWindows(hWnd, MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
+                break;
+
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
@@ -192,45 +190,6 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
     return 0;
 }
 
-LRESULT CALLBACK PropertiesWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message)
-    {
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        // Parse the menu selections:
-        switch (wmId)
-        {
-        case IDM_ABOUT:
-            DialogBox(g_Instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-            break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    }
-    break;
-    case WM_PAINT:
-    {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hWnd, &ps);
-        // TODO: Add any drawing code that uses hdc here...
-        EndPaint(hWnd, &ps);
-    }
-    break;
-
-    case WM_CLOSE:
-        //Minimise a tool window when hitting the X button.
-        PostMessage(hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
-}
 
 // Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

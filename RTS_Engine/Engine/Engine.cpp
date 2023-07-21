@@ -119,6 +119,7 @@ namespace Bennett
 
 		switch (message)
 		{
+
 		case WM_MOUSEMOVE:
 		case WM_XBUTTONDOWN:
 		case WM_XBUTTONUP:
@@ -135,6 +136,7 @@ namespace Bennett
 		case WM_KEYUP:
 		case WM_SYSKEYUP:
 		{
+			Engine::SetInFocus(true);
 			InputMonitor::Win32InputCallback(message, lParam, wParam);
 		}
 			break;
@@ -167,7 +169,7 @@ namespace Bennett
 			break;
 		}
 
-		return 0;
+		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
 	Engine* Engine::CreateEngine(Window& renderWindow)
