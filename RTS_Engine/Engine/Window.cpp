@@ -25,7 +25,7 @@ namespace Bennett
 
 		HINSTANCE instance = GetModuleHandle(NULL);
 
-		if (details.ClassDetails.ClassName != "NULL")
+		if (details.ClassDetails.WndProcCallback != NULL)
 		{
 			ATOM win32Class = RegisterWin32Class(instance, details);
 
@@ -34,6 +34,10 @@ namespace Bennett
 				Log(GetLastWin32Error(), LOG_SERIOUS);
 				return false;
 			}
+		}
+		else
+		{
+			Log("Window Win32 WndProc is NULL, skipping class registration.", LOG_MINIMAL);
 		}
 
 		m_WindowHandle = CreateWin32WindowHandle(instance, details);

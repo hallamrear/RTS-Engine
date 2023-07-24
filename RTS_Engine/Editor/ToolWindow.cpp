@@ -18,7 +18,6 @@ Window* CreateToolWindow(HINSTANCE hInstance, Window* parentWindow)
     return Window::CreateWin32Window(ToolWindowDetails);
 }
 
-
 LRESULT CALLBACK ToolWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)

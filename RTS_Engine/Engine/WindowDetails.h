@@ -1,5 +1,6 @@
 #pragma once
 #include "BennettDefines.h"
+#include <string>
 
 namespace Bennett
 {
@@ -9,16 +10,18 @@ namespace Bennett
 	{
 		struct BENNETT_ENGINE WindowWin32ClassDetails
 		{
-			CHAR ClassName[MAX_LOADSTRING] = "NULL";
+			CHAR ClassName[MAX_LOADSTRING] = "";
 			INT MenuName = NULL;
 			WNDPROC WndProcCallback = NULL;
 			int Icon = NULL;
 			int SmallIcon = NULL;
-			HBRUSH BackgroundColour = GetSysColorBrush(0);
+			HBRUSH BackgroundColour = 0;
 			int AdditionalClassStyles = 0;
+
+			WindowWin32ClassDetails() { };
 		} ClassDetails;
 
-		CHAR Title[MAX_LOADSTRING] = "NULL";
+		CHAR Title[MAX_LOADSTRING] = "";
 		DWORD WindowStyles = 0;
 		int X = CW_USEDEFAULT; int Y = CW_USEDEFAULT;
 		int Width = CW_USEDEFAULT; int Height = CW_USEDEFAULT;

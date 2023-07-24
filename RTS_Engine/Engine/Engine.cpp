@@ -120,6 +120,15 @@ namespace Bennett
 		switch (message)
 		{
 
+		case WM_SIZE:
+		{
+			for (HWND hWndChild = ::GetTopWindow(hWnd); hWndChild != NULL; hWndChild = ::GetNextWindow(hWndChild, GW_HWNDNEXT))
+			{
+				SendMessage(hWndChild, WM_SIZE, 0, 0);
+			}
+		}
+		break;
+
 		case WM_MOUSEMOVE:
 		case WM_XBUTTONDOWN:
 		case WM_XBUTTONUP:

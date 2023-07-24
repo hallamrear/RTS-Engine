@@ -2,7 +2,9 @@
 #include "RenderWindow.h"
 #include "Editor.h"
 #include <Engine.h>
-#include <CommCtrl.h>
+
+HWND statusBar = NULL;
+Window* myStatusBar = nullptr;
 
 Window* CreateRenderWindow(HINSTANCE hInstance, Window* parentWindow)
 {
@@ -19,29 +21,28 @@ Window* CreateRenderWindow(HINSTANCE hInstance, Window* parentWindow)
     renderWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_GRADIENTACTIVECAPTION);
     Window* renderWindow = Window::CreateWin32Window(renderWindowDetails);
 
-    if (!renderWindow)
-    {
-        return nullptr;
-    }
+    INITCOMMONCONTROLSEX iccx;
+    iccx.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    iccx.dwICC = ICC_BAR_CLASSES;
+    if (!InitCommonControlsEx(&iccx))
+        return FALSE;
 
-    Window* statusBar = nullptr;
-    WindowDetails renderWindowBarDetails;
-    strcpy_s(renderWindowBarDetails.ClassDetails.ClassName, STATUSCLASSNAME);
-    renderWindowBarDetails.WindowStyles = SBT_TOOLTIPS | SBARS_TOOLTIPS | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE;
-    renderWindowBarDetails.Width = 0; renderWindowBarDetails.Height = 0; renderWindowBarDetails.X = 0; renderWindowBarDetails.Y = 0;
-    renderWindowBarDetails.Parent = renderWindow;
-    renderWindowBarDetails.ClassDetails.WndProcCallback = RenderWindowExtraDetailsWndProc;
-    renderWindowBarDetails.ClassDetails.AdditionalClassStyles = WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR;
-    statusBar = Window::CreateWin32Window(renderWindowBarDetails);
-
+    WindowDetails statusBarDetails;
+    std::string className = STATUSCLASSNAME;
+    strcpy_s(statusBarDetails.ClassDetails.ClassName, STATUSCLASSNAME);
+    statusBarDetails.WindowStyles = SBARS_SIZEGRIP | CCS_BOTTOM | CCS_NOMOVEY | CCS_TOP | WS_CHILD | WS_OVERLAPPED | WS_VISIBLE;
+    statusBarDetails.Parent = renderWindow;
+    statusBarDetails.ClassDetails.MenuName = IDC_GAME_WINDOW_EXTRAS;
+    statusBarDetails.ClassDetails.AdditionalClassStyles = WS_EX_CLIENTEDGE | WS_EX_LEFT | WS_EX_LTRREADING | WS_EX_RIGHTSCROLLBAR;
+    myStatusBar = Window::CreateWin32Window(statusBarDetails);
     //Split bar into 4 parts.
-    int parts[] = { 500, 600, 700, -1 };
-
-    SendMessage(statusBar->GetWindowHandle(), SB_SETPARTS, 4, (LPARAM)parts);
-    SendMessage(statusBar->GetWindowHandle(), SB_SETTEXT, 0, (LPARAM)"Status Bar");
-    SendMessage(statusBar->GetWindowHandle(), SB_SETTEXT, 1, (LPARAM)"Cells");
-    SendMessage(statusBar->GetWindowHandle(), SB_SETTEXT, 2, (LPARAM)"text");
-    SendMessage(statusBar->GetWindowHandle(), SB_SETTEXT, 3, (LPARAM)"text 2");
+    int parts[4] = { 200, 300, 400, -1 };
+    SendMessage(myStatusBar->GetWindowHandle(), SB_SETPARTS, (WPARAM)4, (LPARAM)parts);
+    SendMessage(myStatusBar->GetWindowHandle(), SB_SETTEXT, 0, (LPARAM)"Part 1");
+    SendMessage(myStatusBar->GetWindowHandle(), SB_SETTEXT, 1, (LPARAM)"Part 2");
+    SendMessage(myStatusBar->GetWindowHandle(), SB_SETTEXT, 2, (LPARAM)"Part 3");
+    SendMessage(myStatusBar->GetWindowHandle(), SB_SETTEXT, 3, (LPARAM)"Part 4");
+    SendMessage(myStatusBar->GetWindowHandle(), WM_SIZE, 0, 0);
 
     return renderWindow;
 }
@@ -50,18 +51,20 @@ LRESULT CALLBACK RenderWindowExtraDetailsWndProc(HWND hWnd, UINT message, WPARAM
 {
     switch (message)
     {
-        //case WM_SIZE:
-        //    if(statusBar)
-        //        SendMessage(statusBar->GetWindowHandle(), WM_SIZE, 0, 0);
-        //    break;
+    case WM_SIZE:
+    {
+        RECT rc = { 0, 0, 0, 0 };
+        GetClientRect(NULL, &rc);
 
-    case WM_CLOSE:
-        DestroyWindow(hWnd);
-        break;
+        int nHalf = 200;
+        int nParts[] = { nHalf, nHalf + nHalf / 3, nHalf + nHalf * 2 / 3, -1 };
 
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
+        if (statusBar == NULL)
+            return 0;
+        else
+            SendMessage(statusBar, SB_SETPARTS, 4, (LPARAM)&nParts);
+    }
+    break;
 
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);

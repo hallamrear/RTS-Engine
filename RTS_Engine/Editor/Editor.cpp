@@ -39,6 +39,10 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     freopen_s(&file, "CONOUT$", "w", stdout);
     freopen_s(&file, "CONOUT$", "w", stderr);
 #endif
+    INITCOMMONCONTROLSEX controls{};
+    controls.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    controls.dwICC = ICC_BAR_CLASSES;
+    InitCommonControlsEx(&controls);
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_EDITOR));
 
@@ -53,6 +57,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     #else
     mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
     #endif
+
     mainWindowDetails.ClassDetails.Icon = IDI_FACE;
     mainWindowDetails.ClassDetails.SmallIcon = IDI_FACE;
     mainWindowDetails.ClassDetails.MenuName = IDC_EDITOR;
@@ -190,8 +195,6 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
     return 0;
 }
 
-
-// Message handler for about box.
 INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);

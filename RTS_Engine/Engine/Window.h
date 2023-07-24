@@ -28,35 +28,19 @@ namespace Bennett
 
 			HWND windowHandle = NULL;
 
-			if (details.ClassDetails.AdditionalClassStyles != 0)
-			{
-				windowHandle = CreateWindowEx(
-					details.ClassDetails.AdditionalClassStyles,
-					details.ClassDetails.ClassName,
-					details.Title,
-					details.WindowStyles,
-					details.X, details.Y,
-					details.Width, details.Height,
-					parentHandle,
-					nullptr,
-					hInstance,
-					details.lpParam
-				);
-			}
-			else
-			{
-				windowHandle = CreateWindow(
-					details.ClassDetails.ClassName,
-					details.Title,
-					details.WindowStyles,
-					details.X, details.Y,
-					details.Width, details.Height,
-					parentHandle,
-					nullptr,
-					hInstance,
-					details.lpParam);
-			}			
-
+			windowHandle = CreateWindowEx(
+				details.ClassDetails.AdditionalClassStyles,
+				details.ClassDetails.ClassName,
+				details.Title,
+				details.WindowStyles,
+				details.X, details.Y,
+				details.Width, details.Height,
+				parentHandle,
+				nullptr,
+				hInstance,
+				details.lpParam
+			);
+			
 			if (!windowHandle)
 			{
 				Log(GetLastWin32Error(), LOG_SERIOUS);
