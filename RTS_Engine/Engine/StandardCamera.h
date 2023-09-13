@@ -11,6 +11,6 @@ namespace Bennett
 		~StandardCamera();
 
 		glm::mat4 GetViewMatrix();
-		void ProcessInput(const float& deltaTime);
+		void Update(const float& deltaTime);
 	};
 }

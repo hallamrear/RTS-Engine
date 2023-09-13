@@ -20,7 +20,7 @@ namespace Bennett
 		return view;
 	}
 
-	void StandardCamera::ProcessInput(const float& deltaTime)
+	void StandardCamera::Update(const float& deltaTime)
 	{
 		if (!m_InputMonitor)
 			return;

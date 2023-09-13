@@ -14,12 +14,7 @@ namespace Bennett
 	{
 		switch (msg)
 		{
-		case WM_LBUTTONDOWN :
-		{ 			
-			InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_LEFT,   true  , false);
-		}
-			break;
-
+		case WM_LBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_LEFT,   true  , false); } break;
 		case WM_LBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_LEFT,   false , false); }	break;
 		case WM_MBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_MIDDLE, true  , false); } break;
 		case WM_MBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_MIDDLE, false , false); } break;

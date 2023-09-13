@@ -6,13 +6,12 @@ namespace Bennett
 	Window::Window()
 	{
 		m_WaitingToClose = false;
-		m_WindowHandle = NULL;
-		
+		m_WindowHandle = NULL;		
 	}
 
 	Window::~Window()
 	{
-		Destroy();
+
 	}
 
 	bool Window::Initialise(const WindowDetails& details)
@@ -20,7 +19,7 @@ namespace Bennett
 		if (m_WindowHandle)
 		{
 			Log("Existing handle in window class. Destroying...", LOG_MINIMAL);
-			Destroy();
+			return false;
 		}
 
 		HINSTANCE instance = GetModuleHandle(NULL);
@@ -45,7 +44,6 @@ namespace Bennett
 		if (!m_WindowHandle)
 		{
 			Log("Failed to create window." + GetLastWin32Error(), LOG_SERIOUS);
-			Destroy();
 			return false;
 		}
 
@@ -54,19 +52,6 @@ namespace Bennett
 		//details.Parent.AddChild(this);
 
 		return true;
-	}
-
-	void Window::Destroy()
-	{
-		BOOL result = DestroyWindow(m_WindowHandle);
-
-		if (result == 0)
-		{
-			Log(GetLastWin32Error(), LOG_SERIOUS);
-		}
-
-		m_WaitingToClose = false;
-		m_WindowHandle = nullptr;
 	}
 
 	void Window::SetTitle(const char* title)

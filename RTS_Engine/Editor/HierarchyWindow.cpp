@@ -15,30 +15,13 @@ Window* CreateHierarchyWindow(HINSTANCE hInstance, Window* parentWindow)
     HierarchyWindowDetails.ClassDetails.SmallIcon = IDI_HAMMER;
     HierarchyWindowDetails.ClassDetails.WndProcCallback = HierarchyWindowWndProc;
     HierarchyWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_3DFACE);
-    return Window::CreateWin32Window(HierarchyWindowDetails);
+    return Window::Create(HierarchyWindowDetails);
 }
 
 LRESULT CALLBACK HierarchyWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        // Parse the menu selections:
-        switch (wmId)
-        {
-        case IDM_ABOUT:
-            DialogBox(g_Instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-            break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    }
-    break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;

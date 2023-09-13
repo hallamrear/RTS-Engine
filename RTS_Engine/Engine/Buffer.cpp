@@ -6,6 +6,18 @@
 
 namespace Bennett
 {
+	Buffer::Buffer()
+	{
+		m_Buffer = VkBuffer{};
+		m_BufferMemory = VkDeviceMemory{};
+		m_Count = -1;
+	}
+
+	Buffer::~Buffer()
+	{
+		//todo : destroy
+	}
+
 	uint32_t Buffer::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags)
 	{
 		VkPhysicalDeviceMemoryProperties memoryProperties;

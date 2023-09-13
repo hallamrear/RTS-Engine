@@ -15,30 +15,13 @@ Window* CreateToolWindow(HINSTANCE hInstance, Window* parentWindow)
     ToolWindowDetails.ClassDetails.SmallIcon = IDI_HAMMER;
     ToolWindowDetails.ClassDetails.WndProcCallback = ToolWindowWndProc;
     ToolWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_3DFACE);
-    return Window::CreateWin32Window(ToolWindowDetails);
+    return Window::Create(ToolWindowDetails);
 }
 
 LRESULT CALLBACK ToolWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        // Parse the menu selections:
-        switch (wmId)
-        {
-        case IDM_ABOUT:
-            DialogBox(g_Instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-            break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    }
-    break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;

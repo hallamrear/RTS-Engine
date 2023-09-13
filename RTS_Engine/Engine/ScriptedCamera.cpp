@@ -14,7 +14,7 @@ namespace Bennett
 
 	}
 
-	void ScriptedCamera::ProcessInput(const float& deltaTime)
+	void ScriptedCamera::Update(const float& deltaTime)
 	{
 		if (!m_InputMonitor)
 			return;

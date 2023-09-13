@@ -15,30 +15,13 @@ Window* CreatePropertiesWindow(HINSTANCE hInstance, Window* parentWindow)
     propertiesWindowDetails.ClassDetails.SmallIcon = IDI_HAMMER;
     propertiesWindowDetails.ClassDetails.WndProcCallback = PropertiesWindowWndProc;
     propertiesWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_3DFACE);
-    return Window::CreateWin32Window(propertiesWindowDetails);
+    return Window::Create(propertiesWindowDetails);
 }
 
 LRESULT CALLBACK PropertiesWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        // Parse the menu selections:
-        switch (wmId)
-        {
-        case IDM_ABOUT:
-            DialogBox(g_Instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-            break;
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    }
-    break;
     case WM_PAINT:
     {
         PAINTSTRUCT ps;

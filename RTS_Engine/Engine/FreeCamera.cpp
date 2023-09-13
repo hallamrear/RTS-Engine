@@ -8,7 +8,6 @@ namespace Bennett
 	FreeCamera::FreeCamera()
 	{
 		m_MouseSensitivity = 10.0f;
-		m_MovementSpeed = 50.0f;
 	}
 
 	FreeCamera::~FreeCamera()
@@ -25,17 +24,22 @@ namespace Bennett
 		return view;
 	}
 
-	void FreeCamera::ProcessInput(const float& deltaTime)
+	void FreeCamera::Update(const float& deltaTime)
 	{
 		if (!m_InputMonitor)
 			return;
 
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_W))		{ Translate(glm::vec3(m_ForwardVector *  m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_S))	    { Translate(glm::vec3(m_ForwardVector * -m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_A))	    { Translate(glm::vec3(m_RightVector   * -m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_D))	    { Translate(glm::vec3(m_RightVector   *  m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_SPACE))  { Translate(glm::vec3(m_UpVector      *  m_MovementSpeed * deltaTime)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_LSHIFT)) { Translate(glm::vec3(m_UpVector	  * -m_MovementSpeed * deltaTime)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_UP))   { m_MovementSpeed++; Log("Camera movement speed: " + std::to_string(m_MovementSpeed), LOG_SAFE); };
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_DOWN)) { m_MovementSpeed--; Log("Camera movement speed: " + std::to_string(m_MovementSpeed), LOG_SAFE); };
+
+		float scaledMovementSpeed = m_MovementSpeed * deltaTime;
+
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_W))		{ Translate(glm::vec3(m_ForwardVector *  scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_S))	    { Translate(glm::vec3(m_ForwardVector * -scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_A))	    { Translate(glm::vec3(m_RightVector   * -scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_D))	    { Translate(glm::vec3(m_RightVector   *  scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_SPACE))  { Translate(glm::vec3(m_UpVector     *  scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_LSHIFT)) { Translate(glm::vec3(m_UpVector	  * -scaledMovementSpeed)); }
 
 		if (m_IsMouseLocked)
 		{

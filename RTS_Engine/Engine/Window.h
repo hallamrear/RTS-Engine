@@ -13,9 +13,9 @@ namespace Bennett
 		bool m_WaitingToClose;
 
 		Window();
+		~Window();
 
 		bool Initialise(const WindowDetails& details);
-		void Destroy();
 
         inline static HWND CreateWin32WindowHandle(HINSTANCE hInstance, const Bennett::WindowDetails& details)
 		{
@@ -82,7 +82,6 @@ namespace Bennett
 		};
 
 	public:
-		~Window();		
 
 		void SetTitle(const char* title);
 		void SetSize(const glm::vec2& size);
@@ -93,18 +92,32 @@ namespace Bennett
 		void Close();
 		const HWND& GetWindowHandle() const;
 
-		inline static Window* CreateWin32Window(const WindowDetails& details)
+		inline static Window* Create(const WindowDetails& details)
 		{
 			Bennett::Window* window = new Bennett::Window();
 
 			if (!window->Initialise(details))
 			{
-				delete window;
-				window = nullptr;
+				Destroy(window);
 			}
 
 			return window;
 		};
+
+		inline static void Destroy(Window* window)
+		{
+			BOOL result = DestroyWindow(window->m_WindowHandle);
+			if (result == 0)
+			{
+				Log(GetLastWin32Error(), LOG_SERIOUS);
+			}
+
+			window->m_WaitingToClose = false;
+			window->m_WindowHandle = nullptr;
+
+			delete window;
+			window = nullptr;
+		}
 	};
 }
 

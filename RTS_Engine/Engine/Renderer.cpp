@@ -237,6 +237,7 @@ namespace Bennett
 	{
 		WaitForFrame();
 		AquireSwapchainImageIndex();
+
 		//Reset
 		vkResetCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame], 0);
 		//Record
@@ -633,14 +634,13 @@ namespace Bennett
 		*
 		* Using any other mode than fill requires enabling a GPU feature.
 		*/
-		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-		//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+		//rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
 
 		//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
 		rasterizer.lineWidth = 2.0f;
 
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.cullMode = VK_CULL_MODE_NONE;
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
 		//Altering depth values and biasing.
@@ -1752,7 +1752,6 @@ namespace Bennett
 			imageCount = details.Capabilities.maxImageCount;
 		}
 
-
 		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		createInfo.surface = m_Surface;
@@ -1819,7 +1818,6 @@ namespace Bennett
 		}
 
 		Log("Successfully created the swapchain.", LOG_SAFE);
-
 
 		//Store variables
 		m_SwapChainExtent = extent;

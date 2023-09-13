@@ -8,36 +8,39 @@ namespace Bennett
 {
 	class BENNETT_ENGINE Engine
 	{
-	private:
+	protected:
 		static Engine* m_Instance;
 
 		World m_World;
 		CameraController& m_CameraController;
 		InputMonitor* m_EngineControls;
 		bool m_IsRunning;
-		inline static bool m_InFocus = false;
+		inline static bool m_InFocus;
 
-		static Engine* GetEngineInstance();
+		Engine();
+		bool InitialiseEngineSystems(Window& renderWindow);
+		void Destroy();
 
 	public:
-		Engine();
-		~Engine();
+		virtual ~Engine() = 0;
+		virtual bool Initialise() = 0;
+		static Engine* GetEngineInstance();
 
 		void ProcessInput(const float& DeltaTime);
 		void Update(float DeltaTime);
 		void Render();
+
 		inline bool IsRunning() const { return m_IsRunning; };
 		inline void SetIsRunning(bool state) { m_IsRunning = state; };
-		inline static void SetInFocus(bool state) { m_InFocus = state; Log("Focus: " + std::to_string(m_InFocus), LOG_SAFE); };
+		inline static void SetInFocus(bool state) 
+		{
+			m_InFocus = state;
+			Log("Focus: " + std::to_string(m_InFocus), LOG_SAFE); 
+		};
 		inline static bool GetInFocus() { return m_InFocus; };
-
-		bool Initialise(Window& renderWindow);
-		void Destroy();
 
 		static LRESULT CALLBACK WindowsCallbackProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		World& GetWorld();
-
-		static Engine* CreateEngine(Window& renderWindow);
 	};
 }

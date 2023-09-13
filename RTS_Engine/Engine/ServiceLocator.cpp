@@ -7,10 +7,10 @@
 
 namespace Bennett
 {
-    std::string ServiceLocator::m_ResourceFolderLocation = "NO RESOURCE FOLDER SET";
-    Renderer* ServiceLocator::m_Renderer = nullptr;
+    std::string   ServiceLocator::m_ResourceFolderLocation = "NO RESOURCE FOLDER SET";
     AssetManager* ServiceLocator::m_AssetManager = nullptr;
-    Window* ServiceLocator::m_Window = nullptr;
+    Renderer*     ServiceLocator::m_Renderer = nullptr;
+    Window*       ServiceLocator::m_Window = nullptr;
 
     bool ServiceLocator::Initialise(Window& renderWindow)
     {
@@ -68,13 +68,31 @@ namespace Bennett
             m_Renderer = nullptr;
         }
 
-        if (m_Window)
-        {
-            delete m_Window;
-            m_Window = nullptr;
-        }
+        m_Window = nullptr;
 
         m_ResourceFolderLocation = "NO RESOURCE FOLDER SET";
     }
 
+    AssetManager& ServiceLocator::GetAssetManager() 
+    { 
+        assert(m_AssetManager != nullptr);
+        return *m_AssetManager; 
+    };
+
+    Renderer& ServiceLocator::GetRenderer() 
+    { 
+        assert(m_Renderer != nullptr);
+        return *m_Renderer; 
+    };
+
+    Window& ServiceLocator::GetWindow()
+    { 
+        assert(m_Window != nullptr);
+        return *m_Window;
+    };
+
+    const std::string& ServiceLocator::GetResourceFolderLocation()
+    { 
+        return m_ResourceFolderLocation;
+    };
 }

@@ -34,6 +34,8 @@ namespace Bennett
 			BENNETT_KEY_Q,			 //Rotate Left
 			BENNETT_KEY_E,			 //Rotate Right
 			BENNETT_KEY_TAB,		 //Toggle Mouse Lock
+			BENNETT_KEY_UP,			 //Movement speed up
+			BENNETT_KEY_DOWN,		 //Movement speed down
 		};
 
 		m_InputMonitor = new InputMonitor(m_CameraControlKeys);
@@ -76,7 +78,7 @@ namespace Bennett
 		return m_Position;
 	}
 
-	void Camera::ProcessInput(const float& deltaTime)
+	void Camera::Update(const float& deltaTime)
 	{
 
 	}
@@ -172,6 +174,13 @@ namespace Bennett
 	glm::mat4 Camera::GetProjectionMatrix()
 	{
 		glm::vec2 size = ServiceLocator::GetWindow().GetSize();
+
+		if (size.x == 0.0f && size.y == 0.0f)
+		{
+			size.x = 1.0f;
+			size.y = 1.0f;
+		}
+
 		m_AspectRatio = size.x / size.y;
 
 		/*

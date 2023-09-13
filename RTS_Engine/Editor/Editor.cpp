@@ -1,12 +1,12 @@
 // Editor.cpp : Defines the entry point for the application.
 
 #include "pch.h"
-#include "Editor.h"
 #include <Window.h>
 #include <Engine.h>
 #include <Logger.h>
+#include <InputMonitor.h>
 #include <chrono>
-
+#include "Editor.h"
 #include "PropertiesWindow.h"
 #include "ToolWindow.h"
 #include "HierarchyWindow.h"
@@ -14,37 +14,58 @@
 
 using namespace Bennett;
 
-// Forward declarations of functions included in this code module:
-LRESULT CALLBACK MainWindowWndProc(HWND, UINT, WPARAM, LPARAM);
-INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
-int APIENTRY WinMain(_In_ HINSTANCE hInstance,
-    _In_opt_ HINSTANCE hPrevInstance,
-    _In_ LPSTR    lpCmdLine,
-    _In_ int       nCmdShow)
+Editor::Editor()
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+    m_MainWindow = nullptr;
+    m_EngineControls = nullptr;
+    m_HierarchyWindow = nullptr;
+    m_ToolWindow = nullptr;
+    m_PropertiesWindow = nullptr;
+    m_RenderWindow = nullptr;
+}
 
-    g_Argc = __argc;
-    g_Argv = __argv;
-    g_Instance = hInstance;
+Editor::~Editor()
+{
+    Window::Destroy(m_HierarchyWindow);
+    Window::Destroy(m_ToolWindow);
+    Window::Destroy(m_PropertiesWindow);
+    Window::Destroy(m_RenderWindow);
+    Window::Destroy(m_MainWindow);
+}
 
-#ifdef _DEBUG
-    if (!AttachConsole(ATTACH_PARENT_PROCESS))
-        AllocConsole();
+bool Editor::Initialise()
+{
+    CreateWindows();
 
-    FILE* file = nullptr;
-    freopen_s(&file, "CONIN$", "r", stdin);
-    freopen_s(&file, "CONOUT$", "w", stdout);
-    freopen_s(&file, "CONOUT$", "w", stderr);
-#endif
-    INITCOMMONCONTROLSEX controls{};
-    controls.dwSize = sizeof(INITCOMMONCONTROLSEX);
-    controls.dwICC = ICC_BAR_CLASSES;
-    InitCommonControlsEx(&controls);
+    std::vector<int> keys =
+    {
+        BENNETT_KEY_F1,
+        BENNETT_KEY_F2,
+        BENNETT_KEY_F3,
+        BENNETT_KEY_F4,
+        BENNETT_KEY_F5,
+        BENNETT_KEY_F6,
+        BENNETT_KEY_F7,
+        BENNETT_KEY_F8,
+        BENNETT_KEY_F9,
+        BENNETT_KEY_F10,
+        BENNETT_KEY_F11,
+        BENNETT_KEY_F12
+    };
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_EDITOR));
+    m_EngineControls = new InputMonitor(keys);
+
+    if (!InitialiseEngineSystems(*m_RenderWindow))
+    {
+        Log("Failed to initialise engine systems.", LOG_CRITICAL);
+        return FALSE;
+    }
+}
+
+bool Editor::CreateWindows()
+{
+    HINSTANCE hInstance = GetModuleHandle(NULL);
 
     WindowDetails mainWindowDetails;
     LoadString(hInstance, IDS_APP_TITLE, mainWindowDetails.Title, MAX_LOADSTRING);
@@ -52,53 +73,52 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
     mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
     mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
-    #ifdef _DEBUG
+#ifdef _DEBUG
     mainWindowDetails.ShowState = WindowDetails::NORMAL;
-    #else
+#else
     mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
-    #endif
+#endif
 
     mainWindowDetails.ClassDetails.Icon = IDI_FACE;
     mainWindowDetails.ClassDetails.SmallIcon = IDI_FACE;
     mainWindowDetails.ClassDetails.MenuName = IDC_EDITOR;
-    Window* mainWindow = Window::CreateWin32Window(mainWindowDetails);
- 
+    m_MainWindow = Window::Create(mainWindowDetails);
+
     // Perform application initialization:
-    if (!mainWindow)
+    if (!m_MainWindow)
     {
-        Log(GetLastWin32Error(), LOG_SERIOUS);
-        return FALSE;
+        Log(GetLastWin32Error(), LOG_SERIOUS); 
+        Log("Failed to create a window.", LOG_SERIOUS);
+        return false;
     }
 
-    Window* renderWindow = CreateRenderWindow(hInstance, mainWindow);
-    if (!renderWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
+    m_RenderWindow = CreateRenderWindow(hInstance, m_MainWindow);
+    if (!m_RenderWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
 
-    Window* propertiesWindow = CreatePropertiesWindow(hInstance, mainWindow);
-    if (!propertiesWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
+    m_PropertiesWindow = CreatePropertiesWindow(hInstance, m_MainWindow);
+    if (!m_PropertiesWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
 
-    Window* toolWindow = CreateToolWindow(hInstance, mainWindow);
-    if (!toolWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
+    m_ToolWindow = CreateToolWindow(hInstance, m_MainWindow);
+    if (!m_ToolWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
 
-    Window* hierarchyWindow = CreateHierarchyWindow(hInstance, mainWindow);
-    if (!hierarchyWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); return FALSE; }
+    m_HierarchyWindow = CreateHierarchyWindow(hInstance, m_MainWindow);
+    if (!m_HierarchyWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
 
-    TileWindows(mainWindow->GetWindowHandle(), MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
+    TileWindows(m_MainWindow->GetWindowHandle(), MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
 
-    g_Engine = Engine::CreateEngine(*renderWindow);
-    if (!g_Engine)
-    {
-        Log("Engine Run finished. Engine deleting.", LOG_CRITICAL);
-        return 0;
-    }
+    return true;
+}
 
+void Editor::RunGameLoop()
+{
     auto lTime = std::chrono::steady_clock::now();
     auto cTime = lTime;
     float dTime = 0.0f;
 
     MSG msg{};
-    while (g_Engine->IsRunning())
+    while (IsRunning())
     {
-        if (PeekMessage(&msg, mainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
+        if (PeekMessage(&msg, m_MainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -111,41 +131,30 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
             if (dTime > TIMESTEP_CAP)
                 dTime = TIMESTEP_CAP;
 
-            g_Engine->ProcessInput(dTime);
-            g_Engine->Update(dTime);
-            //g_Engine->Render();
+            //ProcessInput(dTime);
+            Update(dTime);
+            Render();
 
             lTime = cTime;
         }
     }
-
-    //Todo : proper cleanup of all windows.
-
-    Log("Engine has finished running, it is now closing.", LOG_SAFE);
-    delete g_Engine;
-    g_Engine = nullptr;
-
-    return (int)msg.wParam;
 }
 
 LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    Bennett::Engine* editor = Engine::GetEngineInstance();
+
     switch (message)
     {
-    case WM_LBUTTONDOWN:
-    {
-        g_Engine->SetInFocus(false);
-    } 
-        break;
-
     case WM_KEYDOWN:
     case WM_SYSKEYDOWN:
     case WM_KEYUP:
     case WM_SYSKEYUP:
     {
-        if (g_Engine->GetInFocus())
+        bool state = Engine::GetInFocus();
+        if (state)
         {
-            g_Engine->WindowsCallbackProcedure(hWnd, message, wParam, lParam);
+            Engine::WindowsCallbackProcedure(hWnd, message, wParam, lParam);
         }
         else
         {
@@ -162,17 +171,56 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
             // Parse the menu selections:
             switch (wmId)
             {
+            case ID_FILE_NEW:
+            {
+                //TODO : Implement
+            }
+                break;
+
+            case ID_FILE_LOAD:
+            {
+                //TODO : Implement
+            }
+                break;
+
+            case ID_FILE_SAVE:
+            {
+                //TODO : Implement
+            }
+                break;
+
+            case ID_FILE_SAVEAS:
+            {
+                //TODO : Implement
+            }
+                break;
+
+            case ID_RENDERMODE_SOLID:
+            {
+                //TODO : Implement
+            }
+                break;
+
+            case ID_RENDERMODE_WIREFRAME:
+            {
+                //TODO : Implement
+            }
+                break;
+
+            case IDM_EXIT:
+            {
+                DestroyWindow(hWnd);
+            }
+                break;
+
             case IDM_ABOUT:
-                DialogBox(g_Instance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+                DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
 
             case ID_ARRANGEWINDOWS_4SQUARES:
                 TileWindows(hWnd, MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
                 break;
 
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }

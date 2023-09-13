@@ -5,6 +5,8 @@
 #include "AssetManager.h"
 #include "InputMonitor.h"
 #include "LevelManager.h"
+#include "FileManagement.h"
+#include "PrimativeModelCreation.h"
 #include "Model.h"
 #include "World.h"
 
@@ -19,6 +21,7 @@ namespace Bennett
 		m_IsRunning = true;
 		m_InFocus = true;
 		m_EngineControls = nullptr;
+		m_Instance = this;
 	}
 
 	Engine::~Engine()
@@ -29,6 +32,7 @@ namespace Bennett
 	
 	void Engine::Update(float DeltaTime)
 	{
+		m_CameraController.GetCurrentCamera().Update(DeltaTime);
 		m_World.Update(DeltaTime);
 	}
 
@@ -45,35 +49,18 @@ namespace Bennett
 		renderer.EndFrame();
 	}
 
-	bool Engine::Initialise(Window& renderWindow)
+	bool Engine::InitialiseEngineSystems(Window& renderWindow)
 	{
-		ServiceLocator::Initialise(renderWindow);
-		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
-		Log("Initialised Engine successfully.", LOG_SAFE);
-
-		std::vector<int> EngineControls =
+		if (!ServiceLocator::Initialise(renderWindow))
 		{
-			BENNETT_KEY_F1,
-			BENNETT_KEY_F2,
-			BENNETT_KEY_F3,
-			BENNETT_KEY_F4,
-			BENNETT_KEY_F5,
-			BENNETT_KEY_F6,
-			BENNETT_KEY_F7,
-			BENNETT_KEY_F8,
-			BENNETT_KEY_F9,
-			BENNETT_KEY_F10,
-			BENNETT_KEY_F11,
-			BENNETT_KEY_F12
+			return false;
+		}
 
-		};
-		m_EngineControls = new InputMonitor(EngineControls);
+		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
 
-		m_CameraController.SetCamera(CAMERA_MODE::FREE_CAM);
-		m_CameraController.GetCurrentCamera().SetPosition(glm::vec3(10.0f, 10.0f, 10.0f));
+		CreateGenericModels();
 
-		LevelManager::LoadLevel(ServiceLocator::GetResourceFolderLocation() + "testLevel.xml", m_World);
-
+		Log("Initialised Engine successfully.", LOG_SAFE);
 		return true;
 	}
 
@@ -84,25 +71,35 @@ namespace Bennett
 
 	void Engine::ProcessInput(const float& DeltaTime)
 	{
-		m_CameraController.GetCurrentCamera().ProcessInput(DeltaTime);
-
-		if (m_EngineControls->GetKeyState(BENNETT_KEY_F1))
-			m_CameraController.SetCamera(FREE_CAM);
-		if (m_EngineControls->GetKeyState(BENNETT_KEY_F2))
-			m_CameraController.SetCamera(STANDARD_CAM);
-		if (m_EngineControls->GetKeyState(BENNETT_KEY_F3))
-			m_CameraController.SetCamera(SCRIPTED_CAMERA);
-
-		if (m_EngineControls->GetKeyState(BENNETT_KEY_F4))
+		if (m_EngineControls)
 		{
-			LevelManager::UnloadLevel(m_World);
-			LevelManager::LoadLevel("testLevel.xml", m_World);
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F1))
+				m_CameraController.SetCamera(FREE_CAM);
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F2))
+				m_CameraController.SetCamera(STANDARD_CAM);
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F3))
+				m_CameraController.SetCamera(SCRIPTED_CAMERA);
+
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F4))
+			{
+				//TODO : Fix the blocking issue, F4 KEY_UP does not call when the file dialog opens.
+				//LevelManager::UnloadLevel(m_World);
+				//std::string path = "NO PATH LOADED";
+				//bool didYouFindFile = FileManagement::OpenFileDialog(".level", path);
+				//if (path != "")
+				//{
+				//	LevelManager::LoadLevel(path, m_World);
+				//}
+
+				LevelManager::UnloadLevel(m_World);
+				LevelManager::LoadLevel("TestLevel.level", m_World);
+			}
+
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F9))
+			{
+				ServiceLocator::GetRenderer().RecreateSwapChain();
+			}
 		}
-	
-		if (m_EngineControls->GetKeyState(BENNETT_KEY_F9))
-		{
-			ServiceLocator::GetRenderer().RecreateSwapChain();
-		}	
 	}
 
 	World& Engine::GetWorld()
@@ -112,92 +109,65 @@ namespace Bennett
 
 	LRESULT CALLBACK Engine::WindowsCallbackProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		Engine* engine = Engine::GetEngineInstance();
-
-		if (engine == nullptr)
-			return DefWindowProc(hWnd, message, wParam, lParam);
-
 		switch (message)
 		{
-
-		case WM_SIZE:
-		{
-			for (HWND hWndChild = ::GetTopWindow(hWnd); hWndChild != NULL; hWndChild = ::GetNextWindow(hWndChild, GW_HWNDNEXT))
+			case WM_NCMOUSEMOVE:
+			case WM_NCMOUSELEAVE:
+			case WM_NCMOUSEHOVER:
 			{
-				SendMessage(hWndChild, WM_SIZE, 0, 0);
+				Engine::SetInFocus(false);
 			}
-		}
-		break;
+				break;
 
-		case WM_MOUSEMOVE:
-		case WM_XBUTTONDOWN:
-		case WM_XBUTTONUP:
-		case WM_LBUTTONDOWN:
-		case WM_LBUTTONUP:
-		case WM_MBUTTONDOWN:
-		case WM_MBUTTONUP:
-		case WM_RBUTTONDOWN:
-		case WM_RBUTTONUP:
-		case WM_MOUSEHOVER:
-		case WM_MOUSEWHEEL:
-		case WM_KEYDOWN:
-		case WM_SYSKEYDOWN:
-		case WM_KEYUP:
-		case WM_SYSKEYUP:
-		{
-			Engine::SetInFocus(true);
-			InputMonitor::Win32InputCallback(message, lParam, wParam);
-		}
-			break;
+			case WM_MOUSEMOVE:
+			case WM_XBUTTONDOWN:
+			case WM_XBUTTONUP:
+			case WM_LBUTTONDOWN:
+			case WM_LBUTTONUP:
+			case WM_MBUTTONDOWN:
+			case WM_MBUTTONUP:
+			case WM_RBUTTONDOWN:
+			case WM_RBUTTONUP:
+			case WM_MOUSEHOVER:
+			case WM_MOUSEWHEEL:
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
+			case WM_KEYUP:
+			case WM_SYSKEYUP:
+			{
+				Engine::SetInFocus(true);
+				InputMonitor::Win32InputCallback(message, lParam, wParam);
+			}
+				break;
 
-		case WM_CLOSE:
-		{
-			engine->SetIsRunning(false);
-		}
-			break;
+			//case WM_CLOSE:
+			//{
+				//engine->SetIsRunning(false);
+			//}
+			//	break;
 
-		case WM_PAINT:
-		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hWnd, &ps);
-			// TODO: Add any drawing code that uses hdc here...
-			EndPaint(hWnd, &ps);
-		}
-			break;
+			case WM_PAINT:
+			{
+				PAINTSTRUCT ps;
+				HDC hdc = BeginPaint(hWnd, &ps);
+				// TODO: Add any drawing code that uses hdc here...
+				EndPaint(hWnd, &ps);
+			}
+				break;
 
-		case WM_DESTROY:
-		{
-			PostQuitMessage(0);
-		}
-			break;
+			case WM_DESTROY:
+			{
+				PostQuitMessage(0);
+			}
+				break;
 
-		default:
-		{
-			return DefWindowProc(hWnd, message, wParam, lParam);
-		}
-			break;
-		}
-
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-
-	Engine* Engine::CreateEngine(Window& renderWindow)
-	{
-		if (Engine::m_Instance != nullptr)
-		{
-			delete m_Instance;
-			m_Instance = nullptr;
-		}
-
-		m_Instance = new Engine();
-
-		if (!m_Instance->Initialise(renderWindow))
-		{
-			delete m_Instance;
-			m_Instance = nullptr;
-		}
-
-		return m_Instance;
+			default:
+			{
+				return DefWindowProc(hWnd, message, wParam, lParam);
+			}
+				break;
+			}
+		return 0;
 	}
 
 	Engine* Engine::GetEngineInstance()

@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Model.h"
 #include "tinyxml2.h"
+#include "ServiceLocator.h"
 
 namespace Bennett
 {
@@ -15,7 +16,8 @@ namespace Bennett
         }
 
         tinyxml2::XMLDocument document;
-        document.LoadFile(levelName.c_str());
+        std::string fileLocation = ServiceLocator::GetResourceFolderLocation() + levelName.c_str();
+        document.LoadFile(fileLocation.c_str());
 
         if (document.Error())
         {
@@ -26,9 +28,9 @@ namespace Bennett
         terrainName = document.FirstChildElement("Level")->FirstChildElement("TerrainName")->GetText();
         if (terrainName != "")
         {
-            Entity* floor = world.SpawnEntity("Bender");
-            floor->SetModel(AssetManager::GetModel("Bender"));
-            floor->SetTexture(AssetManager::GetTexture("Bender"));
+            Entity* floor = world.SpawnEntity("tank");
+            floor->SetModel(AssetManager::GetModel("tank"));
+            floor->SetTexture(AssetManager::GetTexture("tank"));
             floor->SetPosition(glm::vec3(5.0f, 0.0f, 5.0f));
             floor->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
         }

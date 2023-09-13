@@ -6,8 +6,11 @@ namespace Bennett
 	class BENNETT_ENGINE Buffer
 	{
 	private:
-
+		
 	protected:
+		Buffer();
+		~Buffer();
+
 		static bool CreateGenericBuffer(const VkDeviceSize& deviceSize, const VkBufferUsageFlags& usageFlags, const VkMemoryPropertyFlags& properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		static void CopyBuffers(VkBuffer src, VkBuffer dst, size_t size);
 

@@ -18,7 +18,6 @@
 #define IDC_GAME_WINDOW_EXTRAS          108
 #define IDC_EDITOR                      109
 #define IDS_GAME_WINDOW_EXTRAS_TITLE    110
-#define IDC_STATUSBAR                   111
 #define IDR_MAINFRAME                   128
 #define IDI_ICON1                       131
 #define IDI_FACE                        131
@@ -32,6 +31,13 @@
 #define IDS_OUTPUT_WINDOW_TITLE         140
 #define ID_Menu                         32771
 #define ID_ARRANGEWINDOWS_4SQUARES      32772
+#define ID_FILE_NEW                     32773
+#define ID_FILE_LOAD                    32774
+#define ID_FILE_SAVE                    32775
+#define ID_FILE_SAVEAS                  32776
+#define ID_VIEW_RENDERMODE              32777
+#define ID_RENDERMODE_SOLID             32778
+#define ID_RENDERMODE_WIREFRAME         32779
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -40,7 +46,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        138
-#define _APS_NEXT_COMMAND_VALUE         32773
+#define _APS_NEXT_COMMAND_VALUE         32780
 #define _APS_NEXT_CONTROL_VALUE         1001
 #define _APS_NEXT_SYMED_VALUE           110
 #endif

@@ -10,7 +10,7 @@ namespace Bennett
         ScriptedCamera();
         ~ScriptedCamera();	
         
-        void ProcessInput(const float& deltaTime);
+        void Update(const float& deltaTime);
         glm::mat4 GetViewMatrix();
     };
 }

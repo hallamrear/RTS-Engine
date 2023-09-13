@@ -1,137 +1,115 @@
-// Editor.cpp : Defines the entry point for the application.
-
 #include "pch.h"
-#include "resource.h"
-#include <Engine.h>
-#include <Window.h>
+#include "Game.h"
 #include <chrono>
+#include <Window.h>
+#include <InputMonitor.h>
+#include <ServiceLocator.h>
+#include <AssetManager.h>
+#include <Vertex.h>
 
-#include <mini/ini.h>
-
-HINSTANCE g_Instance = NULL;
-
-// Forward declarations of functions included in this code module:
-LRESULT CALLBACK    MainWindowWndProc(HWND, UINT, WPARAM, LPARAM);
-
-using namespace Bennett;
-
-int APIENTRY WinMain(_In_ HINSTANCE hInstance,
-    _In_opt_ HINSTANCE hPrevInstance,
-    _In_ LPSTR    lpCmdLine,
-    _In_ int       nCmdShow)
+Game::Game()
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+    m_Window = nullptr;
+}
 
-    int argc = __argc;
-    char** argv = __argv;
+Game::~Game()
+{
+    if (m_Window)
+    {
+        Bennett::Window::Destroy(m_Window);
+    }
+}
 
-#ifdef _DEBUG
-    if (!AttachConsole(ATTACH_PARENT_PROCESS))   // try to hijack existing console of command line
-        AllocConsole();                           // or create your own.
+bool Game::Initialise()
+{
+    HINSTANCE hInstance = GetModuleHandle(NULL);
 
-    FILE* file = nullptr;
-    freopen_s(&file, "CONIN$", "r", stdin);
-    freopen_s(&file, "CONOUT$", "w", stdout);
-    freopen_s(&file, "CONOUT$", "w", stderr);
-#endif
-
-    g_Instance = hInstance;
-
-    WindowDetails mainWindowDetails;
+    Bennett::WindowDetails mainWindowDetails;
     LoadString(hInstance, IDS_APP_TITLE, mainWindowDetails.Title, MAX_LOADSTRING);
     LoadString(hInstance, IDC_GAME, mainWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
     mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
     mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
-    mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
+    mainWindowDetails.ClassDetails.WndProcCallback = Engine::WindowsCallbackProcedure;
     mainWindowDetails.ClassDetails.Icon = IDI_GAME;
     mainWindowDetails.ClassDetails.SmallIcon = IDI_SMALL;
-    mainWindowDetails.ClassDetails.MenuName = IDC_GAME;
-    Window* mainWindow = Window::CreateWin32Window(mainWindowDetails);
+    m_Window = Bennett::Window::Create(mainWindowDetails);
 
     // Perform application initialization:
-    if (!mainWindow)
+    if (!m_Window)
     {
         Log(GetLastWin32Error(), LOG_SERIOUS);
         return FALSE;
     }
 
-    HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_GAME));
-
-    Engine* engine = Engine::CreateEngine(*mainWindow);
-
-    if (!engine)
+    std::vector<int> keys =
     {
-        Log("Failed to create engine.", LOG_CRITICAL);
-        return 0;
+        BENNETT_KEY_F1,
+        BENNETT_KEY_F2,
+        BENNETT_KEY_F3,
+        BENNETT_KEY_F4,
+        BENNETT_KEY_F5,
+        BENNETT_KEY_F6,
+        BENNETT_KEY_F7,
+        BENNETT_KEY_F8,
+        BENNETT_KEY_F9,
+        BENNETT_KEY_F10,
+        BENNETT_KEY_F11,
+        BENNETT_KEY_F12
+    };
+
+    m_EngineControls = new Bennett::InputMonitor(keys);
+
+    if (!InitialiseEngineSystems(*m_Window))
+    {
+        Log("Failed to initialise engine systems.", LOG_CRITICAL);
+        return FALSE;
     }
 
+    Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
+
+    for (int j = 0; j < 20; j += 1)
+    {
+        Bennett::Entity* entity = GetWorld().SpawnEntity(std::to_string(c));
+        entity->SetModel(am.GetModel("1x1_Quad"));
+        int x = (rand() % 30) - 10;
+        int y = (rand() % 30) - 10;
+        int z = (rand() % 30) - 10;
+        entity->SetPosition(glm::vec3(x, y, z));
+        int r = rand() % 10;
+        entity->SetScale(glm::vec3(r));
+    }
+
+    m_CameraController.SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
+    m_CameraController.GetCurrentCamera().SetPosition(glm::vec3(-15.0f, 15.0f, -15.0f));
+
+    return true;
+}
+
+void Game::RunGameLoop()
+{
     auto lTime = std::chrono::steady_clock::now();
     auto cTime = lTime;
     float dTime = 0.0f;
 
     MSG msg{};
-    while (engine->IsRunning())
+    while (IsRunning())
     {
-        if (PeekMessage(&msg, mainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
+        while(PeekMessage(&msg, m_Window->GetWindowHandle(), 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        else
-        {
-            cTime = std::chrono::steady_clock::now();
-            dTime = (cTime - lTime).count();
 
-            if (dTime > TIMESTEP_CAP)
-                dTime = TIMESTEP_CAP;
+        cTime = std::chrono::steady_clock::now();
+        dTime = (cTime - lTime).count();
 
-            engine->ProcessInput(dTime);
-            engine->Update(dTime);
-            engine->Render();
+        if (dTime > TIMESTEP_CAP)
+            dTime = TIMESTEP_CAP;
 
-            lTime = cTime;
-        }
+        ProcessInput(dTime);
+        Update(dTime);
+        Render();
+
+        lTime = cTime;
     }
-
-    Log("Engine has finished running, it is now closing.", LOG_SAFE);
-    delete engine;
-    engine = nullptr;
-
-    return (int)msg.wParam;
-}
-
-LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    switch (message)
-    {
-    case WM_COMMAND:
-    {
-        int wmId = LOWORD(wParam);
-        // Parse the menu selections:
-        switch (wmId)
-        {
-        case IDM_EXIT:
-            DestroyWindow(hWnd);
-            break;
-        default:
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    }
-    break;
-    case WM_PAINT:
-    {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hWnd, &ps);
-        // TODO: Add any drawing code that uses hdc here...
-        EndPaint(hWnd, &ps);
-    }
-    break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
 }

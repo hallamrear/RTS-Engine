@@ -8,6 +8,7 @@ namespace Bennett
 
 	struct BENNETT_ENGINE WindowDetails
 	{
+
 		struct BENNETT_ENGINE WindowWin32ClassDetails
 		{
 			CHAR ClassName[MAX_LOADSTRING] = "";
@@ -35,7 +36,7 @@ namespace Bennett
 			MINIMIZED = SW_SHOWMINIMIZED,
 			MAXIMIZED = SW_SHOWMAXIMIZED,
 			RESTORE = SW_RESTORE
-		} ShowState = NORMAL;
+		} ShowState = WINDOW_SHOW_STATE::NORMAL;
 	};
 
 

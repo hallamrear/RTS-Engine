@@ -20,10 +20,9 @@ namespace Bennett
 		static bool Initialise(Window& renderWindow);
 		static void Shutdown();
 
-		inline static AssetManager& GetAssetManager() { assert(m_AssetManager != nullptr); return *m_AssetManager; };
-		inline static Renderer& GetRenderer() { assert(m_Renderer != nullptr); return *m_Renderer; };
-		inline static Window& GetWindow() { assert(m_Window != nullptr); return *m_Window; };
-
-		inline static const std::string& GetResourceFolderLocation() { return m_ResourceFolderLocation; };
-	};
+		static AssetManager& GetAssetManager();
+		static Renderer& GetRenderer();
+		static Window& GetWindow();
+		static const std::string& GetResourceFolderLocation();
+	};	
 }

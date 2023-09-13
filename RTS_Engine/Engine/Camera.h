@@ -58,7 +58,7 @@ namespace Bennett
 		void SetPosition(const glm::vec3& position);
 		void SetRotation(const glm::vec3& rotation);
 
-		virtual void ProcessInput(const float& deltaTime) = 0;
+		virtual void Update(const float& deltaTime) = 0;
 		void Translate(const glm::vec3& offset);
 		void Rotate(const glm::vec3& offset);
 	};
