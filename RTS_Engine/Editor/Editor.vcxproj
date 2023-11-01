@@ -48,12 +48,14 @@
     <IntDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\bin\</IntDir>
     <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(SolutionDir)Engine;$(ExternalIncludePath)</ExternalIncludePath>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\bin\</IntDir>
     <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(SolutionDir)Engine;$(ExternalIncludePath)</ExternalIncludePath>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -118,25 +120,25 @@
   <ItemGroup>
     <ClInclude Include="Editor.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="HierarchyWindow.h" />
+    <ClInclude Include="Window\HierarchyWindow.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="PropertiesWindow.h" />
-    <ClInclude Include="RenderWindow.h" />
+    <ClInclude Include="Window\PropertiesWindow.h" />
+    <ClInclude Include="Window\RenderWindow.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="ToolWindow.h" />
+    <ClInclude Include="Window\ToolWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Editor.cpp" />
     <ClCompile Include="entry.cpp" />
-    <ClCompile Include="HierarchyWindow.cpp" />
+    <ClCompile Include="Window\HierarchyWindow.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="PropertiesWindow.cpp" />
-    <ClCompile Include="RenderWindow.cpp" />
-    <ClCompile Include="ToolWindow.cpp" />
+    <ClCompile Include="Window\PropertiesWindow.cpp" />
+    <ClCompile Include="Window\RenderWindow.cpp" />
+    <ClCompile Include="Window\ToolWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Editor.rc" />

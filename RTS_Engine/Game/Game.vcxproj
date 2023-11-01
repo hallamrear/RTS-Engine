@@ -72,7 +72,8 @@
       <AdditionalDependencies>Engine.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy /C /Y /I $(SolutionDir)Builds\$(Platform)\$(Configuration)\Engine\*.dll $(OutputPath)</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -104,7 +105,8 @@
       <AdditionalDependencies>Engine.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy /C /Y /I $(SolutionDir)Builds\$(Platform)\$(Configuration)\Engine\*.dll $(OutputPath)</Command>
+      <Command>
+      </Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>

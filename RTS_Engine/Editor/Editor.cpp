@@ -1,19 +1,18 @@
 // Editor.cpp : Defines the entry point for the application.
 
 #include "pch.h"
-#include <Window.h>
-#include <Engine.h>
-#include <Logger.h>
-#include <InputMonitor.h>
+#include <Rendering/Window.h>
+#include <System/Engine.h>
+#include <System/Logger.h>
+#include <System/InputMonitor.h>
 #include <chrono>
 #include "Editor.h"
-#include "PropertiesWindow.h"
-#include "ToolWindow.h"
-#include "HierarchyWindow.h"
-#include "RenderWindow.h"
+#include <Window/PropertiesWindow.h>
+#include <Window/ToolWindow.h>
+#include <Window/HierarchyWindow.h>
+#include <Window/RenderWindow.h>
 
 using namespace Bennett;
-
 
 Editor::Editor()
 {

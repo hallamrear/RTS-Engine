@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "resource.h"
 #include "Game.h"
-#include <Logger.h>
-#include <BennettDefines.h>
+#include <System/Logger.h>
+#include <Defines/BennettDefines.h>
 
 int APIENTRY WinMain(
     _In_ HINSTANCE hInstance,

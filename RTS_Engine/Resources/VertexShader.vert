@@ -27,7 +27,7 @@ void main()
 {
 	mat4 MVP =	UBO.Projection * UBO.View * PC.Model;
 	gl_Position = MVP * vec4(inPosition, 1.0f);
-	outColour = vec4(inPosition, 1.0f);
+	outColour = vec4(inColour);
 	vec4 wsNormal = vec4(inNormal, 1.0f) * (PC.Model);
 	outNormal = wsNormal.rgb;
 	outUV = inUV;

@@ -19,5 +19,4 @@ layout(push_constant) uniform PushConstants
 void main()
 {
 	outColor = texture(sampler2D(textures[PC.texID], texSampler), UV);
-	outColor = vec4(normal, 1.0f);
 }

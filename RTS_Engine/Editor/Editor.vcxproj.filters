@@ -30,16 +30,16 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PropertiesWindow.h">
+    <ClInclude Include="Window\PropertiesWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ToolWindow.h">
+    <ClInclude Include="Window\ToolWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HierarchyWindow.h">
+    <ClInclude Include="Window\HierarchyWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderWindow.h">
+    <ClInclude Include="Window\RenderWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,16 +50,16 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PropertiesWindow.cpp">
+    <ClCompile Include="Window\PropertiesWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ToolWindow.cpp">
+    <ClCompile Include="Window\ToolWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HierarchyWindow.cpp">
+    <ClCompile Include="Window\HierarchyWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RenderWindow.cpp">
+    <ClCompile Include="Window\RenderWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="entry.cpp">

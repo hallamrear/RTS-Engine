@@ -3,7 +3,7 @@
 #include "Editor.h"
 #include "resource.h"
 
-#include <BennettDefines.h>
+#include <Defines/BennettDefines.h>
 #include <chrono>
 
 int APIENTRY WinMain(_In_ HINSTANCE hInstance,

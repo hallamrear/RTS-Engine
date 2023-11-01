@@ -13,219 +13,300 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Collision">
+      <UniqueIdentifier>{d8157e0a-bae2-4f1d-9e02-4129cbfe0426}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Camera">
+      <UniqueIdentifier>{e3584053-d48d-4bb6-9798-31e628809613}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System">
+      <UniqueIdentifier>{1d7d262a-d0a6-421e-99c2-14cb72d3c384}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Defines">
+      <UniqueIdentifier>{1175e2ee-3da4-4b7d-bdc3-646897912052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\World">
+      <UniqueIdentifier>{08531889-e452-4599-961b-0da8ef07e497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{2e76f32e-9b71-4667-9ed8-3c76a8da531d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PCH and External Headers">
+      <UniqueIdentifier>{5fe5f9e5-a852-4219-9ca1-7ec6fd26e5b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System\Loader">
+      <UniqueIdentifier>{29066a61-8e0d-439c-81b9-e6dfd59c258d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System\Manager">
+      <UniqueIdentifier>{51e2bcbe-7160-4398-adc8-b8c7123314c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Collision\Colliders">
+      <UniqueIdentifier>{ee648fa5-4c73-4eee-9fdf-b87231a67e13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AssetManager.cpp">
+    <ClCompile Include="System\Manager\AssetManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BennettPCH.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Buffer.cpp">
+    <ClCompile Include="Rendering\Buffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
+    <ClCompile Include="Camera\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CameraController.cpp">
+    <ClCompile Include="Camera\CameraController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Engine.cpp">
+    <ClCompile Include="System\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
+    <ClCompile Include="World\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FreeCamera.cpp">
+    <ClCompile Include="Camera\FreeCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IndexBuffer.cpp">
+    <ClCompile Include="Rendering\IndexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputMonitor.cpp">
+    <ClCompile Include="System\InputMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LevelManager.cpp">
+    <ClCompile Include="System\Manager\LevelManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MarchingCubesTriangulationTable.cpp">
+    <ClCompile Include="Defines\MarchingCubesTriangulationTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
+    <ClCompile Include="Rendering\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="Rendering\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ModelLoader.cpp">
+    <ClCompile Include="System\Loader\ModelLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
+    <ClCompile Include="Rendering\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScriptedCamera.cpp">
+    <ClCompile Include="Camera\ScriptedCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ServiceLocator.cpp">
+    <ClCompile Include="System\ServiceLocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StandardCamera.cpp">
+    <ClCompile Include="Camera\StandardCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Terrain.cpp">
+    <ClCompile Include="World\Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainChunk.cpp">
+    <ClCompile Include="World\TerrainChunk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Rendering\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TextureLoader.cpp">
+    <ClCompile Include="System\Loader\TextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tinyxml2.cpp">
+    <ClCompile Include="External\tinyxml2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vertex.cpp">
+    <ClCompile Include="Rendering\Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VertexBuffer.cpp">
+    <ClCompile Include="Rendering\VertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="Rendering\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WindowDetails.cpp">
+    <ClCompile Include="Rendering\WindowDetails.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="World.cpp">
+    <ClCompile Include="World\World.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FileManagement.cpp">
+    <ClCompile Include="System\Manager\FileManagement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PrimativeModelCreation.cpp">
+    <ClCompile Include="Defines\PrimativeModelCreation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Octree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\OctreeNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Collision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Collider\Collider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Collider\Ray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Collider\SphereCollider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World\MoveableTestEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Collision\Collider\AABBCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ApplicationEvents.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Collision\Collision.h">
+      <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="AssetManager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Collision\Octree.h">
+      <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="BennettDefines.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Collision\OctreeNode.h">
+      <Filter>Header Files\Collision</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\Camera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\CameraController.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\FreeCamera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\StandardCamera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\ScriptedCamera.h">
+      <Filter>Header Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Engine.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\InputMonitor.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Logger.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="System\ServiceLocator.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines\BennettDefines.h">
+      <Filter>Header Files\Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines\BennettInputDefines.h">
+      <Filter>Header Files\Defines</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines\DebugDefines.h">
+      <Filter>Header Files\Defines</Filter>
     </ClInclude>
     <ClInclude Include="BennettPCH.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\PCH and External Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Buffer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Defines\MarchingCubesTriangulationTable.h">
+      <Filter>Header Files\Defines</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Defines\PrimativeModelCreation.h">
+      <Filter>Header Files\Defines</Filter>
     </ClInclude>
-    <ClInclude Include="CameraController.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="External\WindowsHeaders.h">
+      <Filter>Header Files\PCH and External Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Engine.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="External\resource.h">
+      <Filter>Header Files\PCH and External Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="World\Terrain.h">
+      <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="Event.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="World\TerrainChunk.h">
+      <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="FreeCamera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="World\World.h">
+      <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="IndexBuffer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="World\Entity.h">
+      <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="InputMonitor.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="System\ApplicationEvents.h">
+      <Filter>Header Files\System</Filter>
     </ClInclude>
-    <ClInclude Include="LevelManager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="System\Event.h">
+      <Filter>Header Files\System</Filter>
     </ClInclude>
-    <ClInclude Include="Logger.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Buffer.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="MarchingCubesTriangulationTable.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\IndexBuffer.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Mesh.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Model.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="ModelLoader.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Renderer.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Texture.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Vertex.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="ScriptedCamera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\VertexBuffer.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="ServiceLocator.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\Window.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="StandardCamera.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Rendering\WindowDetails.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Terrain.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="External\tinyxml2.h">
+      <Filter>Header Files\PCH and External Headers</Filter>
     </ClInclude>
-    <ClInclude Include="TerrainChunk.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="System\Manager\LevelManager.h">
+      <Filter>Header Files\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="System\Manager\FileManagement.h">
+      <Filter>Header Files\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="TextureLoader.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="System\Manager\AssetManager.h">
+      <Filter>Header Files\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="tinyxml2.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="System\Loader\ModelLoader.h">
+      <Filter>Header Files\System\Loader</Filter>
     </ClInclude>
-    <ClInclude Include="Vertex.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="System\Loader\TextureLoader.h">
+      <Filter>Header Files\System\Loader</Filter>
     </ClInclude>
-    <ClInclude Include="VertexBuffer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Collision\Collider\Collider.h">
+      <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Collision\Collider\SphereCollider.h">
+      <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
-    <ClInclude Include="WindowDetails.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="World\MoveableTestEntity.h">
+      <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="WindowsHeaders.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Collision\Collider\AABBCollider.h">
+      <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
-    <ClInclude Include="World.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BennettInputDefines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FileManagement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PrimativeModelCreation.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Collision\Collider\Ray.h">
+      <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

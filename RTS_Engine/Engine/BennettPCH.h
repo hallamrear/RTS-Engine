@@ -1,8 +1,12 @@
 #pragma once
-#include "BennettDefines.h"
+
+//I am disabling this error to avoid all the messages for DLL exports from Vulkan objects.
+#pragma warning( disable : 4251)
+
+#include <Defines/BennettDefines.h>
 
 //Windows Libraries
-#include "WindowsHeaders.h"
+#include <External/WindowsHeaders.h>
 
 //C++ Libraries
 #include <array>
@@ -21,4 +25,4 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 //Adding Logger
-#include "Logger.h"
+#include <System/Logger.h>
