@@ -291,25 +291,17 @@ namespace Bennett
 		template<>
 		inline static bool CheckCollision<SphereCollider, SphereCollider>(const SphereCollider& colliderA, const SphereCollider& colliderB)
 		{
-			//const glm::vec3 sphereOnePosition = colliderA.GetPosition();
-			//const glm::vec3 sphereTwoPosition = colliderB.GetPosition();
+			const glm::vec3 positionDiff = colliderA.GetPosition() - colliderB.GetPosition();
 
-			//const float distanceSqr = 
-			//   ((sphereOnePosition.x - sphereTwoPosition.x) * (sphereOnePosition.x - sphereTwoPosition.x) +
-			//	(sphereOnePosition.y - sphereTwoPosition.y) * (sphereOnePosition.y - sphereTwoPosition.y) +
-			//	(sphereOnePosition.z - sphereTwoPosition.z) * (sphereOnePosition.z - sphereTwoPosition.z));
+			const float distanceSquared = 
+			   ((positionDiff.x) * (positionDiff.x) +
+				(positionDiff.y) * (positionDiff.y) +
+				(positionDiff.z) * (positionDiff.z));
 
-			//const float sqrRadius = (colliderA.GetRadius() + colliderB.GetRadius()) * (colliderA.GetRadius() + colliderB.GetRadius());
+			const float radiusSum = colliderA.GetRadius() + colliderB.GetRadius();
+			const float radiusSquared = radiusSum * radiusSum;
 
-			//return distanceSqr < sqrRadius; 
-			
-			float dx = colliderA.GetPosition().x - colliderB.GetPosition().x,
-				dy = colliderA.GetPosition().y - colliderB.GetPosition().y,
-				dz = colliderA.GetPosition().z - colliderB.GetPosition().z,
-				sumRadius = colliderA.GetRadius() + colliderB.GetRadius();
-
-			float distSqr = dx * dx + dy * dy + dz * dz;
-			return (sqrtf(distSqr) <= sumRadius);
+			return distanceSquared <= radiusSquared; 
 		};
 
 		/// <summary>
