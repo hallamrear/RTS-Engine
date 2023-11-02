@@ -167,8 +167,9 @@ void Game::RunGameLoop()
         const Bennett::SphereCollider& collOne = (const Bennett::SphereCollider&)*entityOne->GetCollider();
         const Bennett::SphereCollider& collTwo = (const Bennett::SphereCollider&)*entityTwo->GetCollider();
         const Bennett::Ray ray = Bennett::Ray(m_CameraController.GetCurrentCamera().GetPosition(), m_CameraController.GetCurrentCamera().GetForwardVector());
+
         bool result = Bennett::Collision::CheckCollision<Bennett::SphereCollider, Bennett::SphereCollider>(collOne, collTwo);
-        Log("Collision: " + std::to_string(result), LOG_SAFE);
+        //Log("Collision: " + std::to_string(result), LOG_SAFE);
 
         Update(dTime);
         Render();

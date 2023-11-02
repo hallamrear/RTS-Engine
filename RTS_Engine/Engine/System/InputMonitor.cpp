@@ -180,7 +180,8 @@ namespace Bennett
 			s = "SC X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
 			Log(s, LOG_SAFE);
 			ScreenToClient(m_AttachedWindow->GetWindowHandle(), &p);
-			s = "cc X " + std::to_string(p.x) + ", Y " + std::to_string(p.y) + "\n";
+			s = "cc X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
+			Log(s, LOG_SAFE);
 			position = glm::vec2(p.x, p.y);
 		}
 
@@ -189,10 +190,18 @@ namespace Bennett
 
 	void InputMonitor::SetMousePositionToCentre() const
 	{
+		std::string s = "";
 		glm::vec2 winSize = m_AttachedWindow->GetSize();
 		POINT p;
+		//Client coords
 		p.x = (long)(winSize.x / 2.0f);
 		p.y = (long)(winSize.y / 2.0f);
+		s = "Client centre: X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
+		Log(s, LOG_SAFE);
+		ClientToScreen(m_AttachedWindow->GetWindowHandle(), &p);
+		//p is now in screen space.
+		s = "Screen centre: X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
+		Log(s, LOG_SAFE);
 		SetCursorPos(p.x, p.y);
 	}
 

@@ -47,14 +47,17 @@ namespace Bennett
 		{
 			glm::vec2 mousePos = m_InputMonitor->GetMousePosition();
 			glm::vec2 mouseDelta = mousePos - m_MousePositionLastFrame;
+			m_InputMonitor->SetMousePositionToCentre();
+
+			std::string str = "Delta X: " + std::to_string(mouseDelta.x) + " Y: " + std::to_string(mouseDelta.y);
+			Log(str, LOG_SAFE);
 
 			if (mouseDelta != glm::vec2(0.0f, 0.0f))
 			{
-				Rotate(glm::vec3(mouseDelta.y * -m_MouseSensitivity * m_RotationSpeed * deltaTime, mouseDelta.x * m_MouseSensitivity * m_RotationSpeed * deltaTime, 0.0f));
+			//	Rotate(glm::vec3(mouseDelta.y * -m_MouseSensitivity * m_RotationSpeed * deltaTime, mouseDelta.x * m_MouseSensitivity * m_RotationSpeed * deltaTime, 0.0f));
 			}
 
 			m_MousePositionLastFrame = mousePos;
-			m_InputMonitor->SetMousePositionToCentre();
 		}
 		else
 		{
