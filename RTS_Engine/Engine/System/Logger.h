@@ -14,7 +14,8 @@ enum LOG_STATUS
 
 #ifdef _DEBUG
 template<typename T>
-inline BENNETT_ENGINE void Log(T var, int statusLevel)
+//Todo : Rearrange parameters to match other log function. Ensure release define function also matches.
+inline BENNETT_ENGINE void Log(T var, LOG_STATUS status)
 {
 	if (var == "" || !ENABLE_LOG)
 		return;
@@ -27,6 +28,24 @@ inline BENNETT_ENGINE void Log(T var, int statusLevel)
 	if (statusLevel == LOG_CRITICAL)
 		DebugBreak();
 };
+
+inline BENNETT_ENGINE void Log(LOG_STATUS statusLevel, const char* format, ...)
+{
+	if (format == "" || !ENABLE_LOG)
+		return;
+
+	va_list args;
+	//Changing debug colour then back to original.
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (int)statusLevel);
+	va_start(args, format);
+	printf(format, args);
+	va_end(args);
+
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
+
+	if (statusLevel == LOG_CRITICAL)
+		DebugBreak();
+}
 
 inline BENNETT_ENGINE std::string GetLastWin32Error()
 {
@@ -68,5 +87,11 @@ inline BENNETT_ENGINE std::string BENNETT_ENGINE GetLastWin32Error()
 {
 	return "";
 };
+
+
+inline BENNETT_ENGINE void Log(LOG_STATUS statusLevel, const char* format, ...)
+{
+
+}
 
 #endif
