@@ -15,7 +15,7 @@ enum LOG_STATUS
 #ifdef _DEBUG
 template<typename T>
 //Todo : Rearrange parameters to match other log function. Ensure release define function also matches.
-inline BENNETT_ENGINE void Log(T var, LOG_STATUS status)
+inline BENNETT_ENGINE void Log(T var, LOG_STATUS statusLevel)
 {
 	if (var == "" || !ENABLE_LOG)
 		return;
@@ -38,7 +38,7 @@ inline BENNETT_ENGINE void Log(LOG_STATUS statusLevel, const char* format, ...)
 	//Changing debug colour then back to original.
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), (int)statusLevel);
 	va_start(args, format);
-	printf(format, args);
+	vprintf(format, args);
 	va_end(args);
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
