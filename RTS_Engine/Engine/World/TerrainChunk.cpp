@@ -1,6 +1,7 @@
 #include <BennettPCH.h>
 #include <Defines/MarchingCubesTriangulationTable.h>
 #include <System/Manager/AssetManager.h>
+#include <Collision/Collider/Collider.h>
 #include <System/ServiceLocator.h>
 #include <World/TerrainChunk.h>
 
@@ -62,6 +63,9 @@ namespace Bennett
 		{
 			Model* chunkModel = ServiceLocator::GetAssetManager().CreateModel(GetName(), triangleVertices, indices);
 			SetModel(chunkModel);
+
+			glm::vec3 colliderSize = glm::vec3(1.0f, 0.5f, 1.0f);
+			AddBroadPhaseCollider(ColliderType::AABB, colliderSize);
 		}
 	}
 

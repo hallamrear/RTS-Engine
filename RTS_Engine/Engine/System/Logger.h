@@ -25,7 +25,7 @@ inline BENNETT_ENGINE void Log(T var, LOG_STATUS statusLevel)
 	std::cout << var << std::endl;
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 	
-	if (statusLevel == LOG_CRITICAL)
+	if (statusLevel == LOG_CRITICAL && ENABLE_LOG_BREAK_ON_CRITICAL_ERROR)
 		DebugBreak();
 };
 
@@ -43,7 +43,7 @@ inline BENNETT_ENGINE void Log(LOG_STATUS statusLevel, const char* format, ...)
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
 
-	if (statusLevel == LOG_CRITICAL)
+	if (statusLevel == LOG_CRITICAL && ENABLE_LOG_BREAK_ON_CRITICAL_ERROR)
 		DebugBreak();
 }
 

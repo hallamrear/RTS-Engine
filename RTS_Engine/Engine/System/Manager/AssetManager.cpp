@@ -1,10 +1,10 @@
 #include <BennettPCH.h>
-#include <System/ServiceLocator.h>
-#include <System/Manager/AssetManager.h>
-#include <System/Loader/TextureLoader.h>
-#include <System/Loader/ModelLoader.h>
 #include <Defines/BennettDefines.h>
 #include <Rendering/Renderer.h>
+#include <System/Loader/ModelLoader.h>
+#include <System/Loader/TextureLoader.h>
+#include <System/Manager/AssetManager.h>
+#include <System/ServiceLocator.h>
 
 namespace Bennett
 {

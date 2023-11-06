@@ -26,6 +26,7 @@ namespace Bennett
 		Camera** m_Cameras;
 
 		void CreateCameras();
+		void DestroyCameras();
 
 	protected:
 		CameraController();

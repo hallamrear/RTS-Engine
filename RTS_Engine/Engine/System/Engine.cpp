@@ -16,7 +16,7 @@ namespace Bennett
 {
 	Engine* Engine::m_Instance = nullptr;
 
-	Engine::Engine() : m_CameraController(CameraController::Get())
+	Engine::Engine()
 	{
 		srand((unsigned int)time(NULL));
 		Log("Engine created.", LOG_SAFE);
@@ -24,6 +24,7 @@ namespace Bennett
 		m_InFocus = true;
 		m_EngineControls = nullptr;
 		m_Instance = this;
+		m_CameraController = nullptr;
 	}
 
 	Engine::~Engine()
@@ -41,7 +42,7 @@ namespace Bennett
 			Log("FPS: " + std::to_string(fps), LOG_SAFE);
 		}
 
-		m_CameraController.GetCurrentCamera().Update(DeltaTime);
+		m_CameraController->GetCurrentCamera().Update(DeltaTime);
 		m_World.Update(DeltaTime);
 	}
 
@@ -51,8 +52,8 @@ namespace Bennett
 			return;
 
 		Renderer& renderer = ServiceLocator::GetRenderer();
-		renderer.UniformMatrixBuffer.View = m_CameraController.GetCurrentCamera().GetViewMatrix();
-		renderer.UniformMatrixBuffer.Projection = m_CameraController.GetCurrentCamera().GetProjectionMatrix();
+		renderer.UniformMatrixBuffer.View = m_CameraController->GetCurrentCamera().GetViewMatrix();
+		renderer.UniformMatrixBuffer.Projection = m_CameraController->GetCurrentCamera().GetProjectionMatrix();
 		renderer.StartFrame();
 		m_World.Render(renderer);
 		renderer.EndFrame();
@@ -65,7 +66,27 @@ namespace Bennett
 			return false;
 		}
 
+		m_CameraController = &CameraController::Get();
+
 		InputMonitor::AttachToWindow(ServiceLocator::GetWindow());
+
+		std::vector<int> keys =
+		{
+			BENNETT_KEY_F1,
+			BENNETT_KEY_F2,
+			BENNETT_KEY_F3,
+			BENNETT_KEY_F4,
+			BENNETT_KEY_F5,
+			BENNETT_KEY_F6,
+			BENNETT_KEY_F7,
+			BENNETT_KEY_F8,
+			BENNETT_KEY_F9,
+			BENNETT_KEY_F10,
+			BENNETT_KEY_F11,
+			BENNETT_KEY_F12
+		};
+
+		m_EngineControls = new Bennett::InputMonitor(keys);
 
 		CreateGenericModels();
 
@@ -82,12 +103,23 @@ namespace Bennett
 	{
 		if (m_EngineControls)
 		{
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F1))
-				m_CameraController.SetCamera(FREE_CAM);
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F2))
-				m_CameraController.SetCamera(STANDARD_CAM);
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F3))
-				m_CameraController.SetCamera(SCRIPTED_CAMERA);
+			if (m_CameraController)
+			{
+				if (m_EngineControls->GetKeyState(BENNETT_KEY_F1))
+				{
+					m_CameraController->SetCamera(FREE_CAM);
+				}
+				
+				if (m_EngineControls->GetKeyState(BENNETT_KEY_F2))
+				{
+					m_CameraController->SetCamera(STANDARD_CAM);
+				}
+
+				if (m_EngineControls->GetKeyState(BENNETT_KEY_F3))
+				{
+					m_CameraController->SetCamera(SCRIPTED_CAMERA);
+				}
+			}
 
 			if (m_EngineControls->GetKeyState(BENNETT_KEY_F4))
 			{
@@ -104,7 +136,7 @@ namespace Bennett
 				LevelManager::LoadLevel("TestLevel.level", m_World);
 			}
 
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F8))
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F9))
 			{
 				ServiceLocator::GetRenderer().RecreateSwapChain();
 			}
@@ -118,12 +150,32 @@ namespace Bennett
 			{
 				GetWorld().GetOctree().IncreaseMaxDepth();
 			}
+
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F7))
+			{
+				ServiceLocator::GetRenderer().SetDrawMode(RENDERER_DRAW_MODE::SOLID);
+			}
+
+			if (m_EngineControls->GetKeyState(BENNETT_KEY_F8))
+			{
+				ServiceLocator::GetRenderer().SetDrawMode(RENDERER_DRAW_MODE::WIREFRAME);
+			}
 		}
 	}
 
 	World& Engine::GetWorld()
 	{
 		return m_World;
+	}
+
+	InputMonitor& Engine::GetEngineControls()
+	{
+		return *m_EngineControls;
+	}
+
+	CameraController& Engine::GetCameraController()
+	{
+		return *m_CameraController;
 	}
 
 	LRESULT CALLBACK Engine::WindowsCallbackProcedure(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

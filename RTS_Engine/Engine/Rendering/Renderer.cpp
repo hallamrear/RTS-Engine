@@ -18,9 +18,12 @@ namespace Bennett
 
 	Renderer::Renderer()
 	{
-		m_CommandPool = VkCommandPool();
+		m_DepthImage = VkImage{};
+		m_DepthImageMemory = VkDeviceMemory{};
+		m_Viewport = VkViewport{};
+		m_CommandPool = VkCommandPool{};
 		m_CurrentImageIndex = -1;
-		m_DebugMessenger = VkDebugUtilsMessengerEXT();
+		m_DebugMessenger = VkDebugUtilsMessengerEXT{};
 		m_PhysicalDevice = VK_NULL_HANDLE;
 		m_IsInitialised = false;
 		m_Instance = nullptr;
@@ -93,6 +96,19 @@ namespace Bennett
 		return true;
 	}
 
+	void Renderer::WaitForRendererIdle()
+	{
+		vkDeviceWaitIdle(m_Device);
+	}
+
+	void Renderer::CleanupCommandPoolAndBuffers(VkDevice& device, VkCommandPool& commandPool, std::vector<VkCommandBuffer>& commandBuffers)
+	{
+		vkFreeCommandBuffers(device, commandPool, (uint32_t)commandBuffers.size(), commandBuffers.data());
+		commandBuffers.clear();
+		vkDestroyCommandPool(device, commandPool, nullptr);
+		commandPool = VK_NULL_HANDLE;
+	}
+
 	bool Renderer::RecordCommandBuffer()
 	{
 		/*
@@ -131,17 +147,19 @@ namespace Bennett
 	{
 		std::array<VkClearValue, 2> clearValues{};
 		clearValues[0].color = { {0.245f, 0.245f, 0.245f, 1.0f} };
+		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
 		clearValues[1].depthStencil = { 1.0f, 0 };
 
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.clearValueCount = 1;
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = m_RenderPass;
 		renderPassInfo.framebuffer = m_Framebuffers[m_CurrentImageIndex];
 		renderPassInfo.renderArea.offset = { 0 ,0 };
 		renderPassInfo.renderArea.extent = m_SwapChainExtent;
+		renderPassInfo.renderPass = m_RenderPass;
 		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
 		renderPassInfo.pClearValues = clearValues.data();
+
 		vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentRenderFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	}
 
@@ -152,33 +170,50 @@ namespace Bennett
 
 	void Renderer::CleanupSwapChain()
 	{
-		vkDestroyImage(m_Device, m_DepthImage, nullptr);
-		vkDestroyImageView(m_Device, m_DepthImageView, nullptr);
-		vkFreeMemory(m_Device, m_DepthImageMemory, nullptr);
+		CleanupDepthResources();
 
 		for (size_t i = 0; i < m_Framebuffers.size(); i++)
 		{
-			vkDestroyFramebuffer(m_Device, m_Framebuffers[i], nullptr);
+			CleanupFrameBuffer(m_Device, m_Framebuffers[i]);
 		}
+		m_Framebuffers.clear();
 
 		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
 		{
-			vkDestroyImageView(m_Device, m_SwapChainImageViews[i], nullptr);
+			CleanupImageView(m_Device, m_SwapChainImageViews[i]);
 		}
+		m_SwapChainImageViews.clear();
 
-		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
-		vkDestroyShaderModule(m_Device, m_FragShaderModule, nullptr);
-		vkDestroyShaderModule(m_Device, m_VertShaderModule, nullptr);
+		CleanupRenderPass(m_Device, m_RenderPass);
 
-		m_FragShaderModule = VK_NULL_HANDLE;
-		m_VertShaderModule = VK_NULL_HANDLE;
+		CleanupShaderModule(m_Device, m_FragShaderModule);
+		CleanupShaderModule(m_Device, m_VertShaderModule);
 
+		//Swapchain image creation is handled by the swapchain itself.
+		//so we do not need to clear them up (m_SwapChainImages).
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
+		m_SwapChain = VK_NULL_HANDLE;
+
+		//^^ doesnt mean i cant tidy up the data.
+		// todo: Check this is ok
+		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
+		{
+			m_SwapChainImages[i] = VK_NULL_HANDLE;
+		}
+		m_SwapChainImages.clear();
+	}
+
+	void Renderer::CleanupSwapChainImageViews()
+	{
+		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
+		{
+			CleanupImageView(m_Device, m_SwapChainImageViews[i]);
+		}
 	}
 
 	bool Renderer::RecreateSwapChain()
 	{
-		vkDeviceWaitIdle(m_Device);
+		WaitForRendererIdle();
 
 		CleanupSwapChain();
 
@@ -234,6 +269,12 @@ namespace Bennett
 		return true;
 	}
 
+	void Renderer::CleanupSampler(VkDevice& device, VkSampler& sampler)
+	{
+		vkDestroySampler(device, sampler, nullptr);
+		sampler = VK_NULL_HANDLE;
+	}
+
 	void Renderer::StartFrame()
 	{
 		WaitForFrame();
@@ -246,7 +287,20 @@ namespace Bennett
 
 		BeginRenderPass();
 
-		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+		switch (m_DrawMode)
+		{
+		case Bennett::SOLID:
+			vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_SolidGraphicsPipeline);
+			break;
+		case Bennett::WIREFRAME:
+			vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_WireframeGraphicsPipeline);
+			break;
+		default:
+			Log(LOG_SAFE, "Unsupported draw mode. Failed to bind graphics pipeline.\n");
+			break;
+		}
+
 	}
 
 	void Renderer::EndFrame()
@@ -308,8 +362,6 @@ namespace Bennett
 
 			//todo : load the new vulkan shaders into the pipeline.
 			//Will need to recreate the pipeline using the new objects.
-
-
 		}
 	}
 
@@ -444,6 +496,42 @@ namespace Bennett
 		return true;
 	}
 
+	void Renderer::CleanupUniformBuffers()
+	{
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			CleanupBuffer(m_Device, m_UniformBuffers[i]);
+			vkUnmapMemory(m_Device, m_UniformBuffersMemory[i]);
+			FreeDeviceMemory(m_Device, m_UniformBuffersMemory[i]);
+		}
+		m_UniformBuffers.clear();
+		m_UniformBuffersMemory.clear();
+	}
+
+	void Renderer::FreeDeviceMemory(VkDevice& device, VkDeviceMemory& memory)
+	{
+		vkFreeMemory(device, memory, nullptr);
+		memory = VK_NULL_HANDLE;
+	}
+
+	void Renderer::CleanupBuffer(VkDevice& device, VkBuffer& buffer)
+	{
+		vkDestroyBuffer(device, buffer, nullptr);
+		buffer = VK_NULL_HANDLE;
+	}
+
+	void Renderer::CleanupSemaphore(VkDevice& device, VkSemaphore& semaphore)
+	{
+		vkDestroySemaphore(device, semaphore, nullptr);
+		semaphore = VK_NULL_HANDLE;
+	}
+
+	void Renderer::CleanupFence(VkDevice& device, VkFence& fence)
+	{
+		vkDestroyFence(device, fence, nullptr);
+		fence = VK_NULL_HANDLE;
+	}
+
 	const VkDevice& Renderer::GetDevice() const
 	{
 		return m_Device;
@@ -533,6 +621,12 @@ namespace Bennett
 		return true;
 	}
 
+	void Renderer::CleanupFrameBuffer(VkDevice& device, VkFramebuffer& framebuffer)
+	{
+		vkDestroyFramebuffer(device, framebuffer, nullptr);		
+		framebuffer = VK_NULL_HANDLE;
+	}
+
 	std::vector<char> Renderer::ReadShaderFile(const std::string& fileName)
 	{
 		std::vector<char> readBytes = std::vector<char>();
@@ -566,6 +660,12 @@ namespace Bennett
 			Log("Failed to create shader module.", LOG_SERIOUS);
 		}
 		return module;
+	}
+
+	void Renderer::CleanupShaderModule(VkDevice& device, VkShaderModule& module)
+	{
+		vkDestroyShaderModule(device, module, nullptr);
+		module = VK_NULL_HANDLE;
 	}
 
 	bool Renderer::InitialiseGraphicsPipeline()
@@ -635,8 +735,8 @@ namespace Bennett
 		*
 		* Using any other mode than fill requires enabling a GPU feature.
 		*/
-		//rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+		//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
 
 		//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
 		rasterizer.lineWidth = 3.0f;
@@ -716,7 +816,7 @@ namespace Bennett
 #pragma region Colour Blending
 		VkPipelineColorBlendAttachmentState colorBlend{};
 		colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlend.blendEnable = VK_TRUE;
+		colorBlend.blendEnable = VK_FALSE;
 		colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
 		colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
 		colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
@@ -778,15 +878,34 @@ namespace Bennett
 		pipelineInfo.basePipelineIndex = -1;
 
 
-		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS)
+		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_SolidGraphicsPipeline) != VK_SUCCESS)
 		{
-			Log("Failed to create the graphics pipeline object.", LOG_CRITICAL);
+			Log("Failed to create the solid render graphics pipeline object.", LOG_CRITICAL);
+			return false;
+		}
+
+		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_WireframeGraphicsPipeline) != VK_SUCCESS)
+		{
+			Log("Failed to create the wireframe render graphics pipeline object.", LOG_CRITICAL);
 			return false;
 		}
 
 #pragma endregion
 
 		return true;
+	}
+
+	void Renderer::ShutdownGraphicsPipeline(VkDevice& device, VkPipeline& pipeline)
+	{
+		vkDestroyPipeline(device, pipeline, nullptr);
+		pipeline = VK_NULL_HANDLE;
+	}
+
+	void Renderer::ShutdownGraphicsPipelineLayout(VkDevice& device, VkPipelineLayout& layout)
+	{
+		vkDestroyPipelineLayout(device, layout, nullptr);
+		layout = VK_NULL_HANDLE;
 	}
 
 	bool Renderer::CreateDescriptorLayout()
@@ -839,7 +958,7 @@ namespace Bennett
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT;
+		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 		poolInfo.poolSizeCount = (uint32_t)poolSize.size();
 		poolInfo.pPoolSizes = poolSize.data();
 		poolInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
@@ -939,7 +1058,6 @@ namespace Bennett
 			vkUpdateDescriptorSets(m_Device, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 		}
 
-
 		return true;
 	}
 
@@ -981,8 +1099,22 @@ namespace Bennett
 		return true;
 	}
 
+	void Renderer::CleanupSyncObjects()
+	{
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			CleanupSemaphore(m_Device, m_ImageAvailableSemaphores[i]);
+			CleanupSemaphore(m_Device, m_RenderFinishedSemaphores[i]);
+			CleanupFence(m_Device, m_InFlightFences[i]);
+		}
+		m_ImageAvailableSemaphores.clear();
+		m_RenderFinishedSemaphores.clear();
+		m_InFlightFences.clear();
+	}
+
 	bool Renderer::CreateRenderPass()
-	{	/*
+	{	
+		/*
 		- VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL: Images used as color attachment
 		- VK_IMAGE_LAYOUT_PRESENT_SRC_KHR: Images to be presented in the swapchain
 		- VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: Images to be used as destination for a memory copy operation
@@ -1002,7 +1134,6 @@ namespace Bennett
 		VkAttachmentReference colorAttachmentRef{};
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
 
 		VkAttachmentDescription depthAttachment{};
 		depthAttachment.format = FindDepthFormat();
@@ -1051,42 +1182,76 @@ namespace Bennett
 		return true;
 	}
 
+	void Renderer::CleanupRenderPass(VkDevice& device, VkRenderPass& renderpass)
+	{
+		vkDestroyRenderPass(device, renderpass, nullptr);
+		renderpass = VK_NULL_HANDLE;
+	}
+
+	void Renderer::CleanupDescriptorPool(VkDevice& device, VkDescriptorPool& descriptorPool)
+	{
+		vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+		descriptorPool = VK_NULL_HANDLE;
+	}
+
+	void Renderer::CleanupDescriptorLayout(VkDevice& device, VkDescriptorSetLayout& layout)
+	{
+		vkDestroyDescriptorSetLayout(device, layout, nullptr);
+		layout = VK_NULL_HANDLE;
+	}
+
+	void Renderer::DeallocateDescriptorSets(VkDevice& device, VkDescriptorPool& descriptorPool, std::vector<VkDescriptorSet>& descriptorSets)
+	{
+		vkFreeDescriptorSets(device, descriptorPool, descriptorSets.size(), descriptorSets.data());
+	}
+
 	void Renderer::Shutdown()
 	{
 		if (m_IsInitialised)
 		{
-			vkDeviceWaitIdle(m_Device);
+			/*
+			VkViewport m_Viewport;
+			VkRect2D m_ScissorRect;
 
-			for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-			{
-				vkDestroyBuffer(m_Device, m_UniformBuffers[i], nullptr);
-				vkFreeMemory(m_Device, m_UniformBuffersMemory[i], nullptr);
-			}
+			VkFormat m_SwapChainFormat;
+			VkExtent2D m_SwapChainExtent;
+			std::vector<void*> m_UniformBuffersMapped;
+			*/
 
-			vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
-			vkDestroyDescriptorSetLayout(m_Device, m_DescriptorSetLayout, nullptr);
+			WaitForRendererIdle();
 
-			for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-			{
-				vkDestroySemaphore(m_Device, m_ImageAvailableSemaphores[i], nullptr);
-				vkDestroySemaphore(m_Device, m_RenderFinishedSemaphores[i], nullptr);
-				vkDestroyFence(m_Device, m_InFlightFences[i], nullptr);
-			}
+			CleanupSampler(m_Device, m_TextureSampler);
 
-			vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
+			CleanupUniformBuffers();
 
-			vkDestroyShaderModule(m_Device, m_FragShaderModule, nullptr);
-			vkDestroyShaderModule(m_Device, m_VertShaderModule, nullptr);
+			DeallocateDescriptorSets(m_Device, m_DescriptorPool, m_DescriptorSets);
+			m_DescriptorSets.clear();
+			CleanupDescriptorPool(m_Device, m_DescriptorPool);
+			CleanupDescriptorLayout(m_Device, m_DescriptorSetLayout);
 
+			CleanupSyncObjects();
+
+			CleanupCommandPoolAndBuffers(m_Device, m_CommandPool, m_CommandBuffers);
+			
 			CleanupSwapChain();
 
 			DestroyWindowSurface();
 
-			vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
-			vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
+			ShutdownGraphicsPipeline(m_Device, m_SolidGraphicsPipeline);
+			ShutdownGraphicsPipeline(m_Device, m_WireframeGraphicsPipeline);
+			ShutdownGraphicsPipelineLayout(m_Device, m_PipelineLayout);
 
 			vkDestroyDevice(m_Device, nullptr);
 			DestroyVulkanInstance();
+
+			DestroyDebugMessenger();
+
+			m_PushConstantBuffer.ModelMatrix = glm::mat4(1.0f);
+			m_PushConstantBuffer.TextureID = -1;
+
+			m_CurrentImageIndex = NULL;
+			m_AttachedWindow = nullptr;
+			m_IsInitialised = false;
 		}
 	}
 
@@ -1219,6 +1384,7 @@ namespace Bennett
 	{
 		Log("Destroying vulkan instance", LOG_MINIMAL);
 		vkDestroyInstance(m_Instance, nullptr);
+		m_Instance = VK_NULL_HANDLE;
 	}
 
 	bool Renderer::CheckValidationLayerSupport()
@@ -1321,6 +1487,18 @@ namespace Bennett
 
 		return true;
 	}
+	
+	void Renderer::CleanupImage(VkDevice& device, VkImage& image)
+	{
+		vkDestroyImage(device, image, nullptr);
+		image = VK_NULL_HANDLE;
+	}
+
+	void Renderer::CleanupImageView(VkDevice& device, VkImageView& image)
+	{
+		vkDestroyImageView(device, image, nullptr);
+		image = VK_NULL_HANDLE;
+	}
 
 	bool Renderer::CreateDepthResources()
 	{
@@ -1335,6 +1513,13 @@ namespace Bennett
 			return false;
 
 		return true;
+	}
+
+	void Renderer::CleanupDepthResources()
+	{
+		CleanupImage(m_Device, m_DepthImage);
+		CleanupImageView(m_Device, m_DepthImageView);
+		FreeDeviceMemory(m_Device, m_DepthImageMemory);
 	}
 
 	VkFormat Renderer::FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features)
@@ -1442,6 +1627,7 @@ namespace Bennett
 		if (m_EnableValidationLayers)
 		{
 			DestroyDebugUtilsMessengerEXT(m_Instance, m_DebugMessenger, nullptr);
+			m_DebugMessenger = VK_NULL_HANDLE;
 		}
 	}
 
@@ -1530,7 +1716,6 @@ namespace Bennett
 				break;
 
 			i++;
-
 		}
 	}
 
@@ -1628,6 +1813,7 @@ namespace Bennett
 	void Renderer::DestroyWindowSurface()
 	{
 		vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+		m_Surface = VK_NULL_HANDLE;
 	}
 	
 	Renderer::SwapChainSupportDetails Renderer::QuerySwapChainSupport(VkPhysicalDevice device)
@@ -1687,7 +1873,7 @@ namespace Bennett
 		and the program inserts rendered images at the back of the queue. If the
 		queue is full then the program has to wait. This is most similar to vertical
 		sync as found in modern games. The moment that the display is refreshed
-		is known as “vertical blank”.
+		is known as ï¿½vertical blankï¿½.
 
 	VK_PRESENT_MODE_FIFO_RELAXED_KHR: 
 		This mode only differs from the previous one if the application is late and
@@ -1701,7 +1887,7 @@ namespace Bennett
 		are simply replaced with the newer ones. This mode can be used to render 
 		frames as fast as possible while still avoiding tearing, resulting in
 		fewer latency issues than standard vertical	sync. This is commonly known
-		as “triple buffering”, although the existence of three buffers alone does 
+		as ï¿½triple bufferingï¿½, although the existence of three buffers alone does 
 		not necessarily mean that the framerate	is unlocked.
 	*/
 	VkPresentModeKHR Renderer::ChooseSwapChainPresentMode(const std::vector<VkPresentModeKHR>& presentModes)
@@ -1871,5 +2057,10 @@ namespace Bennett
 		}
 
 		return true;
+	}
+
+	void Renderer::SetDrawMode(const RENDERER_DRAW_MODE& mode)
+	{
+		m_DrawMode = mode;
 	}
 }

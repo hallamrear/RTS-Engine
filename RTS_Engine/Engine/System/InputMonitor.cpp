@@ -14,12 +14,12 @@ namespace Bennett
 	{
 		switch (msg)
 		{
-		case WM_LBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_LEFT,   true  , false); } break;
-		case WM_LBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_LEFT,   false , false); }	break;
-		case WM_MBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_MIDDLE, true  , false); } break;
-		case WM_MBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_MIDDLE, false , false); } break;
-		case WM_RBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_RIGHT, true, false);    } break;
-		case WM_RBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_RIGHT, false, false);   } break;
+		case WM_LBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_LEFT,    true, false); } break;
+		case WM_LBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_LEFT,   false, false); }	break;
+		case WM_MBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_MIDDLE,  true, false); } break;
+		case WM_MBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_MIDDLE, false, false); } break;
+		case WM_RBUTTONDOWN : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_RIGHT,   true, false); } break;
+		case WM_RBUTTONUP   : { InputMonitor::KeyboardInputCallback(BENNETT_MOUSE_RIGHT,  false, false); } break;
 
 		case WM_XBUTTONDOWN: 
 		{
@@ -140,17 +140,30 @@ namespace Bennett
 
 	void InputMonitor::LockCursor()
 	{
-		//TODO : FINISH this rect should define the outline of the render window.
-		RECT rect{};
-		glm::vec2 size = ServiceLocator::GetWindow().GetSize();
-		rect.right  = (long)size.x;
-		rect.bottom = (long)size.y;
-		ClipCursor(&rect);
+		if (m_IsCursorLocked == false)
+		{
+			//TODO : FINISH this rect should define the outline of the render window.
+			RECT rect{};
+			glm::vec2 size = ServiceLocator::GetWindow().GetSize();
+			rect.right = (long)size.x;
+			rect.bottom = (long)size.y;
+			ClipCursor(&rect);
+			m_IsCursorLocked = true;
+
+			while (ShowCursor(FALSE) >= 0);
+		}
 	}
 
 	void InputMonitor::UnlockCursor()
 	{
 		ClipCursor(NULL);
+		m_IsCursorLocked = false;
+		while (ShowCursor(TRUE) <= 0);		
+	}
+
+	const bool& InputMonitor::IsCursorLocked() const
+	{
+		return m_IsCursorLocked;
 	}
 
 	void InputMonitor::ToggleCursorLock()
@@ -174,14 +187,9 @@ namespace Bennett
 		}
 		else
 		{
-			std::string s = "";
 			POINT p;
 			GetCursorPos(&p);
-			s = "SC X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
-			Log(s, LOG_SAFE);
 			ScreenToClient(m_AttachedWindow->GetWindowHandle(), &p);
-			s = "cc X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
-			Log(s, LOG_SAFE);
 			position = glm::vec2(p.x, p.y);
 		}
 
@@ -190,18 +198,13 @@ namespace Bennett
 
 	void InputMonitor::SetMousePositionToCentre() const
 	{
-		std::string s = "";
 		glm::vec2 winSize = m_AttachedWindow->GetSize();
-		POINT p;
+		POINT p{};
 		//Client coords
 		p.x = (long)(winSize.x / 2.0f);
 		p.y = (long)(winSize.y / 2.0f);
-		s = "Client centre: X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
-		Log(s, LOG_SAFE);
 		ClientToScreen(m_AttachedWindow->GetWindowHandle(), &p);
 		//p is now in screen space.
-		s = "Screen centre: X " + std::to_string(p.x) + ", Y " + std::to_string(p.y);
-		Log(s, LOG_SAFE);
 		SetCursorPos(p.x, p.y);
 	}
 
@@ -214,10 +217,12 @@ namespace Bennett
 			return itr->second;
 		}
 
+		Log("Tried to get the keystate of a key not being tracked.", LOG_SAFE);
+
 		return false;
 	}
 
-	bool InputMonitor::GetIsEnabled()
+	bool InputMonitor::GetIsEnabled() const
 	{
 		return m_IsEnabled;
 	}

@@ -17,7 +17,6 @@ using namespace Bennett;
 Editor::Editor()
 {
     m_MainWindow = nullptr;
-    m_EngineControls = nullptr;
     m_HierarchyWindow = nullptr;
     m_ToolWindow = nullptr;
     m_PropertiesWindow = nullptr;
@@ -52,8 +51,6 @@ bool Editor::Initialise()
         BENNETT_KEY_F11,
         BENNETT_KEY_F12
     };
-
-    m_EngineControls = new InputMonitor(keys);
 
     if (!InitialiseEngineSystems(*m_RenderWindow))
     {

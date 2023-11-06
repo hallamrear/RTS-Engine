@@ -31,12 +31,13 @@ namespace Bennett
 
 		void LockCursor();
 		void UnlockCursor();
+		const bool& IsCursorLocked() const;
 		void ToggleCursorLock();
 
 		glm::vec2 GetMousePosition() const;
 		void SetMousePositionToCentre() const;
 		bool GetKeyState(int key);
-		bool GetIsEnabled();
+		bool GetIsEnabled() const;
 		void SetIsEnabled(const bool& state);
 
 		/// <summary>

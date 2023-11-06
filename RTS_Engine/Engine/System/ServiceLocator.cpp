@@ -55,6 +55,8 @@ namespace Bennett
 
     void ServiceLocator::Shutdown()
     {
+        m_Renderer->WaitForRendererIdle();
+
         if (m_AssetManager)
         {
             delete m_AssetManager;

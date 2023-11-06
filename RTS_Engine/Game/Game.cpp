@@ -46,24 +46,6 @@ bool Game::Initialise()
         return FALSE;
     }
 
-    std::vector<int> keys =
-    {
-        BENNETT_KEY_F1,
-        BENNETT_KEY_F2,
-        BENNETT_KEY_F3,
-        BENNETT_KEY_F4,
-        BENNETT_KEY_F5,
-        BENNETT_KEY_F6,
-        BENNETT_KEY_F7,
-        BENNETT_KEY_F8,
-        BENNETT_KEY_F9,
-        BENNETT_KEY_F10,
-        BENNETT_KEY_F11,
-        BENNETT_KEY_F12
-    };
-
-    m_EngineControls = new Bennett::InputMonitor(keys);
-
     if (!InitialiseEngineSystems(*m_Window))
     {
         Log("Failed to initialise engine systems.", LOG_CRITICAL);
@@ -102,11 +84,10 @@ bool Game::Initialise()
     entity = GetWorld().SpawnTestEntity("testMoveable");
     entity->SetPosition(glm::vec3(-5.0f, 5.0f, 0.0f));
     entity->SetModel(am.GetModel("1x1_Cube"));
-    entity->SetTexture(am.GetTexture("tank"));
+    entity->SetTexture(am.GetTexture("red"));
     entity->AddBroadPhaseCollider(Bennett::ColliderType::Sphere, glm::vec3(1.0f));
 
-
-    for (int i = -10; i < 10; i++)
+    /*for (int i = -10; i < 10; i++)
     {
         for (int j = -10; j < 10; j++)
         {
@@ -115,7 +96,7 @@ bool Game::Initialise()
             entity->SetPosition(glm::vec3(i, 0.0f, j));
             entity->SetModel(am.GetModel("1x1_Cube"));
         }
-    }
+    }*/
 
   /*  for (size_t i = 1; i < 3; i++)
     {
@@ -127,9 +108,9 @@ bool Game::Initialise()
     if (!entity)
         return false;
 
-    m_CameraController.SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
-    m_CameraController.GetCurrentCamera().SetPosition(glm::vec3(-15.0f, 0.0f, -15.0f));
-    m_CameraController.GetCurrentCamera().SetMovementSpeed(10.0f);
+    GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(-15.0f, 0.0f, -15.0f));
+    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
     return true;
 }
@@ -166,9 +147,16 @@ void Game::RunGameLoop()
         const glm::vec3& pos = entityOne->GetPosition();
         const Bennett::SphereCollider& collOne = (const Bennett::SphereCollider&)*entityOne->GetCollider();
         const Bennett::SphereCollider& collTwo = (const Bennett::SphereCollider&)*entityTwo->GetCollider();
-        const Bennett::Ray ray = Bennett::Ray(m_CameraController.GetCurrentCamera().GetPosition(), m_CameraController.GetCurrentCamera().GetForwardVector());
+        const Bennett::Ray ray = Bennett::Ray(GetCameraController().GetCurrentCamera().GetPosition(), GetCameraController().GetCurrentCamera().GetForwardVector());
 
-        bool result = Bennett::Collision::CheckCollision<Bennett::SphereCollider, Bennett::SphereCollider>(collOne, collTwo);
+     /*   for (size_t i = 0; i < ; i++)
+        {
+
+            if ()
+        }*/
+
+        //bool result = Bennett::Collision::CheckCollision<Bennett::SphereCollider, Bennett::SphereCollider>(collOne, collTwo);
+        //bool result = Bennett::Collision::CheckCollision<Bennett::Ray, Bennett::AABBCollider>(ray, terrainCollider);
         //Log("Collision: " + std::to_string(result), LOG_SAFE);
 
         Update(dTime);

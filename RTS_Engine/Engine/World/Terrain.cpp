@@ -36,6 +36,8 @@ namespace Bennett
 				m_Chunks.back()->SetTexture(ServiceLocator::GetAssetManager().GetTexture("Floor"));
 			}
 		}
+
+		Log(LOG_SAFE, "Generated %d chunks in terrain.\n", m_ChunkCountXZ * m_ChunkCountXZ);
 	}
 
 	Terrain* Terrain::Create(int size)

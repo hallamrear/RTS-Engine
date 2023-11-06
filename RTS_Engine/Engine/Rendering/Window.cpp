@@ -105,6 +105,14 @@ namespace Bennett
 		return glm::vec2(rect.right, rect.bottom);
 	}
 
+	const glm::vec2& Window::GetCentre() const
+	{
+		glm::vec2 halfSize = GetSize();
+		halfSize.x /= 2.0f;
+		halfSize.y /= 2.0f;
+		return halfSize;
+	}
+
 	void Window::Close()
 	{
 		m_WaitingToClose = true;

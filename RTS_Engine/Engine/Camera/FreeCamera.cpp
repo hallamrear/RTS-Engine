@@ -1,15 +1,16 @@
 #include <BennettPCH.h>
 #include <Camera/FreeCamera.h>
-#include <System/InputMonitor.h>
 #include <glm/matrix.hpp>
+#include <Rendering/Window.h>
+#include <System/InputMonitor.h>
+#include <System/ServiceLocator.h>
 
 namespace Bennett
 {
-	FreeCamera::FreeCamera()
+	FreeCamera::FreeCamera() : m_RenderWindow(ServiceLocator::GetWindow())
 	{
-		m_MouseSensitivity = 10.0f;
-		m_IsMouseLocked = false;
-		m_MousePositionLastFrame = m_InputMonitor->GetMousePosition();
+		m_MouseSensitivity = 0.5f;
+		m_MouseDelta = glm::vec2(0.0f, 0.0f);
 	}
 
 	FreeCamera::~FreeCamera()
@@ -22,7 +23,6 @@ namespace Bennett
 		UpdateBasisVectors();
 		glm::vec3 target = m_Position + glm::normalize(m_ForwardVector);
 		glm::mat4 view = glm::lookAt(m_Position, target, glm::vec3(0.0f, 1.0f, 0.0f));
-
 		return view;
 	}
 
@@ -31,33 +31,39 @@ namespace Bennett
 		if (!m_InputMonitor)
 			return;
 
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_UP))   { m_MovementSpeed++; Log("Camera movement speed: " + std::to_string(m_MovementSpeed), LOG_SAFE); };
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_DOWN)) { m_MovementSpeed--; Log("Camera movement speed: " + std::to_string(m_MovementSpeed), LOG_SAFE); };
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_HOME)) { m_MovementSpeed++; Log("Camera movement speed: " + std::to_string(m_MovementSpeed), LOG_SAFE); };
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_END)) { m_MovementSpeed--; Log("Camera movement speed: " + std::to_string(m_MovementSpeed), LOG_SAFE); };
+
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_PRIOR))
+		{ 
+			m_RotationSpeed++; Log("Camera rotation speed: " + std::to_string(m_RotationSpeed), LOG_SAFE);
+		};
+
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_NEXT))
+		{ 
+			m_RotationSpeed--; Log("Camera rotation speed: " + std::to_string(m_RotationSpeed), LOG_SAFE); 
+		};
 
 		float scaledMovementSpeed = m_MovementSpeed * deltaTime;
 
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_W))		{ Translate(glm::vec3(m_ForwardVector *  scaledMovementSpeed)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_S))	    { Translate(glm::vec3(m_ForwardVector * -scaledMovementSpeed)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_A))	    { Translate(glm::vec3(m_RightVector   * -scaledMovementSpeed)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_D))	    { Translate(glm::vec3(m_RightVector   *  scaledMovementSpeed)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_SPACE))  { Translate(glm::vec3(m_UpVector     *  scaledMovementSpeed)); }
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_LSHIFT)) { Translate(glm::vec3(m_UpVector	  * -scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_W))		 { Translate(glm::vec3(m_ForwardVector *  scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_S))	     { Translate(glm::vec3(m_ForwardVector * -scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_A))	     { Translate(glm::vec3(m_RightVector   * -scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_D))	     { Translate(glm::vec3(m_RightVector   *  scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_SPACE))  { Translate(glm::vec3(m_UpVector     *   scaledMovementSpeed)); }
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_LSHIFT)) { Translate(glm::vec3(m_UpVector	  *  -scaledMovementSpeed)); }
 
-		if (m_IsMouseLocked)
+		if (m_InputMonitor->IsCursorLocked())
 		{
 			glm::vec2 mousePos = m_InputMonitor->GetMousePosition();
-			glm::vec2 mouseDelta = mousePos - m_MousePositionLastFrame;
-			m_InputMonitor->SetMousePositionToCentre();
+			m_MouseDelta = mousePos - m_RenderWindow.GetCentre();
 
-			std::string str = "Delta X: " + std::to_string(mouseDelta.x) + " Y: " + std::to_string(mouseDelta.y);
-			Log(str, LOG_SAFE);
-
-			if (mouseDelta != glm::vec2(0.0f, 0.0f))
+			if (m_MouseDelta != glm::vec2(0.0f, 0.0f))
 			{
-			//	Rotate(glm::vec3(mouseDelta.y * -m_MouseSensitivity * m_RotationSpeed * deltaTime, mouseDelta.x * m_MouseSensitivity * m_RotationSpeed * deltaTime, 0.0f));
+				Rotate(glm::vec3(m_MouseDelta.y * -m_MouseSensitivity * m_RotationSpeed * deltaTime, m_MouseDelta.x * m_MouseSensitivity * m_RotationSpeed * deltaTime, 0.0f));
 			}
 
-			m_MousePositionLastFrame = mousePos;
+			m_InputMonitor->SetMousePositionToCentre();
 		}
 		else
 		{
@@ -70,15 +76,16 @@ namespace Bennett
 
 		if (m_InputMonitor->GetKeyState(VK_TAB))
 		{
-			m_IsMouseLocked = !m_IsMouseLocked;
-			if (m_IsMouseLocked)
+			if (m_InputMonitor->IsCursorLocked())
 			{
-				Log("Mouse locked to screen centre.", LOG_SAFE), m_InputMonitor->SetMousePositionToCentre();
-				m_MousePositionLastFrame = m_InputMonitor->GetMousePosition();
+				m_InputMonitor->UnlockCursor();
+				Log("Mouse unlocked.", LOG_SAFE);				
 			}
 			else
-			{
-				Log("Mouse unlocked.", LOG_SAFE);
+			{ 
+				m_InputMonitor->LockCursor();
+				Log("Mouse locked to screen centre.", LOG_SAFE);
+				m_InputMonitor->SetMousePositionToCentre();
 			}
 		};
 	}

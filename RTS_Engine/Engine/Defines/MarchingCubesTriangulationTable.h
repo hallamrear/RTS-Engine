@@ -27,6 +27,7 @@ namespace Bennett
 
 		const Vertex Vertices[8]
 		{
+			/*
 			Vertex(glm::vec3(0.0f, 0.0f,  0.0f)),
 			Vertex(glm::vec3(0.0f, 0.0f, +1.0f)),
 			Vertex(glm::vec3(+1.0f, 0.0f, +1.0f)),
@@ -35,7 +36,16 @@ namespace Bennett
 			Vertex(glm::vec3(0.0f, 1.0f, +1.0f)),
 			Vertex(glm::vec3(+1.0f, 1.0f, +1.0f)),
 			Vertex(glm::vec3(+1.0f, 1.0f,  0.0f)),
+			*/
 
+			Vertex(glm::vec3(-0.5f, -0.5f, -0.5f)),
+			Vertex(glm::vec3(-0.5f, -0.5f, +0.5f)),
+			Vertex(glm::vec3(+0.5f, -0.5f, +0.5f)),
+			Vertex(glm::vec3(+0.5f, -0.5f, -0.5f)),
+			Vertex(glm::vec3(-0.5f, +0.5f, -0.5f)),
+			Vertex(glm::vec3(-0.5f, +0.5f, +0.5f)),
+			Vertex(glm::vec3(+0.5f, +0.5f, +0.5f)),
+			Vertex(glm::vec3(+0.5f, +0.5f, -0.5f)),
 		};
 
 		struct Edge

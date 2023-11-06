@@ -8,6 +8,12 @@ namespace Bennett
 	class Texture;
 	class Window;
 
+	enum BENNETT_ENGINE RENDERER_DRAW_MODE
+	{
+		SOLID,
+		WIREFRAME
+	};
+
 	struct BENNETT_ENGINE UniformBufferObject
 	{
 		glm::mat4 View;
@@ -25,6 +31,8 @@ namespace Bennett
 	{
 	private:
 		const Window* m_AttachedWindow;
+
+		RENDERER_DRAW_MODE m_DrawMode;
 
 		struct SwapChainSupportDetails
 		{
@@ -128,6 +136,10 @@ namespace Bennett
 		VkInstance m_Instance;
 		VkPhysicalDevice m_PhysicalDevice;
 		bool CreateVulkanInstance();
+
+		/// <summary>
+		/// Destroys Vulkan Instance.
+		/// </summary>
 		void DestroyVulkanInstance();
 
 		//Validation Layers
@@ -136,11 +148,17 @@ namespace Bennett
 		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		bool CreateImageView(VkImageView& imageView, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
+		/// <summary>
+		/// Destroys a VkImage.
+		/// </summary>
+		void CleanupImage(VkDevice& device, VkImage& image);
+
 		//Depth/Stencil
 		VkImage m_DepthImage;
 		VkDeviceMemory m_DepthImageMemory;
 		VkImageView m_DepthImageView;
 		bool CreateDepthResources();
+		void CleanupDepthResources();
 		VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 		VkFormat FindDepthFormat();
 		bool HasStencilComponent(VkFormat format);
@@ -161,7 +179,11 @@ namespace Bennett
 		//Queue Families
 		void FindQueueFamilies(VkPhysicalDevice device, QueueFamilyIndices& indices);
 		
-		//Logical Device
+		/// <summary>
+		/// Creates a VkPhysicalDevice.
+		/// VkPhysicalDevice's are implicitly created by vkInstance and so they get destroyed when you destroy the instance.
+		/// </summary>
+		/// <returns></returns>
 		bool CreateLogicalDevice();
 
 		//Graphics Queue
@@ -186,28 +208,50 @@ namespace Bennett
 		bool CreateSwapChain();
 		bool CreateSwapChainImageViews();
 
+		/// <summary> 
+		/// Cleans up assorted swapchain dependent objects. Used in rebuilding the swapchain and renderer destruction. 
+		/// Destroys: 
+		/// - Depth Image, Image view and memory.
+		/// - Framebuffers
+		/// - Swapchain image views
+		/// - Render pass
+		/// - Fragment and Vertex Shader modules
+		/// - SwapChain
+		/// </summary>	
+		void CleanupSwapChain();
+		void CleanupSwapChainImageViews();
+
 		//Shaders
 		VkShaderModule m_FragShaderModule;
 		VkShaderModule m_VertShaderModule;
 		static std::vector<char> ReadShaderFile(const std::string& fileName);
 		VkShaderModule CreateShaderModule(const std::string& fileName);
+		void CleanupShaderModule(VkDevice& device, VkShaderModule& module);
 
 		//Render pass
 		VkRenderPass m_RenderPass;
 		bool CreateRenderPass();
+		void CleanupRenderPass(VkDevice& device, VkRenderPass& renderpass);
 
 		//Pipeline
-		VkPipeline m_GraphicsPipeline;
+		VkPipeline m_SolidGraphicsPipeline;
+		VkPipeline m_WireframeGraphicsPipeline;
 		VkPipelineLayout m_PipelineLayout;
 		bool InitialiseGraphicsPipeline();
+		void ShutdownGraphicsPipeline(VkDevice& device, VkPipeline& pipeline);
+		void ShutdownGraphicsPipelineLayout(VkDevice& device, VkPipelineLayout& layout);
 
-		//Create descriptor layout
+		//Descriptor layout
 		VkDescriptorSetLayout m_DescriptorSetLayout;
-		bool CreateDescriptorLayout();
-		bool CreateDescriptorPool();
-		bool AllocateDescriptorSets();
-		//Create descriptor pools
 		VkDescriptorPool m_DescriptorPool;
+		bool CreateDescriptorLayout();
+		void CleanupDescriptorLayout(VkDevice& device, VkDescriptorSetLayout& layout);
+		//Create descriptor pools
+		bool CreateDescriptorPool();
+		void CleanupDescriptorPool(VkDevice& device, VkDescriptorPool& descriptorPool);
+		bool AllocateDescriptorSets();
+		void DeallocateDescriptorSets(VkDevice& device, VkDescriptorPool& descriptorPool, std::vector<VkDescriptorSet>& descriptorSets);
+		
 		//Create descriptor sets
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 
@@ -216,12 +260,14 @@ namespace Bennett
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		bool CreateFrameBuffers();
+		void CleanupFrameBuffer(VkDevice& device, VkFramebuffer& framebuffer);
 
 		//Command Queue
 		VkCommandPool m_CommandPool;
 		std::vector<VkCommandBuffer> m_CommandBuffers;
 		bool CreateCommandPool();
 		bool CreateCommandBuffer();
+		void CleanupCommandPoolAndBuffers(VkDevice& device, VkCommandPool& commandBuffer, std::vector<VkCommandBuffer>& commandBuffers);
 		bool RecordCommandBuffer();
 
 		//Create syncronisation objects
@@ -230,6 +276,7 @@ namespace Bennett
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
 		std::vector<VkFence> m_InFlightFences;
 		bool CreateSyncObjects();
+		void CleanupSyncObjects();
 
 		//Wait for the previous frame to finish
 		void WaitForFrame();
@@ -242,23 +289,64 @@ namespace Bennett
 		//Present the swap chain image
 		void Present(uint32_t& imageIndex);
 
-
 		//Uniform Buffers
 		std::vector<VkBuffer> m_UniformBuffers;
 		std::vector<VkDeviceMemory> m_UniformBuffersMemory;
 		std::vector<void*> m_UniformBuffersMapped;
 		bool CreateUniformBuffers();
+		void CleanupUniformBuffers();
 
 		void BeginRenderPass();
 		void EndRenderPass();
 
 		static PushConstantBuffer m_PushConstantBuffer;
 
-		bool CreateTextureSampler();
+		/// <summary>
+		/// Texture Sampler.
+		/// </summary>
 		VkSampler m_TextureSampler;
 
-		//Recreating SwapChain
-		void CleanupSwapChain();
+		bool CreateTextureSampler();
+
+		/// <summary>
+		/// Destroys a VkSampler.
+		/// </summary>
+		void CleanupSampler(VkDevice& device, VkSampler& sampler);
+
+		/// <summary>
+		/// Frees device memory objects.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="memory"></param>
+		void FreeDeviceMemory(VkDevice& device, VkDeviceMemory& memory);
+
+		/// <summary>
+		/// Destroys a VkImageView.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="imageView"></param>
+		void CleanupImageView(VkDevice& device, VkImageView& imageView);
+
+		/// <summary>
+		/// Destroys a VkBuffer.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="buffer"></param>
+		void CleanupBuffer(VkDevice& device, VkBuffer& buffer);
+
+		/// <summary>
+		/// Destroys a semaphore.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="semaphore"></param>
+		void CleanupSemaphore(VkDevice& device, VkSemaphore& semaphore);
+
+		/// <summary>
+		/// Destroys a fence.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="fence"></param>
+		void CleanupFence(VkDevice& device, VkFence& fence);
 
 	public:
 		static UniformBufferObject UniformMatrixBuffer;
@@ -286,6 +374,9 @@ namespace Bennett
 		void PushModelMatrix(const glm::mat4& modelMatrix) const;
 		void PushTextureID(const int& texID) const;
 		void EndFrame();
+
+		void SetDrawMode(const RENDERER_DRAW_MODE& mode);
+		void WaitForRendererIdle();
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);

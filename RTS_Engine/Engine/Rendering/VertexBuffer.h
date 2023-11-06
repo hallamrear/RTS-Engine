@@ -15,6 +15,8 @@ namespace Bennett
 		void Bind() override;
 
 		static bool Create(VertexBuffer& buffer, const std::vector<Vertex>& vertices);
+
+		//Todo : move to Base buffer object or renderer.
 		static void Destroy(VertexBuffer& buffer);
 	};
 }

@@ -34,8 +34,10 @@ namespace Bennett
 			BENNETT_KEY_Q,			 //Rotate Left
 			BENNETT_KEY_E,			 //Rotate Right
 			BENNETT_KEY_TAB,		 //Toggle Mouse Lock
-			BENNETT_KEY_UP,			 //Movement speed up
-			BENNETT_KEY_DOWN,		 //Movement speed down
+			BENNETT_KEY_HOME,		 //Movement speed up
+			BENNETT_KEY_END,		 //Movement speed down
+			BENNETT_KEY_PRIOR,		 //Rotation speed up
+			BENNETT_KEY_NEXT,		 //Rotation speed down
 		};
 
 		m_InputMonitor = new InputMonitor(m_CameraControlKeys);
@@ -43,7 +45,11 @@ namespace Bennett
 
 	Camera::~Camera()
 	{
-
+		if (m_InputMonitor)
+		{
+			delete m_InputMonitor;
+			m_InputMonitor = nullptr;
+		}
 	}
 
 	void Camera::UpdateBasisVectors()
@@ -59,9 +65,6 @@ namespace Bennett
 	void Camera::Translate(const glm::vec3& offset)
 	{
 		m_Position += offset;
-
-		std::string str = "x: " + std::to_string(m_Position.x) + " y: " + std::to_string(m_Position.y) + "z: " + std::to_string(m_Position.z) + "\n";
-		Log(str, LOG_MINIMAL);
 	}
 
 	void Camera::Rotate(const glm::vec3& offset)

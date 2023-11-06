@@ -18,6 +18,21 @@ namespace Bennett
         m_Cameras[2] = new ScriptedCamera();
     }
 
+    void CameraController::DestroyCameras()
+    {
+        if (m_Cameras)
+        {
+            for (size_t i = 0; i < CAMERA_MODE::_COUNT; i++)
+            {
+                delete m_Cameras[i];
+                m_Cameras[i] = nullptr;
+            }
+
+            delete[] m_Cameras;
+            m_Cameras = nullptr;
+        }
+    }
+
     CameraController::CameraController()
     {
         m_Cameras = nullptr;
@@ -26,14 +41,7 @@ namespace Bennett
 
     CameraController::~CameraController()
     {
-        for (size_t i = 0; i < CAMERA_MODE::_COUNT; i++)
-        {
-            delete m_Cameras[i];
-            m_Cameras[i] = nullptr;
-        }
-
-        delete[] m_Cameras;
-        m_Cameras = nullptr;
+        DestroyCameras();
     }
 
     CameraController& CameraController::Get()

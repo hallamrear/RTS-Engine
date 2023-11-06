@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include <vector>
+#include "Defines/BennettDefines.h"
 
 namespace Bennett
 {
@@ -33,7 +34,6 @@ namespace Bennett
 		void ClampRotations();
 
 	public:
-
 		virtual ~Camera() = 0;
 
 		virtual glm::mat4 GetViewMatrix() = 0;

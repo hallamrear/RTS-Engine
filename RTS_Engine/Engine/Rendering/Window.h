@@ -88,6 +88,7 @@ namespace Bennett
 		void SetPosition(const glm::vec2& position);
 		glm::vec2 GetSize() const;
 		glm::vec2 GetPosition() const;
+		const glm::vec2& GetCentre() const;
 		const bool ShouldClose() const;
 		void Close();
 		const HWND& GetWindowHandle() const;

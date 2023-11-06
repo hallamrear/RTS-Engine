@@ -3,13 +3,15 @@
 
 namespace Bennett
 {
+    class Window;
+
     class BENNETT_ENGINE FreeCamera :
         public Camera
     {
 	private:
-        glm::vec2 m_MousePositionLastFrame;
-        bool m_IsMouseLocked;
+        Window& m_RenderWindow;
         float m_MouseSensitivity;
+        glm::vec2 m_MouseDelta;
 
 	public:
         FreeCamera();
