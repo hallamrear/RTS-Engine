@@ -32,7 +32,6 @@ namespace Bennett
 
 		for (size_t i = 0; i < m_Meshes.size(); i++)
 		{
-			m_Meshes[i]->Bind();
 			m_Meshes[i]->Render(renderer);
 		}
 	}

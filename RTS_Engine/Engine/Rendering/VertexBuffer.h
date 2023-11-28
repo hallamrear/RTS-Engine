@@ -8,15 +8,15 @@ namespace Bennett
 	{
 	private:
 
+		size_t m_Count;
+
 	public:
 		VertexBuffer();
 		~VertexBuffer();
 
-		void Bind() override;
+		const size_t& Count() const;
 
 		static bool Create(VertexBuffer& buffer, const std::vector<Vertex>& vertices);
-
-		//Todo : move to Base buffer object or renderer.
-		static void Destroy(VertexBuffer& buffer);
+		void Bind() override;
 	};
 }

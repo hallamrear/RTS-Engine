@@ -87,10 +87,56 @@ namespace Bennett
 		vkCmdCopyBuffer(cmd, src, dst, 1, &copyRegion);
 
 		renderer.EndSingleTimeCommands(cmd);
+	}	
+
+	bool Buffer::Create(Buffer& buffer, const VkBufferCreateInfo& createInfo, void* bufferData)
+	{
+		size_t bufferSize = createInfo.size;
+
+		if (bufferData == nullptr || bufferSize <= 0)
+		{
+			Log("Invalid buffer data.", LOG_MINIMAL);
+			return false;
+		}
+
+		Renderer& renderer = ServiceLocator::GetRenderer();
+
+		if (vkCreateBuffer(renderer.GetDevice(), &createInfo, nullptr, &buffer.m_Buffer) != VK_SUCCESS)
+		{
+			Log("Failed to create buffer.", LOG_SERIOUS);
+			return false;
+		}
+
+		VkMemoryRequirements memRequirements;
+		vkGetBufferMemoryRequirements(renderer.GetDevice(), buffer.m_Buffer, &memRequirements);
+
+		VkMemoryAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize = memRequirements.size;
+		allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &buffer.m_BufferMemory) != VK_SUCCESS)
+		{
+			Log("Failed to allocate memory for buffer.", LOG_SERIOUS);
+			return false;
+		}
+
+		vkBindBufferMemory(renderer.GetDevice(), buffer.m_Buffer, buffer.m_BufferMemory, 0);
+
+		//Map data to buffer memory
+		void* data;
+		vkMapMemory(renderer.GetDevice(), buffer.m_BufferMemory, 0, createInfo.size, 0, &data);
+		memcpy(data, bufferData, createInfo.size);
+		vkUnmapMemory(renderer.GetDevice(), buffer.m_BufferMemory);
+
+		return true;
 	}
 
-	int Buffer::Count() const
+	void Buffer::Destroy(Buffer& buffer)
 	{
-		return m_Count;
+		Renderer& renderer = ServiceLocator::GetRenderer();
+		vkDestroyBuffer(renderer.GetDevice(), buffer.m_Buffer, nullptr);
+		vkFreeMemory(renderer.GetDevice(), buffer.m_BufferMemory, nullptr);
+		buffer.m_Count = -1;
 	}
 }

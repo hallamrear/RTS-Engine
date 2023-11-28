@@ -19,8 +19,10 @@ namespace Bennett
 		int m_Count;
 		
 	public:
-		int Count() const;
 		virtual void Bind() = 0;
 		static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+
+		static bool Create(Buffer& buffer, const VkBufferCreateInfo& createInfo, void* bufferData);
+		static void Destroy(Buffer& buffer);
 	};
 }

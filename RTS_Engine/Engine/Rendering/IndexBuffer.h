@@ -4,14 +4,21 @@
 
 namespace Bennett
 {
+	typedef unsigned int VertexIndex;
+
 	class BENNETT_ENGINE IndexBuffer : public Buffer
 	{
 	private:
 
-	public:
-		void Bind() override;
+		size_t m_Count;
 
-		static bool Create(IndexBuffer& buffer, const std::vector<unsigned int>& indices);
-		static void Destroy(IndexBuffer& buffer);
+	public:
+		IndexBuffer();
+		~IndexBuffer();
+
+		const size_t& Count() const;
+
+		static bool Create(IndexBuffer& buffer, const std::vector<VertexIndex>& indices);
+		void Bind() override;
 	};
 }
