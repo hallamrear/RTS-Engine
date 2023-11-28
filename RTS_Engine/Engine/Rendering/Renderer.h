@@ -221,13 +221,6 @@ namespace Bennett
 		void CleanupSwapChain();
 		void CleanupSwapChainImageViews();
 
-		//Shaders
-		VkShaderModule m_FragShaderModule;
-		VkShaderModule m_VertShaderModule;
-		static std::vector<char> ReadShaderFile(const std::string& fileName);
-		VkShaderModule CreateShaderModule(const std::string& fileName);
-		void CleanupShaderModule(VkDevice& device, VkShaderModule& module);
-
 		//Render pass
 		VkRenderPass m_RenderPass;
 		bool CreateRenderPass();

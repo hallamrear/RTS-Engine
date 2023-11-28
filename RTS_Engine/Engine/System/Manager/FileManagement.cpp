@@ -1,8 +1,9 @@
 #include <BennettPCH.h>
+#include <commdlg.h>
+#include <filesystem>
+#include <Rendering/Window.h>
 #include <System/Manager/FileManagement.h>
 #include <System/ServiceLocator.h>
-#include <Rendering/Window.h>
-#include <commdlg.h>
 #include <thread>
 
 namespace Bennett
@@ -33,5 +34,38 @@ namespace Bennett
             path = dialogDetails.lpstrFile;
         }
         return result;
+    }
+
+    bool FileManagement::GetListOfFilePathsWithExtension(const std::string& extensionFilter, const std::string& searchPath, const bool& checkAllFolders, std::vector<std::filesystem::path>& listToPopulate)
+    {
+        std::filesystem::path folderPath = searchPath;
+
+        if (std::filesystem::exists(folderPath))
+        {
+            if (checkAllFolders)
+            {
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(folderPath))
+                {
+                    if (entry.path().extension() == extensionFilter)
+                    {
+                        listToPopulate.push_back(entry.path());
+                    }
+                }
+            }
+            else
+            {
+                for (const auto& entry : std::filesystem::directory_iterator(folderPath))
+                {
+                    if (entry.path().extension() == extensionFilter)
+                    {
+                        listToPopulate.push_back(entry.path());
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }

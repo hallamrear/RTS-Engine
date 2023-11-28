@@ -23,6 +23,7 @@ layout(location = 3) in vec4 inColour;
 layout(location = 0) out vec4 outColour;
 layout(location = 1) out vec3 outNormal;
 layout(location = 2) out vec2 outUV;
+
 void main()
 {
 	mat4 MVP =	UBO.Projection * UBO.View * PC.Model;

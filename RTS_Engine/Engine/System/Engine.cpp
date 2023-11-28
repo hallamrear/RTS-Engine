@@ -138,6 +138,7 @@ namespace Bennett
 
 			if (m_EngineControls->GetKeyState(BENNETT_KEY_F9))
 			{
+				ServiceLocator::GetRenderer().RebuildDefaultShaders();
 				ServiceLocator::GetRenderer().RecreateSwapChain();
 			}
 

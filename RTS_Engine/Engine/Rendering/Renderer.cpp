@@ -1,12 +1,13 @@
 #include <BennettPCH.h>
 #include <System/ServiceLocator.h>
+#include <System/Manager/FileManagement.h>
 #include <Rendering/Renderer.h>
 #include <Rendering/Buffer.h>
 #include <Rendering/Texture.h>
 #include <Rendering/Window.h>
 #include <Rendering/Vertex.h>
+#include <Rendering/ShaderLoader.h>
 
-#include <fstream>
 #include <set>
 
 #define INIT_CHECK(func) if(func != true) { m_AttachedWindow = NULL; return false; } 
@@ -186,9 +187,6 @@ namespace Bennett
 
 		CleanupRenderPass(m_Device, m_RenderPass);
 
-		CleanupShaderModule(m_Device, m_FragShaderModule);
-		CleanupShaderModule(m_Device, m_VertShaderModule);
-
 		//Swapchain image creation is handled by the swapchain itself.
 		//so we do not need to clear them up (m_SwapChainImages).
 		vkDestroySwapchainKHR(m_Device, m_SwapChain, nullptr);
@@ -357,8 +355,25 @@ namespace Bennett
 		if (m_BuildShadersAtRuntime)
 		{
 			const std::string& location = ServiceLocator::GetResourceFolderLocation();
-			std::string rebuildShadersCommand = "call " + location + "buildShaders.bat";
-			system(rebuildShadersCommand.c_str());
+			std::vector<std::filesystem::path> shaderPaths = {};
+			FileManagement::GetListOfFilePathsWithExtension(".frag", location, true, shaderPaths);
+			FileManagement::GetListOfFilePathsWithExtension(".vert", location, true, shaderPaths);
+
+			for (auto itr : shaderPaths)
+			{
+				std::cout << itr.string() << std::endl;
+			}
+
+			std::filesystem::path outputLocation = "";
+			std::string rebuildShadersCommand = "";
+
+			for (size_t i = 0; i < shaderPaths.size(); i++)
+			{
+				outputLocation = shaderPaths[i];
+				outputLocation.replace_extension(".spv");
+				rebuildShadersCommand = "%VULKAN_SDK%\\Bin\\glslc.exe " + shaderPaths[i].string() + " -o " + outputLocation.string();
+				system(rebuildShadersCommand.c_str());
+			}
 
 			//todo : load the new vulkan shaders into the pipeline.
 			//Will need to recreate the pipeline using the new objects.
@@ -627,94 +642,63 @@ namespace Bennett
 		framebuffer = VK_NULL_HANDLE;
 	}
 
-	std::vector<char> Renderer::ReadShaderFile(const std::string& fileName)
-	{
-		std::vector<char> readBytes = std::vector<char>();
-		std::ifstream file(fileName, std::ios::binary | std::ios::ate);
 
-		if (!file.is_open())
-		{
-			return readBytes;
-		}
-
-		size_t fileSize = (size_t)file.tellg();
-		readBytes.resize(fileSize);
-		file.seekg(0);
-		file.read(readBytes.data(), fileSize);
-		file.close();
-		return readBytes;
-	}
-
-	VkShaderModule Renderer::CreateShaderModule(const std::string& fileName)
-	{
-		auto shader = ReadShaderFile(fileName.data());
-
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = shader.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(shader.data());
-
-		VkShaderModule module;
-		if (vkCreateShaderModule(m_Device, &createInfo, nullptr, &module) != VK_SUCCESS)
-		{
-			Log("Failed to create shader module.", LOG_SERIOUS);
-		}
-		return module;
-	}
-
-	void Renderer::CleanupShaderModule(VkDevice& device, VkShaderModule& module)
-	{
-		vkDestroyShaderModule(device, module, nullptr);
-		module = VK_NULL_HANDLE;
-	}
 
 	bool Renderer::InitialiseGraphicsPipeline()
 	{
 #pragma region SHADER SETUP
-
 		//Get resource folder location.
 		const std::string& resourceLocation = ServiceLocator::GetResourceFolderLocation();
 
 		RebuildDefaultShaders();
-		m_FragShaderModule = CreateShaderModule("FragmentShader.spv");
-		m_VertShaderModule = CreateShaderModule("VertexShader.spv");
+
+		bool shaderLoadResult = false;
+
+		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultVertex.spv", "DefaultVertex");
+		if (shaderLoadResult != true)
+		{
+			Log("Failed to load default vertex shader for graphics pipeline.", LOG_SERIOUS);
+			return false;
+		}
+
+		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultFragment.spv", "DefaultFragment");
+		if (shaderLoadResult != true)
+		{
+			Log("Failed to load default fragment shader for graphics pipeline.", LOG_SERIOUS);
+			return false;
+		}	
 
 		VkPipelineShaderStageCreateInfo vertexShaderStageInfo{};
 		vertexShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		vertexShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		vertexShaderStageInfo.module = m_VertShaderModule;
-		vertexShaderStageInfo.pName = "main";
+		vertexShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultVertex")->GetVulkanModule();
+		vertexShaderStageInfo.pName = "main"; 
 
 		VkPipelineShaderStageCreateInfo fragmentShaderStageInfo{};
 		fragmentShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 		fragmentShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragmentShaderStageInfo.module = m_FragShaderModule;
+		fragmentShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultFragment")->GetVulkanModule();
 		fragmentShaderStageInfo.pName = "main";
 
 		VkPipelineShaderStageCreateInfo shaderStages[] = { vertexShaderStageInfo, fragmentShaderStageInfo };
 #pragma endregion
 
 #pragma region INPUT ASSEMBLY
-
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		inputAssembly.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		inputAssembly.primitiveRestartEnable = VK_FALSE;
-
 #pragma endregion
 
 #pragma region VERTEX INPUT ASSEMBLY
-
 		auto vertexAttributes = Vertex::GetAttributeDescription();
 		auto vertexBindings = Vertex::GetBindingDescription();
-
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.pVertexAttributeDescriptions = vertexAttributes.data();
 		vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)vertexAttributes.size();
 		vertexInputInfo.pVertexBindingDescriptions = &vertexBindings;
 		vertexInputInfo.vertexBindingDescriptionCount = 1;
-
 #pragma endregion
 
 #pragma region RASTERIZER
@@ -1219,6 +1203,8 @@ namespace Bennett
 			*/
 
 			WaitForRendererIdle();
+
+			ShaderLoader::DumpAll();
 
 			CleanupSampler(m_Device, m_TextureSampler);
 

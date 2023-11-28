@@ -1,0 +1,1 @@
+cd C://Users//ryem_//source//repos//RTS-Engine//RTS_Engine//Resources// && C://Users//ryem_//source//repos//RTS-Engine//RTS_Engine//Resources//buildShaders.bat C://Users//ryem_//source//repos//RTS-Engine//RTS_Engine//Resources//
