@@ -88,7 +88,7 @@ namespace Bennett
 		barrier.subresourceRange.baseArrayLayer = 0;
 		barrier.subresourceRange.layerCount = 1;
 		barrier.dstAccessMask = 0; //todo
-		barrier.srcAccessMask = 0; //todo;
+		barrier.srcAccessMask = 0; //todo;  Our image is not an array and does not have mipmapping levels, so only one level and layer are specified.
 
 		VkPipelineStageFlags sourceStage{};
 		VkPipelineStageFlags destinationStage{};

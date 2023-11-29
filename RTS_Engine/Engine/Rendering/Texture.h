@@ -20,9 +20,8 @@ namespace Bennett
 		uint32_t m_Width;
 		uint32_t m_Height;
 		VkImage m_Image;
-
-		VkDeviceMemory m_ImageMemory;
 		VkImageView m_ImageView;
+		VkDeviceMemory m_ImageMemory;
 
 		void TransitionImageLayout(Renderer& renderer, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 		void CopyBufferToImage(Renderer& renderer, Buffer& buffer, VkImage& image, uint32_t width, uint32_t height);
