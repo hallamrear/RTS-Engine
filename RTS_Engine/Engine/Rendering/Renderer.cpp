@@ -1844,10 +1844,9 @@ namespace Bennett
 				return format;
 			}
 
-			Log("Failed to find format using B8G8R8A8_SRGB AND COLOR_SPACE_SRGB, returning first available format.", LOG_MINIMAL);
-			return formats[0];
 		}
 
+		Log("Failed to find format using B8G8R8A8_SRGB AND COLOR_SPACE_SRGB, returning first available format.", LOG_MINIMAL);
 		return formats[0];
 	}
 
