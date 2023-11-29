@@ -77,15 +77,15 @@ bool Game::Initialise()
     //entity->SetTexture(am.GetTexture("Required/Debug"));
     //entity->AddBroadPhaseCollider(Bennett::ColliderType::AABB, glm::vec3(1.0f));
 
-    entity = GetWorld().SpawnEntity("test", glm::vec3(1.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f));
+    entity = GetWorld().SpawnEntity("test", glm::vec3(1.0f), glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f));
     entity->SetModel(am.GetModel("1x1_Cube"));
-    entity->AddBroadPhaseCollider(Bennett::ColliderType::Sphere, glm::vec3(1.0f));
+    //entity->AddBroadPhaseCollider(Bennett::ColliderType::Sphere, glm::vec3(1.0f));
 
     entity = GetWorld().SpawnTestEntity("testMoveable");
-    entity->SetPosition(glm::vec3(-5.0f, 5.0f, 0.0f));
+    entity->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
     entity->SetModel(am.GetModel("1x1_Cube"));
-    entity->SetTexture(am.GetTexture("red"));
-    entity->AddBroadPhaseCollider(Bennett::ColliderType::Sphere, glm::vec3(1.0f));
+    entity->SetTexture(am.GetTexture("Floor"));
+    //entity->AddBroadPhaseCollider(Bennett::ColliderType::Sphere, glm::vec3(1.0f));
 
     /*for (int i = -10; i < 10; i++)
     {
@@ -109,7 +109,7 @@ bool Game::Initialise()
         return false;
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
-    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(-15.0f, 0.0f, -15.0f));
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
     return true;

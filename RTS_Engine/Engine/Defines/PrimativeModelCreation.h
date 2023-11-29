@@ -20,6 +20,69 @@ namespace Bennett
 
 #pragma region 1x1 Cube
         indices = {
+            //Left
+            0, 1, 2,
+            0, 2, 3,
+            //Right
+            6, 5, 4,
+            7, 6, 4,
+            //Back
+            8, 9, 10,
+            8, 10, 11,
+            //Front
+            14, 13, 12,
+            15, 14, 12,
+            //Top
+            18, 17, 16,
+            19, 18, 16,
+            //Bottom
+            20, 21, 22,
+            20, 22, 23
+        };  
+
+        vertices =
+        {
+            //Face 1 - Right
+            /*00*/ Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3( 0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*01*/ Vertex(glm::vec3(-0.5f,-0.5f, 0.5f), glm::vec3( 0.0f, 0.0f, 1.0f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*02*/ Vertex(glm::vec3( 0.5f,-0.5f, 0.5f), glm::vec3( 0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*03*/ Vertex(glm::vec3( 0.5f, 0.5f, 0.5f), glm::vec3( 0.0f, 0.0f, 1.0f), glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            //Face 2 - Left                                        
+            /*04*/ Vertex(glm::vec3(-0.5f, 0.5f,-0.5f), glm::vec3( 0.0f, 0.0f,-1.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*05*/ Vertex(glm::vec3(-0.5f,-0.5f,-0.5f), glm::vec3( 0.0f, 0.0f,-1.0f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*06*/ Vertex(glm::vec3( 0.5f,-0.5f,-0.5f), glm::vec3( 0.0f, 0.0f,-1.0f), glm::vec2(0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*07*/ Vertex(glm::vec3( 0.5f, 0.5f,-0.5f), glm::vec3( 0.0f, 0.0f,-1.0f), glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            //Face 3 - Back
+            /*08*/ Vertex(glm::vec3( 0.5f, 0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*09*/ Vertex(glm::vec3( 0.5f,-0.5f, 0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*10*/ Vertex(glm::vec3( 0.5f,-0.5f,-0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*11*/ Vertex(glm::vec3( 0.5f, 0.5f,-0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            //Face 4 - Front
+            /*12*/ Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*13*/ Vertex(glm::vec3(-0.5f,-0.5f, 0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*14*/ Vertex(glm::vec3(-0.5f,-0.5f,-0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*15*/ Vertex(glm::vec3(-0.5f, 0.5f,-0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            //Face 5 - Top
+            /*16*/ Vertex(glm::vec3( 0.5f, 0.5f, 0.5f), glm::vec3( 0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*17*/ Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3( 0.0f, 1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*18*/ Vertex(glm::vec3(-0.5f, 0.5f,-0.5f), glm::vec3( 0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*19*/ Vertex(glm::vec3( 0.5f, 0.5f,-0.5f), glm::vec3( 0.0f, 1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            //Face 6 - Bottom
+            /*16*/ Vertex(glm::vec3( 0.5f,-0.5f, 0.5f), glm::vec3( 0.0f,-1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*17*/ Vertex(glm::vec3(-0.5f,-0.5f, 0.5f), glm::vec3( 0.0f,-1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*18*/ Vertex(glm::vec3(-0.5f,-0.5f,-0.5f), glm::vec3( 0.0f,-1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+            /*19*/ Vertex(glm::vec3( 0.5f,-0.5f,-0.5f), glm::vec3( 0.0f,-1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),
+
+        };
+
+        am.CreateModel("1x1_Cube", vertices, indices);
+        vertices.clear();
+        indices.clear();
+#pragma endregion
+
+
+#pragma region 1x1 Cube Solid
+        indices = {
             4, 2, 0,
             2, 7, 3,
             6, 5, 7,
@@ -34,18 +97,18 @@ namespace Bennett
             4, 0, 1
         };
 
-        vertices = {
-            Vertex(glm::vec3( 0.5f, 0.5f,-0.5f), glm::vec3( 0.5773502691896258f, 0.5773502691896258f,-0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //0 
-            Vertex(glm::vec3( 0.5f,-0.5f,-0.5f), glm::vec3( 0.5773502691896258f,-0.5773502691896258f,-0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //1 
-            Vertex(glm::vec3( 0.5f, 0.5f, 0.5f), glm::vec3( 0.5773502691896258f, 0.5773502691896258f, 0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //2
-            Vertex(glm::vec3( 0.5f,-0.5f, 0.5f), glm::vec3( 0.5773502691896258f,-0.5773502691896258f, 0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //3
-            Vertex(glm::vec3(-0.5f, 0.5f,-0.5f), glm::vec3(-0.5773502691896258f, 0.5773502691896258f,-0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //4  
-            Vertex(glm::vec3(-0.5f,-0.5f,-0.5f), glm::vec3(-0.5773502691896258f,-0.5773502691896258f,-0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //5  
-            Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(-0.5773502691896258f, 0.5773502691896258f, 0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //6 
-            Vertex(glm::vec3(-0.5f,-0.5f, 0.5f), glm::vec3(-0.5773502691896258f,-0.5773502691896258f, 0.5773502691896258f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))   //7 
+        vertices = {                             
+            Vertex(glm::vec3( 0.5f, 0.5f,-0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //0 
+            Vertex(glm::vec3( 0.5f,-0.5f,-0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //1 
+            Vertex(glm::vec3( 0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //2
+            Vertex(glm::vec3( 0.5f,-0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //3
+            Vertex(glm::vec3(-0.5f, 0.5f,-0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //4  
+            Vertex(glm::vec3(-0.5f,-0.5f,-0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //5  
+            Vertex(glm::vec3(-0.5f, 0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)),  //6 
+            Vertex(glm::vec3(-0.5f,-0.5f, 0.5f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(), glm::vec4(1.0f, 1.0f, 1.0f, 1.0f))   //7 
         };
 
-        am.CreateModel("1x1_Cube", vertices, indices);
+        am.CreateModel("1x1_Cube_Solid", vertices, indices);
         vertices.clear();
         indices.clear();
 #pragma endregion

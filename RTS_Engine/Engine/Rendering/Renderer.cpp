@@ -870,6 +870,7 @@ namespace Bennett
 			return false;
 		}
 
+		rasterizer.cullMode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
 		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_WireframeGraphicsPipeline) != VK_SUCCESS)
 		{
