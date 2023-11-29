@@ -1,6 +1,5 @@
 #pragma once
 #include <Rendering/Buffer.h>
-#include <Rendering/Renderer.h>
 
 namespace Bennett
 {
@@ -9,7 +8,6 @@ namespace Bennett
 	class BENNETT_ENGINE IndexBuffer : public Buffer
 	{
 	private:
-
 		size_t m_Count;
 
 	public:

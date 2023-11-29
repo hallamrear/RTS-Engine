@@ -1,4 +1,5 @@
 #include <BennettPCH.h>
+#include <Rendering/Renderer.h>
 #include <Rendering/IndexBuffer.h>
 #include <System/ServiceLocator.h>
 
@@ -43,11 +44,10 @@ namespace Bennett
             buffer.m_Count = indices.size();
         }
 
-        if (!result)
+        if (result == FALSE)
         {
             Log(LOG_MINIMAL, "Failed to create index buffer.\n");
         }
-
 
         return result;
     }

@@ -11,10 +11,10 @@ namespace Bennett
 	{
 	private:
 		VertexBuffer m_VertexBuffer;
-		IndexBuffer m_IndexBuffer;
+		IndexBuffer  m_IndexBuffer;
 
 	public:
-		Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+		Mesh(const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices);
 		~Mesh();
 
 		void Render(const Renderer& renderer);

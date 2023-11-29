@@ -1,9 +1,10 @@
 #include <BennettPCH.h>
 #include <Rendering/Mesh.h>
+#include <Rendering/Renderer.h>
 
 namespace Bennett
 {
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices)
 	{
 		if (VertexBuffer::Create(m_VertexBuffer, vertices) == false)
 		{

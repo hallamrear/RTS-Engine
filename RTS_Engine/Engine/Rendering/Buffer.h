@@ -8,20 +8,21 @@ namespace Bennett
 	private:
 		
 	protected:
-		Buffer();
-		~Buffer();
-
-		static bool CreateGenericBuffer(const VkDeviceSize& deviceSize, const VkBufferUsageFlags& usageFlags, const VkMemoryPropertyFlags& properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
-		static void CopyBuffers(VkBuffer src, VkBuffer dst, size_t size);
-
 		VkBuffer m_Buffer;
 		VkDeviceMemory m_BufferMemory;
 		int m_Count;
 		
 	public:
-		virtual void Bind() = 0;
+		Buffer();
+		~Buffer();
+
+		VkBuffer& Object();
+		VkDeviceMemory& Memory();
+
+		virtual void Bind();
 		static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
 
+		static void Copy(VkBuffer& src, const VkBuffer& dst, const size_t& size);
 		static bool Create(Buffer& buffer, const VkBufferCreateInfo& createInfo, void* bufferData);
 		static void Destroy(Buffer& buffer);
 	};

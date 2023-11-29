@@ -11,6 +11,7 @@ enum VkImageLayout;
 namespace Bennett
 {
 	class Renderer;
+	class Buffer;
 
 	class BENNETT_ENGINE Texture
 	{
@@ -19,14 +20,12 @@ namespace Bennett
 		uint32_t m_Width;
 		uint32_t m_Height;
 		VkImage m_Image;
+
 		VkDeviceMemory m_ImageMemory;
 		VkImageView m_ImageView;
 
-		bool CreateStagingBuffer(const Renderer& renderer, VkBuffer& stagingBuffer, VkDeviceMemory& bufferMemory, const VkDeviceSize& imageSize);
-		bool CreateImage(const Renderer& renderer, const uint32_t& width, const uint32_t& height);
-		bool CreateImageView(const Renderer& renderer, VkImageView& imageView, const VkImage& image, const VkFormat& format);
 		void TransitionImageLayout(Renderer& renderer, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-		void CopyBufferToImage(Renderer& renderer, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
+		void CopyBufferToImage(Renderer& renderer, Buffer& buffer, VkImage& image, uint32_t width, uint32_t height);
 
 	protected:
 

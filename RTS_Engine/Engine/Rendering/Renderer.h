@@ -30,6 +30,8 @@ namespace Bennett
 	class BENNETT_ENGINE Renderer
 	{
 	private:
+		friend class Texture;
+
 		const Window* m_AttachedWindow;
 
 		RENDERER_DRAW_MODE m_DrawMode;
@@ -145,13 +147,43 @@ namespace Bennett
 		//Validation Layers
 		bool CheckValidationLayerSupport();
 
-		bool CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-		bool CreateImageView(VkImageView& imageView, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+		/// <summary>
+		/// Creates a VkImage
+		/// todo : finish
+		/// </summary>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		/// <param name="format"></param>
+		/// <param name="tiling"></param>
+		/// <param name="usage"></param>
+		/// <param name="properties"></param>
+		/// <param name="image"></param>
+		/// <param name="imageMemory"></param>
+		/// <returns></returns>
+		bool CreateImage(VkImage& image, VkDeviceMemory& imageMemory, const VkImageCreateInfo& createInfo);
 
 		/// <summary>
 		/// Destroys a VkImage.
 		/// </summary>
 		void CleanupImage(VkDevice& device, VkImage& image);
+
+		/// <summary>
+		/// Creates a VkImageView
+		/// todo : finish
+		/// </summary>
+		/// <param name="imageView"></param>
+		/// <param name="image"></param>
+		/// <param name="format"></param>
+		/// <param name="aspectFlags"></param>
+		/// <returns></returns>
+		bool CreateImageView(VkImageView& imageView, const VkImageViewCreateInfo& createInfo);
+
+		/// <summary>
+		/// Destroys a VkImageView.
+		/// </summary>
+		/// <param name="device"></param>
+		/// <param name="imageView"></param>
+		void CleanupImageView(VkDevice& device, VkImageView& imageView);
 
 		//Depth/Stencil
 		VkImage m_DepthImage;
@@ -314,13 +346,6 @@ namespace Bennett
 		void FreeDeviceMemory(VkDevice& device, VkDeviceMemory& memory);
 
 		/// <summary>
-		/// Destroys a VkImageView.
-		/// </summary>
-		/// <param name="device"></param>
-		/// <param name="imageView"></param>
-		void CleanupImageView(VkDevice& device, VkImageView& imageView);
-
-		/// <summary>
 		/// Destroys a VkBuffer.
 		/// </summary>
 		/// <param name="device"></param>
@@ -351,6 +376,7 @@ namespace Bennett
 		const VkQueue& GetGraphicsQueue() const;
 
 		Renderer();
+		~Renderer();
 
 		bool Initialise(const Window& renderWindow);
 		void Shutdown();
@@ -375,7 +401,5 @@ namespace Bennett
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 		void RebuildDefaultShaders() const;
-		
-		~Renderer();
 	};
 }

@@ -1,6 +1,8 @@
 #include <BennettPCH.h>
 #include <Defines/BennettDefines.h>
 #include <Rendering/Renderer.h>
+#include <Rendering/Texture.h>
+#include <Rendering/Model.h>
 #include <System/Loader/ModelLoader.h>
 #include <System/Loader/TextureLoader.h>
 #include <System/Manager/AssetManager.h>

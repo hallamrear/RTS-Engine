@@ -61,104 +61,6 @@ namespace Bennett
 		return m_ImageView;
 	}
 
-	bool Texture::CreateStagingBuffer(const Renderer& renderer, VkBuffer& stagingBuffer, VkDeviceMemory& bufferMemory, const VkDeviceSize& imageSize)
-	{
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = imageSize;
-		bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		if (vkCreateBuffer(renderer.GetDevice(), &bufferInfo, nullptr, &stagingBuffer) != VK_SUCCESS)
-		{
-			Log("Failed to create texture staging buffer", LOG_SERIOUS);
-			return false;
-		}
-
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(renderer.GetDevice(), stagingBuffer, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-
-		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-		{
-			Log("Failed to allocate memory for texture.", LOG_SERIOUS);
-			return false;
-		}
-
-		vkBindBufferMemory(renderer.GetDevice(), stagingBuffer, bufferMemory, 0);
-
-		return true;
-	}
-
-	bool Texture::CreateImage(const Renderer& renderer, const uint32_t& width, const uint32_t& height)
-	{
-		VkImageCreateInfo imageInfo{};
-		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = width;
-		imageInfo.extent.height = height;
-		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = 1;
-		imageInfo.arrayLayers = 1;
-		imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.flags = 0; 
-
-		if (vkCreateImage(renderer.GetDevice(), &imageInfo, nullptr, &m_Image) != VK_SUCCESS)
-		{
-			Log("Failed to create an image.", LOG_SERIOUS);
-			return false;
-		}
-
-		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(renderer.GetDevice(), m_Image, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &m_ImageMemory) != VK_SUCCESS) 
-		{
-			Log("Failed to allocate image memory", LOG_SERIOUS);
-			return false;
-		}
-
-		vkBindImageMemory(renderer.GetDevice(), m_Image, m_ImageMemory, 0);
-		
-		return true;
-	}
-
-	bool Texture::CreateImageView(const Renderer& renderer, VkImageView& imageView, const VkImage& image, const VkFormat& format)
-	{
-		VkImageViewCreateInfo viewInfo{};
-		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image = image;
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.format = format;
-		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
-		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = 1;
-
-		if (vkCreateImageView(renderer.GetDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
-		{
-			Log("Failed to create texture image view", LOG_SERIOUS);
-			return true;
-		}
-		
-		return true;
-	}
-
 	void Texture::TransitionImageLayout(Renderer& renderer, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 	{
 		VkCommandBuffer cmd = renderer.BeginSingleTimeCommands();
@@ -218,7 +120,7 @@ namespace Bennett
 		renderer.EndSingleTimeCommands(cmd);
 	}
 
-	void Texture::CopyBufferToImage(Renderer& renderer, VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height)
+	void Texture::CopyBufferToImage(Renderer& renderer, Buffer& buffer, VkImage& image, uint32_t width, uint32_t height)
 	{
 		VkCommandBuffer cmdBuffer = renderer.BeginSingleTimeCommands();
 
@@ -227,7 +129,6 @@ namespace Bennett
 		region.bufferOffset = 0;
 		region.bufferRowLength = 0;
 		region.bufferImageHeight = 0;
-
 		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		region.imageSubresource.mipLevel = 0;
 		region.imageSubresource.baseArrayLayer = 0;
@@ -241,7 +142,7 @@ namespace Bennett
 		};
 
 		//Buffer to image copt operations are enqueued using this.
-		vkCmdCopyBufferToImage(cmdBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+		vkCmdCopyBufferToImage(cmdBuffer, buffer.Object(), image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
 		renderer.EndSingleTimeCommands(cmdBuffer);
 	}
@@ -262,26 +163,42 @@ namespace Bennett
 			return;
 		}
 
+		bool result = false;
+
 		//Creating staging buffer
-		VkBuffer stagingBuffer;
-		VkDeviceMemory bufferMemory;
-		
-		bool result = texture.CreateStagingBuffer(renderer, stagingBuffer, bufferMemory, imageSize);
+		Buffer stagingBuffer;
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = imageSize;
+		bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		result = Buffer::Create(stagingBuffer, bufferInfo, pixels);
 		if (result == false)
 		{
-			Log("Failed to create texture properly.", LOG_SERIOUS);
+			Log("Failed to create staging properly.", LOG_SERIOUS);
 			return;
 		}
-		
-		void* data;
-		vkMapMemory(renderer.GetDevice(), bufferMemory, 0, imageSize, 0, &data);
-		memcpy(data, pixels, imageSize);
-		vkUnmapMemory(renderer.GetDevice(), bufferMemory);
 
 		//Free up pixels from stb_image
 		stbi_image_free(pixels);
 
-		result = texture.CreateImage(renderer, width, height);
+		VkImageCreateInfo imageInfo{};
+		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageInfo.extent.width = width;
+		imageInfo.extent.height = height;
+		imageInfo.extent.depth = 1;
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = 1;
+		imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageInfo.flags = 0;
+
+		result = renderer.CreateImage(texture.m_Image, texture.m_ImageMemory, imageInfo);
 		if (result == false)
 		{
 			Log("Failed to create texture properly.", LOG_SERIOUS);
@@ -292,13 +209,23 @@ namespace Bennett
 		texture.CopyBufferToImage(renderer, stagingBuffer, texture.m_Image, width, height);
 		texture.TransitionImageLayout(renderer, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		vkDestroyBuffer(renderer.GetDevice(), stagingBuffer, nullptr);
-		vkFreeMemory(renderer.GetDevice(), bufferMemory, nullptr);
+		Buffer::Destroy(stagingBuffer);
 		
-		result = texture.CreateImageView(renderer, texture.m_ImageView, texture.m_Image, VK_FORMAT_R8G8B8A8_SRGB);
+		VkImageViewCreateInfo viewInfo{};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = texture.m_Image;
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+
+		result = renderer.CreateImageView(texture.m_ImageView, viewInfo);
 		if (result == false)
 		{
-			Log("Failed to create texture properly.", LOG_SERIOUS);
+			Log("Failed to create texture image view properly.", LOG_SERIOUS);
 			return;
 		}
 

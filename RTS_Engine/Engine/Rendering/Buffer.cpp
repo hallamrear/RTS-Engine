@@ -18,6 +18,21 @@ namespace Bennett
 		//todo : destroy
 	}
 
+	VkBuffer& Buffer::Object()
+	{
+		return m_Buffer;
+	}
+
+	VkDeviceMemory& Buffer::Memory()
+	{
+		return m_BufferMemory;
+	}
+
+	void Buffer::Bind()
+	{
+		return;
+	}
+
 	uint32_t Buffer::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags)
 	{
 		VkPhysicalDeviceMemoryProperties memoryProperties;
@@ -35,65 +50,12 @@ namespace Bennett
 		Log("Failed to find a suitable memory type", LOG_CRITICAL);
 		return 0;
 	}
-
-	bool Buffer::CreateGenericBuffer(
-		const VkDeviceSize& deviceSize,
-		const VkBufferUsageFlags& usageFlags, 
-		const VkMemoryPropertyFlags& properties, 
-		VkBuffer& buffer, VkDeviceMemory& bufferMemory)
-	{
-		Renderer& renderer = ServiceLocator::GetRenderer();
-		//Create buffer object
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = deviceSize;
-		bufferInfo.usage = usageFlags;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		if (vkCreateBuffer(renderer.GetDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-		{
-			Log("Failed to create vertex buffer.", LOG_SERIOUS);
-			return false;
-		}
-
-		//Allocate memory
-		VkMemoryRequirements memoryRequirements;
-		vkGetBufferMemoryRequirements(renderer.GetDevice(), buffer, &memoryRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memoryRequirements.size;
-		allocInfo.memoryTypeIndex = Buffer::FindMemoryType(memoryRequirements.memoryTypeBits, properties);
-
-		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-		{
-			Log("Failed to allocate memory for a vertex buffer.", LOG_CRITICAL);
-			return false;
-		}
-
-		//Filling the buffer memory.
-		vkBindBufferMemory(renderer.GetDevice(), buffer, bufferMemory, 0);
-		return true; 
-	}
-
-	void Buffer::CopyBuffers(VkBuffer src, VkBuffer dst, size_t size)
-	{
-		Renderer& renderer = ServiceLocator::GetRenderer();
-
-		VkCommandBuffer cmd = renderer.BeginSingleTimeCommands();
-
-		VkBufferCopy copyRegion{};
-		copyRegion.size = size;
-		vkCmdCopyBuffer(cmd, src, dst, 1, &copyRegion);
-
-		renderer.EndSingleTimeCommands(cmd);
-	}	
-
+	
 	bool Buffer::Create(Buffer& buffer, const VkBufferCreateInfo& createInfo, void* bufferData)
 	{
 		size_t bufferSize = createInfo.size;
 
-		if (bufferData == nullptr || bufferSize <= 0)
+		if (bufferSize <= 0)
 		{
 			Log("Invalid buffer data.", LOG_MINIMAL);
 			return false;
@@ -123,11 +85,14 @@ namespace Bennett
 
 		vkBindBufferMemory(renderer.GetDevice(), buffer.m_Buffer, buffer.m_BufferMemory, 0);
 
-		//Map data to buffer memory
-		void* data;
-		vkMapMemory(renderer.GetDevice(), buffer.m_BufferMemory, 0, createInfo.size, 0, &data);
-		memcpy(data, bufferData, createInfo.size);
-		vkUnmapMemory(renderer.GetDevice(), buffer.m_BufferMemory);
+		if (bufferData != nullptr)
+		{
+			//Map data to buffer memory
+			void* data;
+			vkMapMemory(renderer.GetDevice(), buffer.m_BufferMemory, 0, createInfo.size, 0, &data);
+			memcpy(data, bufferData, createInfo.size);
+			vkUnmapMemory(renderer.GetDevice(), buffer.m_BufferMemory);
+		}
 
 		return true;
 	}
@@ -138,5 +103,15 @@ namespace Bennett
 		vkDestroyBuffer(renderer.GetDevice(), buffer.m_Buffer, nullptr);
 		vkFreeMemory(renderer.GetDevice(), buffer.m_BufferMemory, nullptr);
 		buffer.m_Count = -1;
+	}
+
+	void Buffer::Copy(VkBuffer& src, const VkBuffer& dst, const size_t& size)
+	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
+		VkCommandBuffer cmd = renderer.BeginSingleTimeCommands();
+		VkBufferCopy copyRegion{};
+		copyRegion.size = size;
+		vkCmdCopyBuffer(cmd, src, dst, 1, &copyRegion);
+		renderer.EndSingleTimeCommands(cmd);
 	}
 }

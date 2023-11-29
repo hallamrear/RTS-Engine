@@ -1,5 +1,6 @@
 #include <BennettPCH.h>
 #include <Rendering/Model.h>
+#include <Rendering/Renderer.h>
 
 namespace Bennett
 {
