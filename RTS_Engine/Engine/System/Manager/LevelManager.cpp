@@ -31,7 +31,7 @@ namespace Bennett
         {
             Entity* floor = world.SpawnEntity("tank");
             floor->SetModel(AssetManager::GetModel("tank"));
-            floor->SetTexture(AssetManager::GetTexture("tank"));
+            floor->GetModel()->SetTexture(AssetManager::GetTexture("tank"));
             floor->SetPosition(glm::vec3(5.0f, 0.0f, 5.0f));
             floor->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
         }

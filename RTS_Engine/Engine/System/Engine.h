@@ -28,7 +28,7 @@ namespace Bennett
 		static Engine* GetEngineInstance();
 
 		void ProcessInput(const float& DeltaTime);
-		void Update(float DeltaTime);
+		void Update(const float& DeltaTime);
 		void Render();
 
 		inline bool IsRunning() const { return m_IsRunning; };

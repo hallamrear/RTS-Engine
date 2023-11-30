@@ -33,7 +33,6 @@ namespace Bennett
 						0.0f,
 						k * offset));
 				m_Chunks.back()->BuildChunk();
-				m_Chunks.back()->SetTexture(ServiceLocator::GetAssetManager().GetTexture("Floor"));
 			}
 		}
 

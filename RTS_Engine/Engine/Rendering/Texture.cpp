@@ -19,17 +19,18 @@ namespace Bennett
 		m_ImageMemory = NULL;
 		m_Height = -1;
 		m_Width = -1;
-		m_TextureID = -1;
 		m_ImageView = VkImageView{};
+		m_IsLoaded = false;
 	}
 
 	Texture::~Texture()
 	{
-		//Renderer& renderer = ServiceLocator::GetRenderer();
-		//vkDestroyImage(renderer.GetDevice(), m_Image, nullptr);
-		//vkFreeMemory(renderer.GetDevice(), m_ImageMemory, nullptr);
-		//vkDestroyImageView(renderer.GetDevice(), m_ImageView, nullptr);
-		//m_TextureID = -1;
+
+	}
+
+	const bool& Texture::Loaded() const
+	{
+		return m_IsLoaded;
 	}
 
 	const uint32_t& Texture::GetWidth() const
@@ -42,10 +43,6 @@ namespace Bennett
 		return m_Height;
 	}
 
-	const uint32_t& Texture::GetID() const
-	{
-		return m_TextureID;
-	}
 	const VkImage& Texture::GetImage() const
 	{
 		return m_Image;
@@ -231,6 +228,15 @@ namespace Bennett
 
 		texture.m_Width = width;
 		texture.m_Height = height;
-		texture.m_TextureID = TextureLoader::m_TextureIDCounter + 1;
+		texture.m_IsLoaded = true;
+	}
+
+	void Texture::Destroy(Texture& texture)
+	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
+		vkDestroyImage(renderer.GetDevice(), texture.m_Image, nullptr);
+		vkFreeMemory(renderer.GetDevice(), texture.m_ImageMemory, nullptr);
+		vkDestroyImageView(renderer.GetDevice(), texture.m_ImageView, nullptr);
+		texture.m_IsLoaded = false;
 	}
 }

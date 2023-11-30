@@ -1,7 +1,5 @@
 #include <BennettPCH.h>
 #include <World/Entity.h>
-#include <Rendering/Model.h>
-#include <Rendering/Texture.h>
 #include <Collision/Collider/Collider.h>
 #include <Collision/Collider/SphereCollider.h>
 #include <Collision/Collider/AABBCollider.h>
@@ -36,7 +34,6 @@ namespace Bennett
 
 		//Model and Texture destruction is done by the AssetManager
 		m_Model = nullptr;
-		m_Texture = nullptr;
 	}
 
 	void Entity::Update(const float& deltaTime)
@@ -55,11 +52,6 @@ namespace Bennett
 		glm::mat4 translate = glm::translate(matrix, m_Position);
 		matrix = translate * rotate * scale;
 		renderer.PushModelMatrix(matrix);
-	
-		if (m_Texture)
-		{
-			renderer.PushTextureID(m_Texture->GetID());
-		}
 
 		if (m_Model != nullptr)
 		{
@@ -72,14 +64,9 @@ namespace Bennett
 		}
 	}
 
-	void Entity::SetModel(const Model* model)
+	void Entity::SetModel(Model* model)
 	{
 		m_Model = model;
-	}
-
-	void Entity::SetTexture(const Texture* texture)
-	{
-		m_Texture = texture;
 	}
 
 	const std::string& Entity::GetName() const

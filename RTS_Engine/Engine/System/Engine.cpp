@@ -33,7 +33,7 @@ namespace Bennett
 		Destroy();
 	}
 	
-	void Engine::Update(float DeltaTime)
+	void Engine::Update(const float& DeltaTime)
 	{
 		if (ENABLE_LOG_DELTATIME_AND_FPS)
 		{

@@ -23,8 +23,8 @@ namespace Bennett
 	struct BENNETT_ENGINE PushConstantBuffer
 	{
 		glm::mat4 ModelMatrix;
-		int TextureID;
-		int Padding[3];
+		float deltaTime;
+		float padding[3];
 	};
 
 	class BENNETT_ENGINE Renderer
@@ -33,6 +33,7 @@ namespace Bennett
 		friend class Texture;
 
 		const Window* m_AttachedWindow;
+		Texture* m_DebugTexture;
 
 		RENDERER_DRAW_MODE m_DrawMode;
 
@@ -46,7 +47,10 @@ namespace Bennett
 		const std::vector<const char*> m_DeviceExtensions =
 		{
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-			"VK_EXT_line_rasterization"
+			VK_EXT_LINE_RASTERIZATION_EXTENSION_NAME,
+			VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
+			"VK_EXT_descriptor_indexing"			
+
 		};
 
 		struct QueueFamilyIndices
@@ -268,6 +272,7 @@ namespace Bennett
 
 		//Descriptor layout
 		VkDescriptorSetLayout m_DescriptorSetLayout;
+		bool UpdateDescriptorSets(const Texture* texture) const;
 		VkDescriptorPool m_DescriptorPool;
 		bool CreateDescriptorLayout();
 		void CleanupDescriptorLayout(VkDevice& device, VkDescriptorSetLayout& layout);
@@ -281,7 +286,7 @@ namespace Bennett
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 
 		//Framebuffers
-		int m_CurrentRenderFrame = 0;
+		int m_CurrentRenderFrame;
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		bool CreateFrameBuffers();
@@ -389,9 +394,9 @@ namespace Bennett
 		void StartFrame();
 		void BindDescriptorSet() const;
 		void UpdateUniformBuffers() const;
-		bool UpdateDescriptorSets(const std::vector<Texture*>& textureList);
+		void PushDescriptorSet(const Texture* texture) const;
 		void PushModelMatrix(const glm::mat4& modelMatrix) const;
-		void PushTextureID(const int& texID) const;
+		void UpdatePushConstantDeltaTime(const float& deltaTime) const;
 		void EndFrame();
 
 		void SetDrawMode(const RENDERER_DRAW_MODE& mode);

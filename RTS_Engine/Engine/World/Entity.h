@@ -1,13 +1,13 @@
 #pragma once
 #include <Defines/BennettDefines.h>
 #include <glm/gtx/quaternion.hpp>
+#include <Rendering/Model.h>
 #include <string>
 
 namespace Bennett
 {
 	enum class ColliderType;
 	class Model;
-	class Texture;
 	class Renderer;
 	class Collider;
 
@@ -21,8 +21,7 @@ namespace Bennett
 		glm::vec3 m_ForwardVector;
 		glm::vec3 m_RightVector;
 		glm::vec3 m_UpVector;
-		const Model* m_Model;
-		const Texture* m_Texture;
+		Model* m_Model;
 		Collider* m_Collider;
 
 	protected:
@@ -49,18 +48,15 @@ namespace Bennett
 		inline const glm::quat& GetRotation()      const { return m_Rotation; };
 		inline const glm::vec3 GetRotationEulerRadians() const { return glm::eulerAngles(m_Rotation); };
 		inline const glm::vec3 GetRotationEulerDegrees() const { return glm::degrees(glm::eulerAngles(m_Rotation)); };
-		inline const glm::vec3& GetScale()		   const { return m_Scale; };
-		inline const Model& GetModel()			   const { return *m_Model; };
-		inline const Texture& GetTexture()		   const { return *m_Texture; };
+		inline const glm::vec3& GetScale() const { return m_Scale; };
+		inline Model* GetModel() { return m_Model; };
 
 		inline void SetPosition(const glm::vec3& position) { m_Position = position; };
 		inline void SetRotation(const glm::quat& quaternion) { m_Rotation = quaternion; };
 		inline void SetRotationEuler(const glm::vec3& eulerAngles) { m_Rotation = glm::quat(eulerAngles); };
 		inline void SetScale(const glm::vec3& scale) { m_Scale = scale; };
-		void SetModel(const Model* model);
+		void SetModel(Model* model);
 		bool HasModel()   const { return m_Model != nullptr; };
-		void SetTexture(const Texture* texture);
-		bool HasTexture() const { return m_Texture != nullptr; };
 
 		Collider* GetCollider() const { if (m_Collider) return m_Collider; else return nullptr; };
 		bool HasCollider()  const { return m_Model != nullptr; };

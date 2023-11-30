@@ -37,6 +37,7 @@ namespace Bennett
         {
             if (textureItr->second)
             {
+                Texture::Destroy(*textureItr->second);
                 delete textureItr->second;
                 textureItr->second = nullptr;
             }
@@ -121,8 +122,6 @@ namespace Bennett
             
             textures.push_back(tex.second);
         }
-
-        ServiceLocator::GetRenderer().UpdateDescriptorSets(textures);
 
         return texture;
     }

@@ -11,11 +11,17 @@
 #include <set>
 
 #define INIT_CHECK(func) if(func != true) { m_AttachedWindow = NULL; return false; } 
+#define DESCRIPTOR_COUNT 2
 
 namespace Bennett
 {
 	UniformBufferObject Renderer::UniformMatrixBuffer = UniformBufferObject();
 	PushConstantBuffer Renderer::m_PushConstantBuffer = PushConstantBuffer();
+
+	/// <summary>
+	/// Function comes from an extension 'VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME' so we need a variable to store the func addr.
+	/// </summary>
+	PFN_vkCmdPushDescriptorSetKHR vkCmdPushDescriptorSetKHR;
 
 	Renderer::Renderer()
 	{
@@ -31,6 +37,8 @@ namespace Bennett
 		m_IsInitialised = false;
 		m_Instance = nullptr;
 		m_AttachedWindow = nullptr;
+		m_CurrentRenderFrame = 0;
+		m_DebugTexture = new Texture();
 	}
 
 	Renderer::~Renderer()
@@ -39,6 +47,9 @@ namespace Bennett
 		{
 			Shutdown();
 		}
+
+		delete m_DebugTexture;
+		m_DebugTexture = nullptr;
 	}
 
 	bool Renderer::Initialise(const Window& renderWindow)
@@ -61,21 +72,16 @@ namespace Bennett
 		INIT_CHECK(CreateCommandPool())
 		INIT_CHECK(CreateTextureSampler())
 		INIT_CHECK(CreateDescriptorLayout())
-		INIT_CHECK(CreateDescriptorPool())
 		INIT_CHECK(InitialiseGraphicsPipeline())
 		INIT_CHECK(CreateUniformBuffers())
-		INIT_CHECK(AllocateDescriptorSets())
-
-		Texture texture, texture2;
-		Texture::Create(texture,  ServiceLocator::GetResourceFolderLocation() + "Required/debug.png");
-		Texture::Create(texture2, ServiceLocator::GetResourceFolderLocation() + "Required/cat.png");
-		std::vector<Texture*> list;
-		list.push_back(&texture);
-		list.push_back(&texture2);
-
-		INIT_CHECK(UpdateDescriptorSets(list))
 		INIT_CHECK(CreateCommandBuffer())
 		INIT_CHECK(CreateSyncObjects())
+
+		if (m_DebugTexture->Loaded())
+		{
+			Texture::Destroy(*m_DebugTexture);
+		}
+		Texture::Create(*m_DebugTexture, ServiceLocator::GetResourceFolderLocation() + "Required/debug.png");
 
 		return true;
 	}
@@ -133,8 +139,6 @@ namespace Bennett
 			return false;
 		}
 
-		BindDescriptorSet();
-
 		vkCmdSetViewport(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_Viewport);
 		vkCmdSetScissor(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_ScissorRect);
 
@@ -143,6 +147,9 @@ namespace Bennett
 
 	void Renderer::BindDescriptorSet() const
 	{
+		Log("Binding descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		return;
+
 		vkCmdBindDescriptorSets(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSets[m_CurrentRenderFrame], 0, nullptr);
 	}
 
@@ -287,7 +294,6 @@ namespace Bennett
 
 		BeginRenderPass();
 
-
 		switch (m_DrawMode)
 		{
 		case Bennett::SOLID:
@@ -361,7 +367,7 @@ namespace Bennett
 			FileManagement::GetListOfFilePathsWithExtension(".frag", location, true, shaderPaths);
 			FileManagement::GetListOfFilePathsWithExtension(".vert", location, true, shaderPaths);
 
-			for (auto itr : shaderPaths)
+			for (std::filesystem::path& itr : shaderPaths)
 			{
 				std::cout << itr.string() << std::endl;
 			}
@@ -414,9 +420,9 @@ namespace Bennett
 		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
 	}
 
-	void Renderer::PushTextureID(const int& texID) const
+	void Renderer::UpdatePushConstantDeltaTime(const float& deltaTime) const
 	{
-		m_PushConstantBuffer.TextureID = texID;
+		m_PushConstantBuffer.deltaTime = deltaTime;
 		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
 	}
 
@@ -644,241 +650,238 @@ namespace Bennett
 		framebuffer = VK_NULL_HANDLE;
 	}
 
-
-
 	bool Renderer::InitialiseGraphicsPipeline()
 	{
-#pragma region SHADER SETUP
-		//Get resource folder location.
-		const std::string& resourceLocation = ServiceLocator::GetResourceFolderLocation();
+		#pragma region SHADER SETUP
+				//Get resource folder location.
+				const std::string& resourceLocation = ServiceLocator::GetResourceFolderLocation();
 
-		RebuildDefaultShaders();
+				RebuildDefaultShaders();
 
-		bool shaderLoadResult = false;
+				bool shaderLoadResult = false;
 
-		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultVertex.spv", "DefaultVertex");
-		if (shaderLoadResult != true)
-		{
-			Log("Failed to load default vertex shader for graphics pipeline.", LOG_SERIOUS);
-			return false;
-		}
+				shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultVertex.spv", "DefaultVertex");
+				if (shaderLoadResult != true)
+				{
+					Log("Failed to load default vertex shader for graphics pipeline.", LOG_SERIOUS);
+					return false;
+				}
 
-		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultFragment.spv", "DefaultFragment");
-		if (shaderLoadResult != true)
-		{
-			Log("Failed to load default fragment shader for graphics pipeline.", LOG_SERIOUS);
-			return false;
-		}	
+				shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultFragment.spv", "DefaultFragment");
+				if (shaderLoadResult != true)
+				{
+					Log("Failed to load default fragment shader for graphics pipeline.", LOG_SERIOUS);
+					return false;
+				}	
 
-		VkPipelineShaderStageCreateInfo vertexShaderStageInfo{};
-		vertexShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		vertexShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		vertexShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultVertex")->GetVulkanModule();
-		vertexShaderStageInfo.pName = "main"; 
+				VkPipelineShaderStageCreateInfo vertexShaderStageInfo{};
+				vertexShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				vertexShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+				vertexShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultVertex")->GetVulkanModule();
+				vertexShaderStageInfo.pName = "main"; 
 
-		VkPipelineShaderStageCreateInfo fragmentShaderStageInfo{};
-		fragmentShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		fragmentShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragmentShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultFragment")->GetVulkanModule();
-		fragmentShaderStageInfo.pName = "main";
+				VkPipelineShaderStageCreateInfo fragmentShaderStageInfo{};
+				fragmentShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				fragmentShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+				fragmentShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultFragment")->GetVulkanModule();
+				fragmentShaderStageInfo.pName = "main";
 
-		VkPipelineShaderStageCreateInfo shaderStages[] = { vertexShaderStageInfo, fragmentShaderStageInfo };
-#pragma endregion
+				VkPipelineShaderStageCreateInfo shaderStages[] = { vertexShaderStageInfo, fragmentShaderStageInfo };
+		#pragma endregion
 
-#pragma region INPUT ASSEMBLY
-		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-		inputAssembly.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-		inputAssembly.primitiveRestartEnable = VK_FALSE;
-#pragma endregion
+		#pragma region INPUT ASSEMBLY
+				VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+				inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+				inputAssembly.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+				inputAssembly.primitiveRestartEnable = VK_FALSE;
+		#pragma endregion
 
-#pragma region VERTEX INPUT ASSEMBLY
-		auto vertexAttributes = Vertex::GetAttributeDescription();
-		auto vertexBindings = Vertex::GetBindingDescription();
-		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.pVertexAttributeDescriptions = vertexAttributes.data();
-		vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)vertexAttributes.size();
-		vertexInputInfo.pVertexBindingDescriptions = &vertexBindings;
-		vertexInputInfo.vertexBindingDescriptionCount = 1;
-#pragma endregion
+		#pragma region VERTEX INPUT ASSEMBLY
+				auto vertexAttributes = Vertex::GetAttributeDescription();
+				auto vertexBindings = Vertex::GetBindingDescription();
+				VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+				vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+				vertexInputInfo.pVertexAttributeDescriptions = vertexAttributes.data();
+				vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)vertexAttributes.size();
+				vertexInputInfo.pVertexBindingDescriptions = &vertexBindings;
+				vertexInputInfo.vertexBindingDescriptionCount = 1;
+		#pragma endregion
 
-#pragma region RASTERIZER
-		//Setting up the actual rasterizer.
-		VkPipelineRasterizationStateCreateInfo rasterizer{};
-		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-		//If rasterizerDisacardEnable is set to true, the rasterizer stage is never ran.
-		rasterizer.rasterizerDiscardEnable = VK_FALSE;
-		//If depthClampEnable is set to true, fragments that are beyond the near and far planes
-		//are clamped to them as opposed to discarding them. This is useful for shadow maps 
-		//and requires and enabling a GPU feature.
-		rasterizer.depthClampEnable = VK_FALSE;
+		#pragma region RASTERIZER
+				//Setting up the actual rasterizer.
+				VkPipelineRasterizationStateCreateInfo rasterizer{};
+				rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+				//If rasterizerDisacardEnable is set to true, the rasterizer stage is never ran.
+				rasterizer.rasterizerDiscardEnable = VK_FALSE;
+				//If depthClampEnable is set to true, fragments that are beyond the near and far planes
+				//are clamped to them as opposed to discarding them. This is useful for shadow maps 
+				//and requires and enabling a GPU feature.
+				rasterizer.depthClampEnable = VK_FALSE;
 
-		/*
-		* VK_POLYGON_MODE_FILL - Fill the area of the polygon with fragments.
-		* VK_POLYGON_MODE_LINE - Polygon edges are drawn as lines.
-		* VK_POLYGON_MODE_POINT - Polygon vertices are drawn as points.
-		*
-		* Using any other mode than fill requires enabling a GPU feature.
-		*/
-		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-		//rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+				/*
+				* VK_POLYGON_MODE_FILL - Fill the area of the polygon with fragments.
+				* VK_POLYGON_MODE_LINE - Polygon edges are drawn as lines.
+				* VK_POLYGON_MODE_POINT - Polygon vertices are drawn as points.
+				*
+				* Using any other mode than fill requires enabling a GPU feature.
+				*/
+				rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 
-		//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
-		rasterizer.lineWidth = 3.0f;
+				//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
+				rasterizer.lineWidth = 2.0f;
 
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+				rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 
-		//Altering depth values and biasing.
-		rasterizer.depthBiasEnable = VK_FALSE;
-		rasterizer.depthBiasClamp = 0.0f;
-		rasterizer.depthBiasConstantFactor = 0.0f;
-		rasterizer.depthBiasSlopeFactor = 0.0f;
-#pragma endregion
+				//Altering depth values and biasing.
+				rasterizer.depthBiasEnable = VK_FALSE;
+				rasterizer.depthBiasClamp = 0.0f;
+				rasterizer.depthBiasConstantFactor = 0.0f;
+				rasterizer.depthBiasSlopeFactor = 0.0f;
+		#pragma endregion
 
-#pragma region DYNAMIC STATES
-		std::vector<VkDynamicState> dynamicStates =
-		{
-			VK_DYNAMIC_STATE_VIEWPORT,
-			VK_DYNAMIC_STATE_SCISSOR
-		};
+		#pragma region DYNAMIC STATES
+				std::vector<VkDynamicState> dynamicStates =
+				{
+					VK_DYNAMIC_STATE_VIEWPORT,
+					VK_DYNAMIC_STATE_SCISSOR
+				};
 
-		//When opting for dynamic viewports, you need to enable resepectic states for the pipeline.
-		VkPipelineDynamicStateCreateInfo dynamicState{};
-		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamicState.dynamicStateCount = (uint32_t)dynamicStates.size();
-		dynamicState.pDynamicStates = dynamicStates.data();
+				//When opting for dynamic viewports, you need to enable resepectic states for the pipeline.
+				VkPipelineDynamicStateCreateInfo dynamicState{};
+				dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+				dynamicState.dynamicStateCount = (uint32_t)dynamicStates.size();
+				dynamicState.pDynamicStates = dynamicStates.data();
 
-		m_Viewport.width = (float)m_SwapChainExtent.width;
-		m_Viewport.height = (float)m_SwapChainExtent.height;
-		m_Viewport.minDepth = 0.0f;
-		m_Viewport.maxDepth = 1.0f;
-		m_Viewport.x = 0.0f;
-		m_Viewport.y = 0.0f;
+				m_Viewport.width = (float)m_SwapChainExtent.width;
+				m_Viewport.height = (float)m_SwapChainExtent.height;
+				m_Viewport.minDepth = 0.0f;
+				m_Viewport.maxDepth = 1.0f;
+				m_Viewport.x = 0.0f;
+				m_Viewport.y = 0.0f;
 
-		m_ScissorRect.offset = { 0, 0 };
-		m_ScissorRect.extent = m_SwapChainExtent;
+				m_ScissorRect.offset = { 0, 0 };
+				m_ScissorRect.extent = m_SwapChainExtent;
 
-		//Specify their count at pipeline creation time.
-		VkPipelineViewportStateCreateInfo viewportState{};
-		viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-		viewportState.pScissors = &m_ScissorRect;
-		viewportState.scissorCount = 1;
-		viewportState.pViewports = &m_Viewport;
-		viewportState.viewportCount = 1;
-#pragma endregion
+				//Specify their count at pipeline creation time.
+				VkPipelineViewportStateCreateInfo viewportState{};
+				viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+				viewportState.pScissors = &m_ScissorRect;
+				viewportState.scissorCount = 1;
+				viewportState.pViewports = &m_Viewport;
+				viewportState.viewportCount = 1;
+		#pragma endregion
 
-#pragma region Multisampling
-		VkPipelineMultisampleStateCreateInfo multisampling{};
-		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-		multisampling.sampleShadingEnable = VK_FALSE;
-		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-		multisampling.minSampleShading = 1.0f;
-		multisampling.pSampleMask = nullptr;
-		multisampling.alphaToCoverageEnable = VK_FALSE;
-		multisampling.alphaToOneEnable = VK_FALSE;
-		//Will be revisited later so leave disabled for now.
-#pragma endregion
+		#pragma region Multisampling
+				VkPipelineMultisampleStateCreateInfo multisampling{};
+				multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+				multisampling.sampleShadingEnable = VK_FALSE;
+				multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+				multisampling.minSampleShading = 1.0f;
+				multisampling.pSampleMask = nullptr;
+				multisampling.alphaToCoverageEnable = VK_FALSE;
+				multisampling.alphaToOneEnable = VK_FALSE;
+				//Will be revisited later so leave disabled for now.
+		#pragma endregion
 
-#pragma region Depth/Stencil
-		VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+		#pragma region Depth/Stencil
+				VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
 
-		depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-		depthStencilInfo.depthTestEnable = VK_TRUE;
-		depthStencilInfo.depthWriteEnable = VK_TRUE;
-		depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
-		depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
-		depthStencilInfo.maxDepthBounds = 1.0f;
-		depthStencilInfo.minDepthBounds = 0.0f;
+				depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+				depthStencilInfo.depthTestEnable = VK_TRUE;
+				depthStencilInfo.depthWriteEnable = VK_TRUE;
+				depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+				depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
+				depthStencilInfo.maxDepthBounds = 1.0f;
+				depthStencilInfo.minDepthBounds = 0.0f;
 
-		depthStencilInfo.stencilTestEnable = VK_FALSE;
-		depthStencilInfo.front = {};
-		depthStencilInfo.back = {};
-
-
-#pragma endregion
-
-#pragma region Colour Blending
-		VkPipelineColorBlendAttachmentState colorBlend{};
-		colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-		colorBlend.blendEnable = VK_FALSE;
-		colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
-		colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-		colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-		colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
-		colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-		colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-		colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
-
-		VkPipelineColorBlendStateCreateInfo colorBlendingInfo{};
-		colorBlendingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-		colorBlendingInfo.attachmentCount = 1;
-		colorBlendingInfo.pAttachments = &colorBlend;
-		colorBlendingInfo.logicOpEnable = VK_FALSE;
-		colorBlendingInfo.logicOp = VK_LOGIC_OP_COPY;
-		colorBlendingInfo.blendConstants[0] = 0.0f;
-		colorBlendingInfo.blendConstants[1] = 0.0f;
-		colorBlendingInfo.blendConstants[2] = 0.0f;
-		colorBlendingInfo.blendConstants[3] = 0.0f;
-
-#pragma endregion
-
-#pragma region Creating Pipeline
-
-		VkPushConstantRange pushConstantInfo{};
-		pushConstantInfo.offset = 0;
-		pushConstantInfo.size = sizeof(PushConstantBuffer);
-		pushConstantInfo.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
-
-		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
-		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
-		pipelineLayoutCreateInfo.setLayoutCount = 1;
-		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantInfo;
-
-		if (vkCreatePipelineLayout(m_Device, &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
-		{
-			Log("Failed to create pipeline layout.", LOG_CRITICAL);
-			return false;
-		}
-
-		VkGraphicsPipelineCreateInfo pipelineInfo{};
-		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineInfo.stageCount = 2;
-		pipelineInfo.pStages = shaderStages;
-		pipelineInfo.pVertexInputState = &vertexInputInfo;
-		pipelineInfo.pInputAssemblyState = &inputAssembly;
-		pipelineInfo.pRasterizationState = &rasterizer;
-		pipelineInfo.pMultisampleState = &multisampling;
-		pipelineInfo.pDepthStencilState = &depthStencilInfo;
-		pipelineInfo.pColorBlendState = &colorBlendingInfo;
-		pipelineInfo.pDynamicState = &dynamicState;
-		pipelineInfo.pViewportState = &viewportState;
-		pipelineInfo.layout = m_PipelineLayout;
-		pipelineInfo.renderPass = m_RenderPass;
-		pipelineInfo.subpass = 0;
-
-		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-		pipelineInfo.basePipelineIndex = -1;
+				depthStencilInfo.stencilTestEnable = VK_FALSE;
+				depthStencilInfo.front = {};
+				depthStencilInfo.back = {};
 
 
-		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_SolidGraphicsPipeline) != VK_SUCCESS)
-		{
-			Log("Failed to create the solid render graphics pipeline object.", LOG_CRITICAL);
-			return false;
-		}
+		#pragma endregion
 
-		rasterizer.cullMode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
-		rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
-		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_WireframeGraphicsPipeline) != VK_SUCCESS)
-		{
-			Log("Failed to create the wireframe render graphics pipeline object.", LOG_CRITICAL);
-			return false;
-		}
+		#pragma region Colour Blending
+				VkPipelineColorBlendAttachmentState colorBlend{};
+				colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+				colorBlend.blendEnable = VK_TRUE;
+				colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
+				colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+				colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+				colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
+				colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+				colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+				colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
 
-#pragma endregion
+				VkPipelineColorBlendStateCreateInfo colorBlendingInfo{};
+				colorBlendingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+				colorBlendingInfo.attachmentCount = 1;
+				colorBlendingInfo.pAttachments = &colorBlend;
+				colorBlendingInfo.logicOpEnable = VK_FALSE;
+				colorBlendingInfo.logicOp = VK_LOGIC_OP_COPY;
+				colorBlendingInfo.blendConstants[0] = 0.0f;
+				colorBlendingInfo.blendConstants[1] = 0.0f;
+				colorBlendingInfo.blendConstants[2] = 0.0f;
+				colorBlendingInfo.blendConstants[3] = 0.0f;
+
+		#pragma endregion
+
+		#pragma region Creating Pipeline
+
+				VkPushConstantRange pushConstantInfo{};
+				pushConstantInfo.offset = 0;
+				pushConstantInfo.size = sizeof(PushConstantBuffer);
+				pushConstantInfo.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+
+				VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
+				pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+				pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+				pipelineLayoutCreateInfo.setLayoutCount = 1;
+				pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+				pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantInfo;
+
+				if (vkCreatePipelineLayout(m_Device, &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
+				{
+					Log("Failed to create pipeline layout.", LOG_CRITICAL);
+					return false;
+				}
+
+				VkGraphicsPipelineCreateInfo pipelineInfo{};
+				pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+				pipelineInfo.stageCount = 2;
+				pipelineInfo.pStages = shaderStages;
+				pipelineInfo.pVertexInputState = &vertexInputInfo;
+				pipelineInfo.pInputAssemblyState = &inputAssembly;
+				pipelineInfo.pRasterizationState = &rasterizer;
+				pipelineInfo.pMultisampleState = &multisampling;
+				pipelineInfo.pDepthStencilState = &depthStencilInfo;
+				pipelineInfo.pColorBlendState = &colorBlendingInfo;
+				pipelineInfo.pDynamicState = &dynamicState;
+				pipelineInfo.pViewportState = &viewportState;
+				pipelineInfo.layout = m_PipelineLayout;
+				pipelineInfo.renderPass = m_RenderPass;
+				pipelineInfo.subpass = 0;
+
+				pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+				pipelineInfo.basePipelineIndex = -1;
+
+
+				if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_SolidGraphicsPipeline) != VK_SUCCESS)
+				{
+					Log("Failed to create the solid render graphics pipeline object.", LOG_CRITICAL);
+					return false;
+				}
+
+				rasterizer.cullMode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
+				rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+				if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_WireframeGraphicsPipeline) != VK_SUCCESS)
+				{
+					Log("Failed to create the wireframe render graphics pipeline object.", LOG_CRITICAL);
+					return false;
+				}
+
+		#pragma endregion
 
 		return true;
 	}
@@ -895,57 +898,20 @@ namespace Bennett
 		layout = VK_NULL_HANDLE;
 	}
 
-	bool Renderer::CreateDescriptorLayout()
-	{
-		VkDescriptorSetLayoutBinding uboLayoutBinding{};
-		uboLayoutBinding.binding = 0;
-		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		uboLayoutBinding.descriptorCount = 1;
-		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		uboLayoutBinding.pImmutableSamplers = nullptr;
-
-		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-		samplerLayoutBinding.binding = 1;
-		samplerLayoutBinding.descriptorCount = 1;
-		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
-		samplerLayoutBinding.pImmutableSamplers = nullptr;
-		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-
-		VkDescriptorSetLayoutBinding textureArrayLayoutBinding = {};
-		textureArrayLayoutBinding.descriptorCount = MAX_LOADED_TEXTURES;
-		textureArrayLayoutBinding.binding = 2;
-		textureArrayLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		textureArrayLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		textureArrayLayoutBinding.pImmutableSamplers = nullptr;
-
-		std::array<VkDescriptorSetLayoutBinding, 3> bindings = { uboLayoutBinding, samplerLayoutBinding, textureArrayLayoutBinding };
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
-		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		layoutInfo.bindingCount = (uint32_t)bindings.size();
-		layoutInfo.pBindings = bindings.data();
-
-		if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
-		{
-			Log("Failed to create descriptor set layout!", LOG_SERIOUS);
-			return false;
-		}
-
-		return true;
-	}
-
 	bool Renderer::CreateDescriptorPool()
 	{
-		std::array<VkDescriptorPoolSize, 3> poolSize{};
+		Log("Allocating descriptor pools is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		return false;
+
+		std::array<VkDescriptorPoolSize, DESCRIPTOR_COUNT> poolSize{};
 		poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		poolSize[0].descriptorCount = MAX_FRAMES_IN_FLIGHT;
-		poolSize[1].type = VK_DESCRIPTOR_TYPE_SAMPLER;
+		poolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		poolSize[1].descriptorCount = MAX_FRAMES_IN_FLIGHT;
-		poolSize[2].type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-		poolSize[2].descriptorCount = MAX_FRAMES_IN_FLIGHT;
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
 		poolInfo.poolSizeCount = (uint32_t)poolSize.size();
 		poolInfo.pPoolSizes = poolSize.data();
 		poolInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
@@ -959,15 +925,58 @@ namespace Bennett
 		return true;
 	}
 
+	bool Renderer::CreateDescriptorLayout()
+	{
+		VkDescriptorSetLayoutBinding uboLayoutBinding{};
+		uboLayoutBinding.binding = 0;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr;
+
+		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
+		samplerLayoutBinding.binding = 1;
+		samplerLayoutBinding.descriptorCount = 1;
+		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		samplerLayoutBinding.pImmutableSamplers = nullptr;
+
+		std::array<VkDescriptorSetLayoutBinding, DESCRIPTOR_COUNT> bindings = { uboLayoutBinding, samplerLayoutBinding };
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = (uint32_t)bindings.size();
+		layoutInfo.pBindings = bindings.data();
+		layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
+		layoutInfo.pNext = nullptr;
+
+		if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
+		{
+			Log("Failed to create descriptor set layout!", LOG_SERIOUS);
+			return false;
+		}
+
+		vkCmdPushDescriptorSetKHR = (PFN_vkCmdPushDescriptorSetKHR)vkGetDeviceProcAddr(m_Device, "vkCmdPushDescriptorSetKHR");
+		if (!vkCmdPushDescriptorSetKHR)
+		{
+			Log("Could not get a valid function pointer for vkCmdPushDescriptorSetKHR", LOG_SERIOUS);
+			return false;
+		}
+
+		return true;
+	}
+
 	bool Renderer::AllocateDescriptorSets()
 	{
-		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
+		Log("Allocating descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		return false;
 
+		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = m_DescriptorPool;
 		allocInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
 		allocInfo.pSetLayouts = layouts.data();
+		allocInfo.pNext = nullptr;
 
 		m_DescriptorSets.clear();
 		m_DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
@@ -981,29 +990,17 @@ namespace Bennett
 		return true;
 	}
 
-	bool Renderer::UpdateDescriptorSets(const std::vector<Texture*>& textureList)
-	{		
-		if (textureList.size() < 1)
+	bool Renderer::UpdateDescriptorSets(const Texture* texture) const
+	{	
+		Log("UpdateDescriptorSets is no longer used. You should be using PushDescriptorSets.", LOG_SERIOUS);
+		return false;
+
+		const Texture* renderTexture = texture;
+
+		if (!texture->Loaded())
 		{
-			Log("Not enough textures in the list to load, please add at least one default list.", LOG_SERIOUS);
-			return false;
-		}
-
-		VkDescriptorImageInfo descriptorTextureInfo[MAX_LOADED_TEXTURES] = {};
-
-		for (size_t i = 0; i < MAX_LOADED_TEXTURES; i++)
-		{
-			descriptorTextureInfo[i].sampler = nullptr;
-			descriptorTextureInfo[i].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
-			if (i < textureList.size())
-			{
-				descriptorTextureInfo[i].imageView = textureList[i]->GetImageView();
-			}
-			else
-			{
-				descriptorTextureInfo[i].imageView = textureList[0]->GetImageView();
-			}
+			Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			renderTexture = m_DebugTexture;
 		}
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -1014,9 +1011,11 @@ namespace Bennett
 			bufferInfo.range = sizeof(UniformBufferObject);
 
 			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = renderTexture->GetImageView();
 			imageInfo.sampler = m_TextureSampler;
 
-			std::array<VkWriteDescriptorSet, 3> descriptorWrites = {};
+			std::array<VkWriteDescriptorSet, DESCRIPTOR_COUNT> descriptorWrites = {};
 			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrites[0].dstSet = m_DescriptorSets[i];
 			descriptorWrites[0].dstBinding = 0;
@@ -1029,23 +1028,59 @@ namespace Bennett
 			descriptorWrites[1].dstSet = m_DescriptorSets[i];
 			descriptorWrites[1].dstBinding = 1;
 			descriptorWrites[1].dstArrayElement = 0;
-			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLER;
+			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			descriptorWrites[1].descriptorCount = 1;
 			descriptorWrites[1].pImageInfo = &imageInfo;
-
-			descriptorWrites[2].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[2].dstSet = m_DescriptorSets[i];
-			descriptorWrites[2].dstBinding = 2;
-			descriptorWrites[2].dstArrayElement = 0;
-			descriptorWrites[2].descriptorType = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-			descriptorWrites[2].descriptorCount = MAX_LOADED_TEXTURES;
-			descriptorWrites[2].pBufferInfo = 0;
-			descriptorWrites[2].pImageInfo = descriptorTextureInfo;
 
 			vkUpdateDescriptorSets(m_Device, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
 		}
 
 		return true;
+	}
+
+	void Renderer::PushDescriptorSet(const Texture* texture) const
+	{
+		const Texture* renderTexture = texture;
+
+		if (renderTexture == nullptr)
+		{
+			Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			renderTexture = m_DebugTexture;
+		}
+
+		if (!renderTexture->Loaded())
+		{
+			Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			renderTexture = m_DebugTexture;
+		}
+
+		std::array<VkWriteDescriptorSet, DESCRIPTOR_COUNT> descriptorWrites = {};
+
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = m_UniformBuffers[m_CurrentRenderFrame];
+		bufferInfo.offset = 0;
+		bufferInfo.range = sizeof(UniformBufferObject);
+
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = renderTexture->GetImageView();
+		imageInfo.sampler = m_TextureSampler;
+
+		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[0].dstBinding = 0;
+		descriptorWrites[0].dstArrayElement = 0;
+		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrites[0].descriptorCount = 1;
+		descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+		descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[1].dstBinding = 1;
+		descriptorWrites[1].dstArrayElement = 0;
+		descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[1].descriptorCount = 1;
+		descriptorWrites[1].pImageInfo = &imageInfo;
+
+		vkCmdPushDescriptorSetKHR(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, descriptorWrites.size(), descriptorWrites.data());
 	}
 
 	bool Renderer::CreateSyncObjects()
@@ -1189,23 +1224,19 @@ namespace Bennett
 
 	void Renderer::DeallocateDescriptorSets(VkDevice& device, VkDescriptorPool& descriptorPool, std::vector<VkDescriptorSet>& descriptorSets)
 	{
-		vkFreeDescriptorSets(device, descriptorPool, descriptorSets.size(), descriptorSets.data());
+		if (descriptorPool != VK_NULL_HANDLE)
+		{
+			vkFreeDescriptorSets(device, descriptorPool, descriptorSets.size(), descriptorSets.data());
+		}
 	}
 
 	void Renderer::Shutdown()
 	{
 		if (m_IsInitialised)
 		{
-			/*
-			VkViewport m_Viewport;
-			VkRect2D m_ScissorRect;
-
-			VkFormat m_SwapChainFormat;
-			VkExtent2D m_SwapChainExtent;
-			std::vector<void*> m_UniformBuffersMapped;
-			*/
-
 			WaitForRendererIdle();
+
+			Texture::Destroy(*m_DebugTexture);
 
 			ShaderLoader::DumpAll();
 
@@ -1230,13 +1261,13 @@ namespace Bennett
 			ShutdownGraphicsPipeline(m_Device, m_WireframeGraphicsPipeline);
 			ShutdownGraphicsPipelineLayout(m_Device, m_PipelineLayout);
 
+			DestroyDebugMessenger();
+
 			vkDestroyDevice(m_Device, nullptr);
 			DestroyVulkanInstance();
 
-			DestroyDebugMessenger();
-
 			m_PushConstantBuffer.ModelMatrix = glm::mat4(1.0f);
-			m_PushConstantBuffer.TextureID = -1;
+			m_PushConstantBuffer.deltaTime = 0.0f;
 
 			m_CurrentImageIndex = NULL;
 			m_AttachedWindow = nullptr;
@@ -1334,7 +1365,6 @@ namespace Bennett
 		* As vulkan is platform agnostic, we need to use an extension to interface
 		* with the window system. We use glfw's built in funcitons to find these.
 		*/
-		
 		std::vector<const char*> requiredExtensions = GetRequiredExtensions();
 		createInfo.enabledExtensionCount = (uint32_t)requiredExtensions.size();
 		createInfo.ppEnabledExtensionNames = requiredExtensions.data();
@@ -1342,7 +1372,6 @@ namespace Bennett
 		/*
 		* The last two struct members determine the global validation layers to enable.
 		*/
-		
 		if (m_EnableValidationLayers && !CheckValidationLayerSupport())
 		{
 			Log("Validation layers are enabled but failed to support them.", LOG_SERIOUS);
@@ -1545,17 +1574,12 @@ namespace Bennett
 	}
 
 	std::vector<const char*> Renderer::GetRequiredExtensions() const
-	{
-		uint32_t glfwExtensionCount = 0;
-		const char* glfwExtensions = "";
-		//const char** glfwExtensions = "";
-		//glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-		
-		//std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+	{	
 		std::vector<const char*> extensions = std::vector<const char*>();
 		//Required for creating a surface in win32.
 		extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
 		extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+		extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
 
 		if (m_EnableValidationLayers)
 		{
@@ -1982,7 +2006,6 @@ namespace Bennett
 		createInfo.clipped = true;
 
 		/*
-		* //todo : window resizing.
 		* This will be used in the future for window resizing but for now assuming theres one window adn swapchain.
 		*/
 		createInfo.oldSwapchain = m_SwapChain;
@@ -2052,5 +2075,4 @@ namespace Bennett
 	{
 		m_DrawMode = mode;
 	}
-
 }

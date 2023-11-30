@@ -11,8 +11,8 @@ layout(binding = 1) uniform sampler2D texSampler;
 layout(push_constant) uniform PushConstants
 {
 	mat4 Model;
-	int texID;
-	int padd[3];
+	float dt;
+	float padding[3];
 } PC;
 
 layout(location = 0) in vec3 inPosition;

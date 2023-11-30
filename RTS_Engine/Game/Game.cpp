@@ -77,14 +77,22 @@ bool Game::Initialise()
     //entity->SetTexture(am.GetTexture("Required/Debug"));
     //entity->AddBroadPhaseCollider(Bennett::ColliderType::AABB, glm::vec3(1.0f));
 
-    entity = GetWorld().SpawnEntity("test", glm::vec3(1.0f), glm::vec3(-5.0f, 0.0f, 0.0f), glm::vec3(0.0f));
+    entity = GetWorld().SpawnEntity("test", glm::vec3(1.0f), glm::vec3(5.0f, 0.0f, 2.5f), glm::vec3(0.0f));
     entity->SetModel(am.GetModel("1x1_Cube"));
+    if (entity->HasModel())
+    {
+        entity->GetModel()->SetTexture(am.GetTexture("Floor"));
+    }
     //entity->AddBroadPhaseCollider(Bennett::ColliderType::Sphere, glm::vec3(1.0f));
 
     entity = GetWorld().SpawnTestEntity("testMoveable");
-    entity->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
-    entity->SetModel(am.GetModel("1x1_Cube"));
-    entity->SetTexture(am.GetTexture("Floor"));
+    entity->SetPosition(glm::vec3(5.0f, 0.0f, -2.5f));
+    entity->SetModel(am.GetModel("Car4"));
+
+    if (entity->HasModel())
+    {
+        entity->GetModel()->SetTexture(am.GetTexture("Car4"));
+    }
     //entity->AddBroadPhaseCollider(Bennett::ColliderType::Sphere, glm::vec3(1.0f));
 
     /*for (int i = -10; i < 10; i++)
@@ -144,10 +152,10 @@ void Game::RunGameLoop()
 
         ProcessInput(dTime);
 
-        const glm::vec3& pos = entityOne->GetPosition();
-        const Bennett::SphereCollider& collOne = (const Bennett::SphereCollider&)*entityOne->GetCollider();
-        const Bennett::SphereCollider& collTwo = (const Bennett::SphereCollider&)*entityTwo->GetCollider();
-        const Bennett::Ray ray = Bennett::Ray(GetCameraController().GetCurrentCamera().GetPosition(), GetCameraController().GetCurrentCamera().GetForwardVector());
+        //const glm::vec3& pos = entityOne->GetPosition();
+        //const Bennett::SphereCollider& collOne = (const Bennett::SphereCollider&)*entityOne->GetCollider();
+        //const Bennett::SphereCollider& collTwo = (const Bennett::SphereCollider&)*entityTwo->GetCollider();
+        //const Bennett::Ray ray = Bennett::Ray(GetCameraController().GetCurrentCamera().GetPosition(), GetCameraController().GetCurrentCamera().GetForwardVector());
 
      /*   for (size_t i = 0; i < ; i++)
         {

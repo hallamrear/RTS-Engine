@@ -1,7 +1,13 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
 
-layout(binding = 1) uniform sampler texSampler;
+layout(binding = 0) uniform UniformBufferObject
+{
+	mat4 View;
+	mat4 Projection;
+} UBO;
+
+layout(binding = 1) uniform sampler2D texSampler;
 layout(binding = 2) uniform texture2D textures[64];
 
 layout(location = 0) in vec4 colour;
@@ -18,5 +24,5 @@ layout(push_constant) uniform PushConstants
 
 void main()
 {
-	outColor = texture(sampler2D(textures[PC.texID], texSampler), UV);
+	outColor = texture(texSampler, UV);
 }

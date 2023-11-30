@@ -16,7 +16,7 @@ namespace Bennett
 	class BENNETT_ENGINE Texture
 	{
 	private:
-		uint32_t m_TextureID;
+		bool m_IsLoaded;
 		uint32_t m_Width;
 		uint32_t m_Height;
 		VkImage m_Image;
@@ -30,6 +30,7 @@ namespace Bennett
 
 	public:
 		static void Create(Texture& texture, const std::string& filepath);
+		static void Destroy(Texture& texture);
 
 		const VkImage& GetImage() const;
 		const VkDeviceMemory& GetImageMemory() const;
@@ -40,5 +41,6 @@ namespace Bennett
 		const uint32_t& GetWidth() const;
 		const uint32_t& GetHeight() const;
 		const uint32_t& GetID() const;
+		const bool& Loaded() const;
 	};
 }
