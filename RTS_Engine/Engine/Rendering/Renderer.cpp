@@ -17,6 +17,7 @@ namespace Bennett
 {
 	UniformBufferObject Renderer::UniformMatrixBuffer = UniformBufferObject();
 	PushConstantBuffer Renderer::m_PushConstantBuffer = PushConstantBuffer();
+	const CustomPipeline* Renderer::m_CurrentPipeline = nullptr;
 
 	/// <summary>
 	/// Function comes from an extension 'VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME' so we need a variable to store the func addr.
@@ -39,6 +40,7 @@ namespace Bennett
 		m_AttachedWindow = nullptr;
 		m_CurrentRenderFrame = 0;
 		m_DebugTexture = new Texture();
+		m_CurrentPipeline = nullptr;
 	}
 
 	Renderer::~Renderer()
@@ -150,7 +152,8 @@ namespace Bennett
 		Log("Binding descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
 		return;
 
-		vkCmdBindDescriptorSets(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_DescriptorSets[m_CurrentRenderFrame], 0, nullptr);
+		assert(m_CurrentPipeline != nullptr);
+		vkCmdBindDescriptorSets(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Layout, 0, 1, &m_DescriptorSets[m_CurrentRenderFrame], 0, nullptr);
 	}
 
 	void Renderer::BeginRenderPass()
@@ -294,19 +297,13 @@ namespace Bennett
 
 		BeginRenderPass();
 
-		switch (m_DrawMode)
-		{
-		case Bennett::SOLID:
-			vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_SolidGraphicsPipeline);
-			break;
-		case Bennett::WIREFRAME:
-			vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_WireframeGraphicsPipeline);
-			break;
-		default:
-			Log(LOG_SAFE, "Unsupported draw mode. Failed to bind graphics pipeline.\n");
-			break;
-		}
+		assert(m_CurrentPipeline != nullptr);
+		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Pipeline);
+	}
 
+	const CustomPipeline* Renderer::GetCurrentGraphicsPipeline() const
+	{
+		return m_CurrentPipeline;
 	}
 
 	void Renderer::EndFrame()
@@ -416,14 +413,33 @@ namespace Bennett
 
 	void Renderer::PushModelMatrix(const glm::mat4& modelMatrix) const
 	{
+		assert(m_CurrentPipeline != nullptr);
 		m_PushConstantBuffer.ModelMatrix = modelMatrix;
-		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
+		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_CurrentPipeline->m_Layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
+	}
+
+	void Renderer::SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const
+	{
+		m_CurrentPipeline = &pipeline;
+		assert(m_CurrentPipeline != nullptr);
+		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Pipeline);
+	}
+
+	void Renderer::SetWireframeGraphicsPipeline() const
+	{
+		SetCustomGraphicsPipeline(m_WireframePipeline);
+	}
+
+	void Renderer::SetSolidGraphicsPipeline() const
+	{
+		SetCustomGraphicsPipeline(m_SolidPipeline);
 	}
 
 	void Renderer::UpdatePushConstantDeltaTime(const float& deltaTime) const
 	{
+		assert(m_CurrentPipeline != nullptr);
 		m_PushConstantBuffer.deltaTime = deltaTime;
-		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
+		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_CurrentPipeline->m_Layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
 	}
 
 	void Renderer::SubmitCommandData()
@@ -649,253 +665,52 @@ namespace Bennett
 		vkDestroyFramebuffer(device, framebuffer, nullptr);		
 		framebuffer = VK_NULL_HANDLE;
 	}
-
+		
 	bool Renderer::InitialiseGraphicsPipeline()
 	{
 		#pragma region SHADER SETUP
-				//Get resource folder location.
-				const std::string& resourceLocation = ServiceLocator::GetResourceFolderLocation();
+		//Get resource folder location.
+		const std::string& resourceLocation = ServiceLocator::GetResourceFolderLocation();
 
-				RebuildDefaultShaders();
+		RebuildDefaultShaders();
 
-				bool shaderLoadResult = false;
+		bool shaderLoadResult = false;
 
-				shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultVertex.spv", "DefaultVertex");
-				if (shaderLoadResult != true)
-				{
-					Log("Failed to load default vertex shader for graphics pipeline.", LOG_SERIOUS);
-					return false;
-				}
+		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultVertex.spv", "DefaultVertex");
+		if (shaderLoadResult != true)
+		{
+			Log("Failed to load default vertex shader for graphics pipeline.", LOG_SERIOUS);
+			return false;
+		}
 
-				shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultFragment.spv", "DefaultFragment");
-				if (shaderLoadResult != true)
-				{
-					Log("Failed to load default fragment shader for graphics pipeline.", LOG_SERIOUS);
-					return false;
-				}	
+		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultFragment.spv", "DefaultFragment");
+		if (shaderLoadResult != true)
+		{
+			Log("Failed to load default fragment shader for graphics pipeline.", LOG_SERIOUS);
+			return false;
+		}	
 
-				VkPipelineShaderStageCreateInfo vertexShaderStageInfo{};
-				vertexShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-				vertexShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-				vertexShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultVertex")->GetVulkanModule();
-				vertexShaderStageInfo.pName = "main"; 
+		bool pipelineSuccessful = false;
+		CustomPipelineDetails pipelineDetails{};
+		pipelineSuccessful = CreateCustomPipeline(m_SolidPipeline, pipelineDetails);
+		if (pipelineSuccessful != true)
+		{
+			Log("Failed to create solid graphics custom pipeline.", LOG_SERIOUS);
+			return false;
+		}
 
-				VkPipelineShaderStageCreateInfo fragmentShaderStageInfo{};
-				fragmentShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-				fragmentShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-				fragmentShaderStageInfo.module = ShaderLoader::GetShaderByName("DefaultFragment")->GetVulkanModule();
-				fragmentShaderStageInfo.pName = "main";
+		pipelineDetails.Cullmode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
+		pipelineDetails.PolygonMode = VkPolygonMode::VK_POLYGON_MODE_LINE;
+		pipelineSuccessful = CreateCustomPipeline(m_WireframePipeline, pipelineDetails);
+		if (pipelineSuccessful != true)
+		{
+			Log("Failed to create wireframe graphics custom pipeline.", LOG_SERIOUS);
+			return false;
+		}
 
-				VkPipelineShaderStageCreateInfo shaderStages[] = { vertexShaderStageInfo, fragmentShaderStageInfo };
-		#pragma endregion
-
-		#pragma region INPUT ASSEMBLY
-				VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
-				inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-				inputAssembly.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-				inputAssembly.primitiveRestartEnable = VK_FALSE;
-		#pragma endregion
-
-		#pragma region VERTEX INPUT ASSEMBLY
-				auto vertexAttributes = Vertex::GetAttributeDescription();
-				auto vertexBindings = Vertex::GetBindingDescription();
-				VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-				vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-				vertexInputInfo.pVertexAttributeDescriptions = vertexAttributes.data();
-				vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)vertexAttributes.size();
-				vertexInputInfo.pVertexBindingDescriptions = &vertexBindings;
-				vertexInputInfo.vertexBindingDescriptionCount = 1;
-		#pragma endregion
-
-		#pragma region RASTERIZER
-				//Setting up the actual rasterizer.
-				VkPipelineRasterizationStateCreateInfo rasterizer{};
-				rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-				//If rasterizerDisacardEnable is set to true, the rasterizer stage is never ran.
-				rasterizer.rasterizerDiscardEnable = VK_FALSE;
-				//If depthClampEnable is set to true, fragments that are beyond the near and far planes
-				//are clamped to them as opposed to discarding them. This is useful for shadow maps 
-				//and requires and enabling a GPU feature.
-				rasterizer.depthClampEnable = VK_FALSE;
-
-				/*
-				* VK_POLYGON_MODE_FILL - Fill the area of the polygon with fragments.
-				* VK_POLYGON_MODE_LINE - Polygon edges are drawn as lines.
-				* VK_POLYGON_MODE_POINT - Polygon vertices are drawn as points.
-				*
-				* Using any other mode than fill requires enabling a GPU feature.
-				*/
-				rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
-
-				//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
-				rasterizer.lineWidth = 2.0f;
-
-				rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-				rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
-
-				//Altering depth values and biasing.
-				rasterizer.depthBiasEnable = VK_FALSE;
-				rasterizer.depthBiasClamp = 0.0f;
-				rasterizer.depthBiasConstantFactor = 0.0f;
-				rasterizer.depthBiasSlopeFactor = 0.0f;
-		#pragma endregion
-
-		#pragma region DYNAMIC STATES
-				std::vector<VkDynamicState> dynamicStates =
-				{
-					VK_DYNAMIC_STATE_VIEWPORT,
-					VK_DYNAMIC_STATE_SCISSOR
-				};
-
-				//When opting for dynamic viewports, you need to enable resepectic states for the pipeline.
-				VkPipelineDynamicStateCreateInfo dynamicState{};
-				dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-				dynamicState.dynamicStateCount = (uint32_t)dynamicStates.size();
-				dynamicState.pDynamicStates = dynamicStates.data();
-
-				m_Viewport.width = (float)m_SwapChainExtent.width;
-				m_Viewport.height = (float)m_SwapChainExtent.height;
-				m_Viewport.minDepth = 0.0f;
-				m_Viewport.maxDepth = 1.0f;
-				m_Viewport.x = 0.0f;
-				m_Viewport.y = 0.0f;
-
-				m_ScissorRect.offset = { 0, 0 };
-				m_ScissorRect.extent = m_SwapChainExtent;
-
-				//Specify their count at pipeline creation time.
-				VkPipelineViewportStateCreateInfo viewportState{};
-				viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-				viewportState.pScissors = &m_ScissorRect;
-				viewportState.scissorCount = 1;
-				viewportState.pViewports = &m_Viewport;
-				viewportState.viewportCount = 1;
-		#pragma endregion
-
-		#pragma region Multisampling
-				VkPipelineMultisampleStateCreateInfo multisampling{};
-				multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-				multisampling.sampleShadingEnable = VK_FALSE;
-				multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-				multisampling.minSampleShading = 1.0f;
-				multisampling.pSampleMask = nullptr;
-				multisampling.alphaToCoverageEnable = VK_FALSE;
-				multisampling.alphaToOneEnable = VK_FALSE;
-				//Will be revisited later so leave disabled for now.
-		#pragma endregion
-
-		#pragma region Depth/Stencil
-				VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
-
-				depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-				depthStencilInfo.depthTestEnable = VK_TRUE;
-				depthStencilInfo.depthWriteEnable = VK_TRUE;
-				depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
-				depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
-				depthStencilInfo.maxDepthBounds = 1.0f;
-				depthStencilInfo.minDepthBounds = 0.0f;
-
-				depthStencilInfo.stencilTestEnable = VK_FALSE;
-				depthStencilInfo.front = {};
-				depthStencilInfo.back = {};
-
-
-		#pragma endregion
-
-		#pragma region Colour Blending
-				VkPipelineColorBlendAttachmentState colorBlend{};
-				colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-				colorBlend.blendEnable = VK_TRUE;
-				colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
-				colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-				colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-				colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
-				colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-				colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-				colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
-
-				VkPipelineColorBlendStateCreateInfo colorBlendingInfo{};
-				colorBlendingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-				colorBlendingInfo.attachmentCount = 1;
-				colorBlendingInfo.pAttachments = &colorBlend;
-				colorBlendingInfo.logicOpEnable = VK_FALSE;
-				colorBlendingInfo.logicOp = VK_LOGIC_OP_COPY;
-				colorBlendingInfo.blendConstants[0] = 0.0f;
-				colorBlendingInfo.blendConstants[1] = 0.0f;
-				colorBlendingInfo.blendConstants[2] = 0.0f;
-				colorBlendingInfo.blendConstants[3] = 0.0f;
-
-		#pragma endregion
-
-		#pragma region Creating Pipeline
-
-				VkPushConstantRange pushConstantInfo{};
-				pushConstantInfo.offset = 0;
-				pushConstantInfo.size = sizeof(PushConstantBuffer);
-				pushConstantInfo.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
-
-				VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
-				pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-				pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
-				pipelineLayoutCreateInfo.setLayoutCount = 1;
-				pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-				pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantInfo;
-
-				if (vkCreatePipelineLayout(m_Device, &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS)
-				{
-					Log("Failed to create pipeline layout.", LOG_CRITICAL);
-					return false;
-				}
-
-				VkGraphicsPipelineCreateInfo pipelineInfo{};
-				pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-				pipelineInfo.stageCount = 2;
-				pipelineInfo.pStages = shaderStages;
-				pipelineInfo.pVertexInputState = &vertexInputInfo;
-				pipelineInfo.pInputAssemblyState = &inputAssembly;
-				pipelineInfo.pRasterizationState = &rasterizer;
-				pipelineInfo.pMultisampleState = &multisampling;
-				pipelineInfo.pDepthStencilState = &depthStencilInfo;
-				pipelineInfo.pColorBlendState = &colorBlendingInfo;
-				pipelineInfo.pDynamicState = &dynamicState;
-				pipelineInfo.pViewportState = &viewportState;
-				pipelineInfo.layout = m_PipelineLayout;
-				pipelineInfo.renderPass = m_RenderPass;
-				pipelineInfo.subpass = 0;
-
-				pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
-				pipelineInfo.basePipelineIndex = -1;
-
-
-				if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_SolidGraphicsPipeline) != VK_SUCCESS)
-				{
-					Log("Failed to create the solid render graphics pipeline object.", LOG_CRITICAL);
-					return false;
-				}
-
-				rasterizer.cullMode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
-				rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
-				if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_WireframeGraphicsPipeline) != VK_SUCCESS)
-				{
-					Log("Failed to create the wireframe render graphics pipeline object.", LOG_CRITICAL);
-					return false;
-				}
-
-		#pragma endregion
+		m_CurrentPipeline = &m_SolidPipeline;
 
 		return true;
-	}
-
-	void Renderer::ShutdownGraphicsPipeline(VkDevice& device, VkPipeline& pipeline)
-	{
-		vkDestroyPipeline(device, pipeline, nullptr);
-		pipeline = VK_NULL_HANDLE;
-	}
-
-	void Renderer::ShutdownGraphicsPipelineLayout(VkDevice& device, VkPipelineLayout& layout)
-	{
-		vkDestroyPipelineLayout(device, layout, nullptr);
-		layout = VK_NULL_HANDLE;
 	}
 
 	bool Renderer::CreateDescriptorPool()
@@ -1080,7 +895,8 @@ namespace Bennett
 		descriptorWrites[1].descriptorCount = 1;
 		descriptorWrites[1].pImageInfo = &imageInfo;
 
-		vkCmdPushDescriptorSetKHR(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, descriptorWrites.size(), descriptorWrites.data());
+		assert(m_CurrentPipeline != nullptr);
+		vkCmdPushDescriptorSetKHR(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Layout, 0, descriptorWrites.size(), descriptorWrites.data());
 	}
 
 	bool Renderer::CreateSyncObjects()
@@ -1257,9 +1073,9 @@ namespace Bennett
 
 			DestroyWindowSurface();
 
-			ShutdownGraphicsPipeline(m_Device, m_SolidGraphicsPipeline);
-			ShutdownGraphicsPipeline(m_Device, m_WireframeGraphicsPipeline);
-			ShutdownGraphicsPipelineLayout(m_Device, m_PipelineLayout);
+			m_CurrentPipeline = nullptr;
+			DestroyCustomPipeline(m_SolidPipeline);
+			DestroyCustomPipeline(m_WireframePipeline);
 
 			DestroyDebugMessenger();
 
@@ -1350,6 +1166,7 @@ namespace Bennett
 		appInfo.pApplicationName = "RTS Game";
 		appInfo.applicationVersion = appInfo.engineVersion;
 
+
 		/*
 		* Like directX, alot of information is passed using structs rather than function params.
 		* Next struct is not optional as it tells the vulkan driver about global extensions and validation layers
@@ -1359,7 +1176,7 @@ namespace Bennett
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
-		
+
 		/*
 		* The next two parameters specify the desired global extensions.
 		* As vulkan is platform agnostic, we need to use an extension to interface
@@ -1387,6 +1204,19 @@ namespace Bennett
 		{
 			createInfo.enabledLayerCount = 0;
 		}
+
+		need to make a new validation layer in the vulkan config or copy an existing one and alter it
+		and edit it to point to output here? idfk.
+	https://github.com/KhronosGroup/Vulkan-ValidationLayers/blob/main/docs/debug_printf.md
+		/*
+		*	Specifying additional features for debug shader printing.
+		*/
+		VkValidationFeatureEnableEXT enables[] = { VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
+		VkValidationFeaturesEXT features = {};
+		features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
+		features.enabledValidationFeatureCount = 1;
+		features.pEnabledValidationFeatures = enables;
+		createInfo.pNext = &features;
 		
 		//We can now create the instance.
 		if (vkCreateInstance(&createInfo, nullptr, &m_Instance) != VK_SUCCESS)
@@ -1584,6 +1414,8 @@ namespace Bennett
 		if (m_EnableValidationLayers)
 		{
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
+			extensions.push_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
 		}
 
 		return extensions;
@@ -2071,8 +1903,227 @@ namespace Bennett
 		return true;
 	}
 
-	void Renderer::SetDrawMode(const RENDERER_DRAW_MODE& mode)
+	bool Renderer::CreateCustomPipeline(CustomPipeline& pipeline, const CustomPipelineDetails& details)
 	{
-		m_DrawMode = mode;
+#pragma region SHADER SETUP
+		Shader* vertexShader = ShaderLoader::GetShaderByName(details.VertexShaderName);
+		if (vertexShader == nullptr)
+		{
+			Log("Failed to find vertex shader for custom pipeline.\n", LOG_MINIMAL);
+			return false;
+		}
+
+		Shader* pixelShader = ShaderLoader::GetShaderByName(details.PixelShaderName);
+		if (pixelShader == nullptr)
+		{
+			Log("Failed to find pixel shader for custom pipeline.\n", LOG_MINIMAL);
+			return false;
+		}
+
+		VkPipelineShaderStageCreateInfo vertexShaderStageInfo{};
+		vertexShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		vertexShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+		vertexShaderStageInfo.module = vertexShader->GetVulkanModule();
+		vertexShaderStageInfo.pName = "main";
+
+		VkPipelineShaderStageCreateInfo fragmentShaderStageInfo{};
+		fragmentShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+		fragmentShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+		fragmentShaderStageInfo.module = pixelShader->GetVulkanModule();
+		fragmentShaderStageInfo.pName = "main";
+
+		VkPipelineShaderStageCreateInfo shaderStages[] = { vertexShaderStageInfo, fragmentShaderStageInfo };
+#pragma endregion
+
+#pragma region INPUT ASSEMBLY
+		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+		inputAssembly.topology = details.Topology;
+		inputAssembly.primitiveRestartEnable = VK_FALSE;
+#pragma endregion
+
+#pragma region VERTEX INPUT ASSEMBLY
+		VkVertexInputBindingDescription vertexBindings = details.InputBindingDescription;
+		std::vector<VkVertexInputAttributeDescription> vertexAttributes = details.InputAttributeDescription;
+				 
+		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		vertexInputInfo.pVertexAttributeDescriptions = vertexAttributes.data();
+		vertexInputInfo.vertexAttributeDescriptionCount = (uint32_t)vertexAttributes.size();
+		vertexInputInfo.pVertexBindingDescriptions = &vertexBindings;
+		vertexInputInfo.vertexBindingDescriptionCount = 1;
+#pragma endregion
+
+#pragma region RASTERIZER
+		//Setting up the actual rasterizer.
+		VkPipelineRasterizationStateCreateInfo rasterizer{};
+		rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+		//If rasterizerDisacardEnable is set to true, the rasterizer stage is never ran.
+		rasterizer.rasterizerDiscardEnable = VK_FALSE;
+		//If depthClampEnable is set to true, fragments that are beyond the near and far planes
+		//are clamped to them as opposed to discarding them. This is useful for shadow maps 
+		//and requires and enabling a GPU feature.
+		rasterizer.depthClampEnable = VK_FALSE;
+
+		/*
+		* VK_POLYGON_MODE_FILL - Fill the area of the polygon with fragments.
+		* VK_POLYGON_MODE_LINE - Polygon edges are drawn as lines.
+		* VK_POLYGON_MODE_POINT - Polygon vertices are drawn as points.
+		*
+		* Using any other mode than fill requires enabling a GPU feature.
+		*/
+		rasterizer.polygonMode = details.PolygonMode;
+
+		//Line thickness. Anything other than 1.0f requires enabling a GPU feature.
+		rasterizer.lineWidth = details.LineWidth;
+
+		rasterizer.cullMode = details.Cullmode;
+		rasterizer.frontFace = details.FrontFace;
+
+		//Altering depth values and biasing.
+		rasterizer.depthBiasEnable = VK_FALSE;
+		rasterizer.depthBiasClamp = 0.0f;
+		rasterizer.depthBiasConstantFactor = 0.0f;
+		rasterizer.depthBiasSlopeFactor = 0.0f;
+#pragma endregion
+
+#pragma region DYNAMIC STATES
+		std::vector<VkDynamicState> dynamicStates =
+		{
+			VK_DYNAMIC_STATE_VIEWPORT,
+			VK_DYNAMIC_STATE_SCISSOR
+		};
+
+		//When opting for dynamic viewports, you need to enable resepectic states for the pipeline.
+		VkPipelineDynamicStateCreateInfo dynamicState{};
+		dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+		dynamicState.dynamicStateCount = (uint32_t)dynamicStates.size();
+		dynamicState.pDynamicStates = dynamicStates.data();
+
+		m_Viewport.width = (float)m_SwapChainExtent.width;
+		m_Viewport.height = (float)m_SwapChainExtent.height;
+		m_Viewport.minDepth = 0.0f;
+		m_Viewport.maxDepth = 1.0f;
+		m_Viewport.x = 0.0f;
+		m_Viewport.y = 0.0f;
+
+		m_ScissorRect.offset = { 0, 0 };
+		m_ScissorRect.extent = m_SwapChainExtent;
+
+		//Specify their count at pipeline creation time.
+		VkPipelineViewportStateCreateInfo viewportState{};
+		viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+		viewportState.pScissors = &m_ScissorRect;
+		viewportState.scissorCount = 1;
+		viewportState.pViewports = &m_Viewport;
+		viewportState.viewportCount = 1;
+#pragma endregion
+
+#pragma region Multisampling
+		VkPipelineMultisampleStateCreateInfo multisampling{};
+		multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+		multisampling.sampleShadingEnable = VK_FALSE;
+		multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+		multisampling.minSampleShading = 1.0f;
+		multisampling.pSampleMask = nullptr;
+		multisampling.alphaToCoverageEnable = VK_FALSE;
+		multisampling.alphaToOneEnable = VK_FALSE;
+		//Will be revisited later so leave disabled for now.
+#pragma endregion
+
+#pragma region Depth/Stencil
+		VkPipelineDepthStencilStateCreateInfo depthStencilInfo{};
+		depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthStencilInfo.depthTestEnable = VK_TRUE;
+		depthStencilInfo.depthWriteEnable = VK_TRUE;
+		depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
+		depthStencilInfo.maxDepthBounds = 1.0f;
+		depthStencilInfo.minDepthBounds = 0.0f;
+		depthStencilInfo.stencilTestEnable = VK_FALSE;
+		depthStencilInfo.front = {};
+		depthStencilInfo.back = {};
+#pragma endregion
+
+#pragma region Colour Blending
+		VkPipelineColorBlendAttachmentState colorBlend{};
+		colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+		colorBlend.blendEnable = VK_TRUE;
+		colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
+		colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+		colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+		colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
+		colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+		colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+		colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
+
+		VkPipelineColorBlendStateCreateInfo colorBlendingInfo{};
+		colorBlendingInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+		colorBlendingInfo.attachmentCount = 1;
+		colorBlendingInfo.pAttachments = &colorBlend;
+		colorBlendingInfo.logicOpEnable = VK_FALSE;
+		colorBlendingInfo.logicOp = VK_LOGIC_OP_COPY;
+		colorBlendingInfo.blendConstants[0] = 0.0f;
+		colorBlendingInfo.blendConstants[1] = 0.0f;
+		colorBlendingInfo.blendConstants[2] = 0.0f;
+		colorBlendingInfo.blendConstants[3] = 0.0f;
+#pragma endregion
+
+#pragma region Creating Pipeline
+
+		VkPushConstantRange pushConstantInfo{};
+		pushConstantInfo.offset = 0;
+		pushConstantInfo.size = sizeof(PushConstantBuffer);
+		pushConstantInfo.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+
+		VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
+		pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutCreateInfo.pSetLayouts = &m_DescriptorSetLayout;
+		pipelineLayoutCreateInfo.setLayoutCount = 1;
+		pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
+		pipelineLayoutCreateInfo.pPushConstantRanges = &pushConstantInfo;
+
+		if (vkCreatePipelineLayout(m_Device, &pipelineLayoutCreateInfo, nullptr, &pipeline.m_Layout) != VK_SUCCESS)
+		{
+			Log("Failed to create pipeline layout.", LOG_CRITICAL);
+			return false;
+		}
+
+		VkGraphicsPipelineCreateInfo pipelineInfo{};
+		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+		pipelineInfo.stageCount = 2;
+		pipelineInfo.pStages = shaderStages;
+		pipelineInfo.pVertexInputState = &vertexInputInfo;
+		pipelineInfo.pInputAssemblyState = &inputAssembly;
+		pipelineInfo.pRasterizationState = &rasterizer;
+		pipelineInfo.pMultisampleState = &multisampling;
+		pipelineInfo.pDepthStencilState = &depthStencilInfo;
+		pipelineInfo.pColorBlendState = &colorBlendingInfo;
+		pipelineInfo.pDynamicState = &dynamicState;
+		pipelineInfo.pViewportState = &viewportState;
+		pipelineInfo.layout = pipeline.m_Layout;
+		pipelineInfo.renderPass = m_RenderPass;
+		pipelineInfo.subpass = 0;
+
+		pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+		pipelineInfo.basePipelineIndex = -1;
+
+		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.m_Pipeline) != VK_SUCCESS)
+		{
+			Log("Failed to create a custom graphics pipeline object.", LOG_CRITICAL);
+			return false;
+		}
+
+#pragma endregion
+		return true;
+	}
+
+	void Renderer::DestroyCustomPipeline(CustomPipeline& pipeline)
+	{
+		Renderer& renderer = ServiceLocator::GetRenderer();
+		vkDestroyPipeline(renderer.GetDevice(), pipeline.m_Pipeline, nullptr);
+		pipeline.m_Pipeline = VK_NULL_HANDLE;
+		vkDestroyPipelineLayout(renderer.GetDevice(), pipeline.m_Layout, nullptr);
+		pipeline.m_Layout = VK_NULL_HANDLE;
 	}
 }

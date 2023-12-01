@@ -2,7 +2,7 @@
 #include <Rendering/Renderer.h>
 #include <World/Entity.h>
 #include <World/World.h>
-#include <World/Terrain.h>
+#include <World/Terrain/Terrain.h>
 #include <World/MoveableTestEntity.h>
 #include <Collision/Octree.h>
 

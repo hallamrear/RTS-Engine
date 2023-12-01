@@ -1,18 +1,13 @@
 #pragma once
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.h>
+#include <Rendering/CustomPipelineObject.h>
 #include <optional>
 
 namespace Bennett
 {
 	class Texture;
 	class Window;
-
-	enum BENNETT_ENGINE RENDERER_DRAW_MODE
-	{
-		SOLID,
-		WIREFRAME
-	};
 
 	struct BENNETT_ENGINE UniformBufferObject
 	{
@@ -34,8 +29,6 @@ namespace Bennett
 
 		const Window* m_AttachedWindow;
 		Texture* m_DebugTexture;
-
-		RENDERER_DRAW_MODE m_DrawMode;
 
 		struct SwapChainSupportDetails
 		{
@@ -263,12 +256,10 @@ namespace Bennett
 		void CleanupRenderPass(VkDevice& device, VkRenderPass& renderpass);
 
 		//Pipeline
-		VkPipeline m_SolidGraphicsPipeline;
-		VkPipeline m_WireframeGraphicsPipeline;
-		VkPipelineLayout m_PipelineLayout;
+		CustomPipeline m_SolidPipeline;
+		CustomPipeline m_WireframePipeline;
+		static const CustomPipeline* m_CurrentPipeline;
 		bool InitialiseGraphicsPipeline();
-		void ShutdownGraphicsPipeline(VkDevice& device, VkPipeline& pipeline);
-		void ShutdownGraphicsPipelineLayout(VkDevice& device, VkPipelineLayout& layout);
 
 		//Descriptor layout
 		VkDescriptorSetLayout m_DescriptorSetLayout;
@@ -399,12 +390,18 @@ namespace Bennett
 		void UpdatePushConstantDeltaTime(const float& deltaTime) const;
 		void EndFrame();
 
-		void SetDrawMode(const RENDERER_DRAW_MODE& mode);
+		const CustomPipeline* GetCurrentGraphicsPipeline() const;
+		void SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const;
+		void SetSolidGraphicsPipeline() const;
+		void SetWireframeGraphicsPipeline() const;
 		void WaitForRendererIdle();
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 		void RebuildDefaultShaders() const;
+
+		bool CreateCustomPipeline(CustomPipeline& pipeline, const CustomPipelineDetails& details);
+		void DestroyCustomPipeline(CustomPipeline& pipeline);
 	};
 }

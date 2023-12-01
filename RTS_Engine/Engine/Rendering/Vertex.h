@@ -21,6 +21,6 @@ namespace Bennett
 		~Vertex();
 
 		static VkVertexInputBindingDescription GetBindingDescription();
-		static std::array<VkVertexInputAttributeDescription, 4> GetAttributeDescription();
+		static std::vector<VkVertexInputAttributeDescription> GetAttributeDescription();
 	};
 }

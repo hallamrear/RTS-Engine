@@ -90,10 +90,7 @@
     <ClCompile Include="Camera\StandardCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="World\Terrain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="World\TerrainChunk.cpp">
+    <ClCompile Include="World\Terrain\Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Loader\TextureLoader.cpp">
@@ -171,6 +168,12 @@
     <ClCompile Include="Rendering\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="World\Terrain\TerrainVertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\CustomPipelineObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\Collision.h">
@@ -233,10 +236,7 @@
     <ClInclude Include="External\resource.h">
       <Filter>Header Files\PCH and External Headers</Filter>
     </ClInclude>
-    <ClInclude Include="World\Terrain.h">
-      <Filter>Header Files\World</Filter>
-    </ClInclude>
-    <ClInclude Include="World\TerrainChunk.h">
+    <ClInclude Include="World\Terrain\Terrain.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
     <ClInclude Include="World\World.h">
@@ -318,6 +318,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Terrain\TerrainVertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\CustomPipelineObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -25,9 +25,9 @@ namespace Bennett
 		return binding;
 	}
 
-	std::array<VkVertexInputAttributeDescription, 4> Vertex::GetAttributeDescription()
+	std::vector<VkVertexInputAttributeDescription> Vertex::GetAttributeDescription()
 	{
-		std::array<VkVertexInputAttributeDescription, 4> attributes{};
+		std::vector<VkVertexInputAttributeDescription> attributes(4);
 
 		//Position
 		attributes[0].binding = 0;

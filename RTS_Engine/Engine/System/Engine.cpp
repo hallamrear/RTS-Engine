@@ -1,7 +1,6 @@
 #include <BennettPCH.h>
 #include <System/Engine.h>
 #include <System/ServiceLocator.h>
-#include <World/TerrainChunk.h>
 #include <System/Manager/AssetManager.h>
 #include <System/InputMonitor.h>
 #include <System/Manager/LevelManager.h>
@@ -150,16 +149,6 @@ namespace Bennett
 			if (m_EngineControls->GetKeyState(BENNETT_KEY_F6))
 			{
 				GetWorld().GetOctree().IncreaseMaxDepth();
-			}
-
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F7))
-			{
-				ServiceLocator::GetRenderer().SetDrawMode(RENDERER_DRAW_MODE::SOLID);
-			}
-
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F8))
-			{
-				ServiceLocator::GetRenderer().SetDrawMode(RENDERER_DRAW_MODE::WIREFRAME);
 			}
 		}
 	}

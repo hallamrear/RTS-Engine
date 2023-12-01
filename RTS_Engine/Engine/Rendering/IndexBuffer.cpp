@@ -51,4 +51,6 @@ namespace Bennett
 
         return result;
     }
+
+    //todo : destroy function
 }

@@ -86,7 +86,7 @@ namespace Bennett
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 		createInfo.codeSize = shaderByteArray.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderByteArray.data());
+		createInfo.pCode = (uint32_t*)(shaderByteArray.data());
 
 		if (vkCreateShaderModule(ServiceLocator::GetRenderer().GetDevice(), &createInfo, nullptr, &m_VulkanModule) != VK_SUCCESS)
 		{
