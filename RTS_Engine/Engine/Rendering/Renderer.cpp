@@ -16,7 +16,7 @@
 namespace Bennett
 {
 	UniformBufferObject Renderer::UniformMatrixBuffer = UniformBufferObject();
-	PushConstantBuffer Renderer::m_PushConstantBuffer = PushConstantBuffer();
+	PushConstantBuffer Renderer::PushConstants = PushConstantBuffer();
 	const CustomPipeline* Renderer::m_CurrentPipeline = nullptr;
 
 	/// <summary>
@@ -145,15 +145,6 @@ namespace Bennett
 		vkCmdSetScissor(m_CommandBuffers[m_CurrentRenderFrame], 0, 1, &m_ScissorRect);
 
 		return true;
-	}
-
-	void Renderer::BindDescriptorSet() const
-	{
-		Log("Binding descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
-		return;
-
-		assert(m_CurrentPipeline != nullptr);
-		vkCmdBindDescriptorSets(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Layout, 0, 1, &m_DescriptorSets[m_CurrentRenderFrame], 0, nullptr);
 	}
 
 	void Renderer::BeginRenderPass()
@@ -411,13 +402,6 @@ namespace Bennett
 		memcpy(m_UniformBuffersMapped[m_CurrentRenderFrame], &UniformMatrixBuffer, sizeof(UniformMatrixBuffer));
 	}
 
-	void Renderer::PushModelMatrix(const glm::mat4& modelMatrix) const
-	{
-		assert(m_CurrentPipeline != nullptr);
-		m_PushConstantBuffer.ModelMatrix = modelMatrix;
-		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_CurrentPipeline->m_Layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
-	}
-
 	void Renderer::SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const
 	{
 		m_CurrentPipeline = &pipeline;
@@ -435,11 +419,9 @@ namespace Bennett
 		SetCustomGraphicsPipeline(m_SolidPipeline);
 	}
 
-	void Renderer::UpdatePushConstantDeltaTime(const float& deltaTime) const
+	void Renderer::UpdatePushConstants() const
 	{
-		assert(m_CurrentPipeline != nullptr);
-		m_PushConstantBuffer.deltaTime = deltaTime;
-		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_CurrentPipeline->m_Layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &m_PushConstantBuffer);
+		vkCmdPushConstants(m_CommandBuffers[m_CurrentRenderFrame], m_CurrentPipeline->m_Layout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantBuffer), &PushConstants);
 	}
 
 	void Renderer::SubmitCommandData()
@@ -713,33 +695,6 @@ namespace Bennett
 		return true;
 	}
 
-	bool Renderer::CreateDescriptorPool()
-	{
-		Log("Allocating descriptor pools is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
-		return false;
-
-		std::array<VkDescriptorPoolSize, DESCRIPTOR_COUNT> poolSize{};
-		poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSize[0].descriptorCount = MAX_FRAMES_IN_FLIGHT;
-		poolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSize[1].descriptorCount = MAX_FRAMES_IN_FLIGHT;
-
-		VkDescriptorPoolCreateInfo poolInfo{};
-		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
-		poolInfo.poolSizeCount = (uint32_t)poolSize.size();
-		poolInfo.pPoolSizes = poolSize.data();
-		poolInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
-
-		if (vkCreateDescriptorPool(m_Device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
-		{
-			Log("Failed to create descriptor pool", LOG_SERIOUS);
-			return false;
-		}
-
-		return true;
-	}
-
 	bool Renderer::CreateDescriptorLayout()
 	{
 		VkDescriptorSetLayoutBinding uboLayoutBinding{};
@@ -780,79 +735,6 @@ namespace Bennett
 		return true;
 	}
 
-	bool Renderer::AllocateDescriptorSets()
-	{
-		Log("Allocating descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
-		return false;
-
-		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
-		VkDescriptorSetAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allocInfo.descriptorPool = m_DescriptorPool;
-		allocInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
-		allocInfo.pSetLayouts = layouts.data();
-		allocInfo.pNext = nullptr;
-
-		m_DescriptorSets.clear();
-		m_DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
-
-		if (vkAllocateDescriptorSets(m_Device, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
-		{
-			Log("failed to create descriptor sets!", LOG_CRITICAL);
-			return false;
-		}
-
-		return true;
-	}
-
-	bool Renderer::UpdateDescriptorSets(const Texture* texture) const
-	{	
-		Log("UpdateDescriptorSets is no longer used. You should be using PushDescriptorSets.", LOG_SERIOUS);
-		return false;
-
-		const Texture* renderTexture = texture;
-
-		if (!texture->Loaded())
-		{
-			Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
-			renderTexture = m_DebugTexture;
-		}
-
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-		{
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = m_UniformBuffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(UniformBufferObject);
-
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = renderTexture->GetImageView();
-			imageInfo.sampler = m_TextureSampler;
-
-			std::array<VkWriteDescriptorSet, DESCRIPTOR_COUNT> descriptorWrites = {};
-			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[0].dstSet = m_DescriptorSets[i];
-			descriptorWrites[0].dstBinding = 0;
-			descriptorWrites[0].dstArrayElement = 0;
-			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrites[0].descriptorCount = 1;
-			descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[1].dstSet = m_DescriptorSets[i];
-			descriptorWrites[1].dstBinding = 1;
-			descriptorWrites[1].dstArrayElement = 0;
-			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrites[1].descriptorCount = 1;
-			descriptorWrites[1].pImageInfo = &imageInfo;
-
-			vkUpdateDescriptorSets(m_Device, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
-		}
-
-		return true;
-	}
-
 	void Renderer::PushDescriptorSet(const Texture* texture) const
 	{
 		const Texture* renderTexture = texture;
@@ -875,7 +757,7 @@ namespace Bennett
 		bufferInfo.buffer = m_UniformBuffers[m_CurrentRenderFrame];
 		bufferInfo.offset = 0;
 		bufferInfo.range = sizeof(UniformBufferObject);
-
+		
 		VkDescriptorImageInfo imageInfo{};
 		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		imageInfo.imageView = renderTexture->GetImageView();
@@ -1082,8 +964,7 @@ namespace Bennett
 			vkDestroyDevice(m_Device, nullptr);
 			DestroyVulkanInstance();
 
-			m_PushConstantBuffer.ModelMatrix = glm::mat4(1.0f);
-			m_PushConstantBuffer.deltaTime = 0.0f;
+			PushConstants.ModelMatrix = glm::mat4(1.0f);
 
 			m_CurrentImageIndex = NULL;
 			m_AttachedWindow = nullptr;
@@ -1114,6 +995,11 @@ namespace Bennett
 			//Message about behaviour that is not an error but probably a bug.
 		case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
 			status = LOG_MINIMAL;
+			break;
+
+			//Message from shader debug printf.
+		case VK_DEBUG_REPORT_ERROR_BIT_EXT:
+			status = LOG_SERIOUS;
 			break;
 
 			//Message about a invalid behaviour that may cause crashes
@@ -1205,21 +1091,9 @@ namespace Bennett
 			createInfo.enabledLayerCount = 0;
 		}
 
-		need to make a new validation layer in the vulkan config or copy an existing one and alter it
-		and edit it to point to output here? idfk.
-	https://github.com/KhronosGroup/Vulkan-ValidationLayers/blob/main/docs/debug_printf.md
-		/*
-		*	Specifying additional features for debug shader printing.
-		*/
-		VkValidationFeatureEnableEXT enables[] = { VK_VALIDATION_FEATURE_ENABLE_DEBUG_PRINTF_EXT };
-		VkValidationFeaturesEXT features = {};
-		features.sType = VK_STRUCTURE_TYPE_VALIDATION_FEATURES_EXT;
-		features.enabledValidationFeatureCount = 1;
-		features.pEnabledValidationFeatures = enables;
-		createInfo.pNext = &features;
-		
 		//We can now create the instance.
-		if (vkCreateInstance(&createInfo, nullptr, &m_Instance) != VK_SUCCESS)
+		VkResult result = vkCreateInstance(&createInfo, nullptr, &m_Instance);
+		if (result != VK_SUCCESS)
 		{
 			Log("Failed to create vulkan instance.", LOG_CRITICAL);
 			return false;
@@ -1414,8 +1288,6 @@ namespace Bennett
 		if (m_EnableValidationLayers)
 		{
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-			extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
-			extensions.push_back(VK_EXT_VALIDATION_FEATURES_EXTENSION_NAME);
 		}
 
 		return extensions;
@@ -1449,7 +1321,9 @@ namespace Bennett
 		createInfo.messageSeverity =
 		VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
 		VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-		VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT |
+				
+		VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
 
 #ifdef _DEBUG
 		createInfo.messageSeverity |= VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
@@ -2126,4 +2000,123 @@ namespace Bennett
 		vkDestroyPipelineLayout(renderer.GetDevice(), pipeline.m_Layout, nullptr);
 		pipeline.m_Layout = VK_NULL_HANDLE;
 	}
+
+
+	#pragma region No longer used.
+
+	/*
+
+	void Renderer::BindDescriptorSet() const
+	{
+		Log("Binding descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		return;
+
+		assert(m_CurrentPipeline != nullptr);
+		vkCmdBindDescriptorSets(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Layout, 0, 1, &m_DescriptorSets[m_CurrentRenderFrame], 0, nullptr);
+	}
+
+	bool Renderer::CreateDescriptorPool()
+	{
+		Log("Allocating descriptor pools is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		return false;
+
+		std::array<VkDescriptorPoolSize, DESCRIPTOR_COUNT> poolSize{};
+		poolSize[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		poolSize[0].descriptorCount = MAX_FRAMES_IN_FLIGHT;
+		poolSize[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSize[1].descriptorCount = MAX_FRAMES_IN_FLIGHT;
+
+		VkDescriptorPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT_EXT | VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT | VK_DESCRIPTOR_BINDING_UPDATE_UNUSED_WHILE_PENDING_BIT;
+		poolInfo.poolSizeCount = (uint32_t)poolSize.size();
+		poolInfo.pPoolSizes = poolSize.data();
+		poolInfo.maxSets = MAX_FRAMES_IN_FLIGHT;
+
+		if (vkCreateDescriptorPool(m_Device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
+		{
+			Log("Failed to create descriptor pool", LOG_SERIOUS);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Renderer::AllocateDescriptorSets()
+	{
+		Log("Allocating descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		return false;
+
+		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = m_DescriptorPool;
+		allocInfo.descriptorSetCount = MAX_FRAMES_IN_FLIGHT;
+		allocInfo.pSetLayouts = layouts.data();
+		allocInfo.pNext = nullptr;
+
+		m_DescriptorSets.clear();
+		m_DescriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+
+		if (vkAllocateDescriptorSets(m_Device, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
+		{
+			Log("failed to create descriptor sets!", LOG_CRITICAL);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool Renderer::UpdateDescriptorSets(const Texture* texture) const
+	{
+		Log("UpdateDescriptorSets is no longer used. You should be using PushDescriptorSets.", LOG_SERIOUS);
+		return false;
+
+		const Texture* renderTexture = texture;
+
+		if (!texture->Loaded())
+		{
+			Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			renderTexture = m_DebugTexture;
+		}
+
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+		{
+			VkDescriptorBufferInfo bufferInfo{};
+			bufferInfo.buffer = m_UniformBuffers[i];
+			bufferInfo.offset = 0;
+			bufferInfo.range = sizeof(UniformBufferObject);
+
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = renderTexture->GetImageView();
+			imageInfo.sampler = m_TextureSampler;
+
+			std::array<VkWriteDescriptorSet, DESCRIPTOR_COUNT> descriptorWrites = {};
+			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[0].dstSet = m_DescriptorSets[i];
+			descriptorWrites[0].dstBinding = 0;
+			descriptorWrites[0].dstArrayElement = 0;
+			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrites[0].descriptorCount = 1;
+			descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[1].dstSet = m_DescriptorSets[i];
+			descriptorWrites[1].dstBinding = 1;
+			descriptorWrites[1].dstArrayElement = 0;
+			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrites[1].descriptorCount = 1;
+			descriptorWrites[1].pImageInfo = &imageInfo;
+
+			vkUpdateDescriptorSets(m_Device, (uint32_t)descriptorWrites.size(), descriptorWrites.data(), 0, nullptr);
+		}
+
+		return true;
+	}
+	*/
+
+#pragma endregion
+
 }
+

@@ -1,30 +1,25 @@
 #pragma once
 #include <World/Entity.h>
 #include <vector>
-#include <Rendering/IndexBuffer.h>
 #include <Rendering/VertexBuffer.h>
 #include <World/Terrain/TerrainVertex.h>
 #include <Rendering/CustomPipelineObject.h>
 
+#define TERRAIN_CELL_SIZE 8.0f
+#define TERRAIN_WIDTH 64
+#define TERRAIN_CHUNK_COUNT (TERRAIN_WIDTH * TERRAIN_WIDTH)
+
 namespace Bennett
 {
-	/// <summary>
-	/// Specification:
-	/// 
-	/// Custom Graphics Pipeline:
-	/// - Triangle Strip
-	/// - Using custom vertex.
-	/// 
-	/// </summary>
-	/// 
 	class TerrainChunk;
 	class Texture;
+	class TerrainDetailBuffer;
 
 	class BENNETT_ENGINE Terrain : public Entity
 	{
 	private:
+		glm::vec2 m_ChunkLocations[TERRAIN_CHUNK_COUNT];
 		CustomPipeline m_TerrainPipeline;
-		IndexBuffer m_IndexBuffer;
 		VertexBuffer m_VertexBuffer;
 		Texture* m_Texture;
 

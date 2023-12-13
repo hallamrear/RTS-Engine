@@ -36,7 +36,8 @@ namespace Bennett
 		glm::mat4 matrix = glm::mat4(1.0f);
 		matrix = glm::translate(matrix, m_Position);
 		matrix = glm::scale(matrix, glm::vec3(m_Radius * 2));
-		renderer.PushModelMatrix(matrix);
+		renderer.PushConstants.ModelMatrix = matrix;
+		renderer.UpdatePushConstants();
 
 		if (GetModel() != nullptr)
 		{

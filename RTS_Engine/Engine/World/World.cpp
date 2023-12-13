@@ -172,18 +172,18 @@ namespace Bennett
 
     void World::Update(const float& deltaTime)
     {
-        m_Octree->Clear();
+        //m_Octree->Clear();
         for (auto& ent : m_Entities)
         {
-            m_Octree->AddDataObject(ent.second);
+        //    m_Octree->AddDataObject(ent.second);
             ent.second->Update(deltaTime);
         }
-        m_Octree->Update(deltaTime);
+        //m_Octree->Update(deltaTime);
     }
 
     void World::Render(const Renderer& renderer)
     {
-        m_Octree->Render(renderer);
+        //m_Octree->Render(renderer);
         for (auto& ent : m_Entities)
         {
             ent.second->Render(renderer);

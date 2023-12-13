@@ -4,6 +4,7 @@ layout(binding = 0) uniform UniformBufferObject
 {
 	mat4 View;
 	mat4 Projection;
+	vec2 ChunkPositions[64];
 } UBO;
 
 layout(binding = 1) uniform sampler2D texSampler;
@@ -11,8 +12,6 @@ layout(binding = 1) uniform sampler2D texSampler;
 layout(push_constant) uniform PushConstants
 {
 	mat4 Model;
-	float dt;
-	float padding[3];
 } PC;
 
 layout(location = 0) in vec3 inPosition;

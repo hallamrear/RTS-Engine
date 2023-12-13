@@ -78,14 +78,22 @@ namespace Bennett
 		{
 			if (m_InputMonitor->IsCursorLocked())
 			{
-				m_InputMonitor->UnlockCursor();
-				Log("Mouse unlocked.", LOG_SAFE);				
+				m_InputMonitor->UnlockCursor(); 
+				
+				if (ENABLE_LOG_MOUSE_LOCK_MESSAGE)
+				{
+					Log("Mouse unlocked.", LOG_SAFE);
+				}
 			}
 			else
 			{ 
 				m_InputMonitor->LockCursor();
-				Log("Mouse locked to screen centre.", LOG_SAFE);
 				m_InputMonitor->SetMousePositionToCentre();
+
+				if (ENABLE_LOG_MOUSE_LOCK_MESSAGE)
+				{
+					Log("Mouse locked to screen centre.", LOG_SAFE);
+				}
 			}
 		};
 	}

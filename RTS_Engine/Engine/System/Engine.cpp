@@ -37,7 +37,7 @@ namespace Bennett
 		if (ENABLE_LOG_DELTATIME_AND_FPS)
 		{
 			Log("DT: " + std::to_string(DeltaTime), LOG_SAFE);
-			float fps = 1000 / DeltaTime;
+			double fps = 1000.0f / DeltaTime;
 			Log("FPS: " + std::to_string(fps), LOG_SAFE);
 		}
 

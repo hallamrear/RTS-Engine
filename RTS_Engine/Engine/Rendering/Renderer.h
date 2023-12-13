@@ -1,6 +1,7 @@
 #pragma once
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.h>
+#include <World/Terrain/Terrain.h>
 #include <Rendering/CustomPipelineObject.h>
 #include <optional>
 
@@ -13,13 +14,12 @@ namespace Bennett
 	{
 		glm::mat4 View;
 		glm::mat4 Projection;
+		glm::vec2 TerrainChunkLocations[TERRAIN_CHUNK_COUNT];
 	};
 
 	struct BENNETT_ENGINE PushConstantBuffer
 	{
 		glm::mat4 ModelMatrix;
-		float deltaTime;
-		float padding[3];
 	};
 
 	class BENNETT_ENGINE Renderer
@@ -320,7 +320,6 @@ namespace Bennett
 		void BeginRenderPass();
 		void EndRenderPass();
 
-		static PushConstantBuffer m_PushConstantBuffer;
 
 		/// <summary>
 		/// Texture Sampler.
@@ -364,6 +363,7 @@ namespace Bennett
 
 	public:
 		static UniformBufferObject UniformMatrixBuffer;
+		static PushConstantBuffer  PushConstants;
 
 		const VkDevice& GetDevice() const;
 		const VkCommandBuffer& GetCommandBuffer() const;
@@ -385,9 +385,8 @@ namespace Bennett
 		void StartFrame();
 		void BindDescriptorSet() const;
 		void UpdateUniformBuffers() const;
+		void UpdatePushConstants() const;
 		void PushDescriptorSet(const Texture* texture) const;
-		void PushModelMatrix(const glm::mat4& modelMatrix) const;
-		void UpdatePushConstantDeltaTime(const float& deltaTime) const;
 		void EndFrame();
 
 		const CustomPipeline* GetCurrentGraphicsPipeline() const;

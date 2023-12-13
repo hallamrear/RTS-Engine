@@ -1,17 +1,17 @@
 #version 450
-#extension GL_EXT_debug_printf : enable
+
+int chunkCount = 4096;
 
 layout(binding = 0) uniform UniformBufferObject
 {
 	mat4 View;
 	mat4 Projection;
+	vec2 ChunkPositions[4096];
 } UBO;
 
 layout(push_constant) uniform PushConstants
 {
 	mat4 Model;
-	float dt;
-	float padding[3];
 } PC;
 
 layout(binding = 1) uniform sampler2D texSampler;
@@ -29,20 +29,27 @@ void main()
 	float rowIndex = mod(gl_VertexIndex, VERTICES_PER_RUN);
 	float clampedIndex = clamp(rowIndex - 1.0f, 0.0f, CLAMPED_VERTICES_PER_RUN);
 	
-	vec3 position = vec3(0.0f, 0.0f, 0.0f);
-	position.x = floor(clampedIndex / 2.0f);
-	position.z = mod(clampedIndex, 2.0f);
-	position.z += floor(gl_VertexIndex / VERTICES_PER_RUN);
+	vec3 gridPosition = vec3(0.0f, 0.0f, 0.0f);
+	gridPosition.x = floor(clampedIndex / 2.0f);
+	gridPosition.z = mod(clampedIndex, 2.0f);
+	gridPosition.z += floor(gl_VertexIndex / VERTICES_PER_RUN);
 	
-	UV.x = outPosition.x / 8.0f;
-	UV.y = outPosition.z / 8.0f;
+	vec2 chunkPosition = UBO.ChunkPositions[gl_InstanceIndex];
+	
+	vec3 position = vec3(gridPosition.x + chunkPosition.x,	gridPosition.y, gridPosition.z + chunkPosition.y);
+	vec4 wPos = vec4(position, 1.0f) * PC.Model;
+	position = wPos.xyz;
+	
+	UV.x = position.x / chunkCount;
+	UV.y = position.z / chunkCount;
 	vec4 sampledColour = texture(texSampler, UV);
-	position.y = sampledColour.r * 10;
+	position.y = sampledColour.r * 20.0f;			
 	
-	outPosition = position;
-	
+	//UV = chunkPosition;
+
+	outPosition = wPos.xyz;
 	mat4 MVP =	UBO.Projection * UBO.View * PC.Model;
-	gl_Position = MVP * vec4(outPosition, 1.0f);
+	gl_Position = MVP * vec4(position, 1.0f);
 	
     //gl_VertexIndex
 	//gl_InstanceIndex

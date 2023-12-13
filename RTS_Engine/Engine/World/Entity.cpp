@@ -51,7 +51,7 @@ namespace Bennett
 		glm::mat4 rotate = glm::toMat4(m_Rotation);
 		glm::mat4 translate = glm::translate(matrix, m_Position);
 		matrix = translate * rotate * scale;
-		renderer.PushModelMatrix(matrix);
+		renderer.PushConstants.ModelMatrix = matrix;
 
 		if (m_Model != nullptr)
 		{

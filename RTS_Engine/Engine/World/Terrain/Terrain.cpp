@@ -6,17 +6,25 @@
 #include <Rendering/Texture.h>
 #include <Rendering/Renderer.h>
 #include <Rendering/ShaderLoader.h>
+#include <cmath>
+
+#define STB_PERLIN_IMPLEMENTATION
 #include <stb_perlin.h>
 
 namespace Bennett
 {
 	Terrain::Terrain(int size) : Entity("Terrain")
 	{
+		m_Texture = nullptr;
 		m_Indices = std::vector<VertexIndex>();
 		m_Vertices = std::vector<TerrainVertex>();
 		m_VertexBuffer = {};
-		m_IndexBuffer = {};
 		m_TerrainPipeline = {};
+
+		for (size_t i = 0; i < TERRAIN_CHUNK_COUNT; i++)
+		{
+			m_ChunkLocations[i] = glm::vec2(0.0f, 0.0f);
+		}
 	}
 
 	Terrain::~Terrain()
@@ -27,7 +35,16 @@ namespace Bennett
 	void Terrain::Generate()
 	{
 		Renderer& renderer = ServiceLocator::GetRenderer();
-		const float offset = TriangulationData::CELL_SIZE / TriangulationData::GRID_RESOLUTION;
+
+		for (int i = 0; i < TERRAIN_CHUNK_COUNT; i++)
+		{
+			int x = i / TERRAIN_WIDTH;
+			int z = i % TERRAIN_WIDTH;
+			m_ChunkLocations[i] = glm::vec2((x * TERRAIN_CELL_SIZE), (z * TERRAIN_CELL_SIZE * 0.5f));
+		}	
+		
+		size_t size = sizeof(glm::vec2) * TERRAIN_CHUNK_COUNT;
+		memcpy(renderer.UniformMatrixBuffer.TerrainChunkLocations, m_ChunkLocations, size);
 
 		std::string src = ServiceLocator::GetResourceFolderLocation();
 
@@ -59,12 +76,12 @@ namespace Bennett
 		CreateTerrainChunkMesh();
 
 		//todo: this is not offset.
-		Log(LOG_SAFE, "Generated %d chunks in terrain.\n", offset);
+		Log(LOG_SAFE, "Generated %d chunks in terrain.\n", TERRAIN_CHUNK_COUNT);
 	}
 
 	void Terrain::CreateTerrainChunkMesh()
 	{
-		if (m_IndexBuffer.Count() == -1 || m_VertexBuffer.Count() == -1)
+		if (m_VertexBuffer.Count() == -1)
 		{
 			std::vector<TerrainVertex> vertices;
 
@@ -73,11 +90,7 @@ namespace Bennett
 				vertices.push_back(TerrainVertex(0.0f, 0.0f, 0.0f));
 			}
 
-			size_t size = 4 * 4;
-			int height = 4, width = 4;
-
 			VertexBuffer::Create(m_VertexBuffer, vertices);
-			//IndexBuffer::Create(m_IndexBuffer, m_Indices);
 		}
 	}
 
@@ -90,20 +103,23 @@ namespace Bennett
 
 	void Terrain::Render(const Renderer& renderer)
 	{
-		renderer.PushModelMatrix(glm::mat4(1.0f));
-
-		size_t chunkCount = 16;
+		glm::mat4 matrix = glm::mat4(1.0f);
+		glm::mat4 scale = glm::scale(matrix, GetScale());
+		glm::mat4 rotate = glm::toMat4(GetRotation());
+		glm::vec3 pos = GetPosition();
+		glm::mat4 translate = glm::translate(matrix, pos);
+		matrix = translate * rotate * scale;
+		renderer.PushConstants.ModelMatrix = matrix;
+		renderer.UpdatePushConstants();
 
 		const CustomPipeline* gp = renderer.GetCurrentGraphicsPipeline();
 		renderer.SetCustomGraphicsPipeline(m_TerrainPipeline);
 		renderer.PushDescriptorSet(m_Texture);
-		renderer.UpdateUniformBuffers();
-
+		size_t size = sizeof(glm::vec2) * TERRAIN_CHUNK_COUNT;
+		memcpy(renderer.UniformMatrixBuffer.TerrainChunkLocations, m_ChunkLocations, size);
+ 		renderer.UpdateUniformBuffers();
 		m_VertexBuffer.Bind();
-		vkCmdDraw(renderer.GetCommandBuffer(), m_VertexBuffer.Count(), 1, 0, 0);
-		//m_IndexBuffer.Bind();
-		//vkCmdDrawIndexed(renderer.GetCommandBuffer(), m_IndexBuffer.Count(), 8, 0, 0, 0);
-
+		vkCmdDraw(renderer.GetCommandBuffer(), m_VertexBuffer.Count(), TERRAIN_CHUNK_COUNT, 0, 0);
 		renderer.SetCustomGraphicsPipeline(*gp);
 		renderer.SetSolidGraphicsPipeline();
 		gp = nullptr;

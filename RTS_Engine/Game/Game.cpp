@@ -25,7 +25,8 @@ Game::~Game()
     }
 }
 
-Bennett::Entity* entity = nullptr;
+Bennett::Entity* origin = nullptr;
+Bennett::Entity* terrain = nullptr;
 
 bool Game::Initialise()
 {
@@ -56,11 +57,12 @@ bool Game::Initialise()
 
     Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
     
-    Bennett::Entity* Terrain = GetWorld().CreateTerrain();
-    entity = GetWorld().SpawnEntity("Test");
-    entity->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
-    entity->SetModel(am.GetModel("1x1_Cube"));
-    entity->GetModel()->SetTexture(am.GetTexture("Car4"));
+    terrain = GetWorld().CreateTerrain();
+
+    origin = GetWorld().SpawnEntity("TerrainOrigin");
+    origin->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
+    origin->SetModel(am.GetModel("1x1_Cube"));
+    origin->GetModel()->SetTexture(am.GetTexture("Car4"));
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -94,6 +96,21 @@ void Game::RunGameLoop()
 
         ProcessInput(dTime);
         Update(dTime);
+
+        float rotSpeed = 50.0f;
+        float r = 10.0f;    
+        float t = glm::radians(90.0f);
+        static float s = 0.0f;
+        s += dTime * rotSpeed;
+        s = fmod(s, 360.0f);
+
+        glm::vec3 position{};
+        position.x = r * cos(glm::radians(s)) * sin(t);
+        position.y = 0.0f;
+        position.z = r * sin(glm::radians(s)) * sin(t);
+        terrain->SetPosition(position);
+        origin->SetPosition(terrain->GetPosition());
+
         Render();
 
         lTime = cTime;
