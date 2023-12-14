@@ -1,12 +1,13 @@
 #version 450
 
-int chunkCount = 4096;
+int terrainWidth = 50;
+int chunkCount = terrainWidth * terrainWidth;
 
 layout(binding = 0) uniform UniformBufferObject
 {
 	mat4 View;
 	mat4 Projection;
-	vec2 ChunkPositions[4096];
+	vec2 ChunkPositions[2500]; /* EQUAL TO CHUNK COUNT */
 } UBO;
 
 layout(push_constant) uniform PushConstants
@@ -36,22 +37,20 @@ void main()
 	
 	vec2 chunkPosition = UBO.ChunkPositions[gl_InstanceIndex];
 	
-	vec3 position = vec3(gridPosition.x + chunkPosition.x,	gridPosition.y, gridPosition.z + chunkPosition.y);
-	vec4 wPos = vec4(position, 1.0f) * PC.Model;
-	position = wPos.xyz;
+	vec3 sumPosition = vec3(gridPosition.x + chunkPosition.x, gridPosition.y, gridPosition.z + chunkPosition.y);
+	vec4 worldPosition = vec4(sumPosition, 1.0f) * PC.Model;
 	
-	UV.x = position.x / chunkCount;
-	UV.y = position.z / chunkCount;
-	vec4 sampledColour = texture(texSampler, UV);
-	position.y = sampledColour.r * 20.0f;			
-	
-	//UV = chunkPosition;
+	float fullSize = (terrainWidth * 8);
 
-	outPosition = wPos.xyz;
+	UV.x = sumPosition.x / fullSize;
+	UV.y = sumPosition.z / fullSize;
+	vec4 sampledColour = texture(texSampler, UV);
+	sumPosition.y = sampledColour.r * 20.0f;			
+	
+	outPosition = worldPosition.xyz;
 	mat4 MVP =	UBO.Projection * UBO.View * PC.Model;
-	gl_Position = MVP * vec4(position, 1.0f);
-	
+	gl_Position = MVP * vec4(sumPosition, 1.0f);
+
     //gl_VertexIndex
-	//gl_InstanceIndex
-	
+	//gl_InstanceIndex	
 }

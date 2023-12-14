@@ -2,6 +2,8 @@
 
 #include "pch.h"
 #include <Rendering/Window.h>
+#include <System/Manager/AssetManager.h>
+#include <System/ServiceLocator.h>
 #include <System/Engine.h>
 #include <System/Logger.h>
 #include <System/InputMonitor.h>
@@ -57,6 +59,19 @@ bool Editor::Initialise()
         Log("Failed to initialise engine systems.", LOG_CRITICAL);
         return FALSE;
     }
+
+    Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
+
+    Entity* terrain = GetWorld().CreateTerrain();
+
+    Entity* origin = GetWorld().SpawnEntity("TerrainOrigin");
+    origin->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
+    origin->SetModel(am.GetModel("1x1_Cube"));
+    origin->GetModel()->SetTexture(am.GetTexture("Car4"));
+
+    GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 }
 
 bool Editor::CreateWindows()
@@ -127,7 +142,7 @@ void Editor::RunGameLoop()
             if (dTime > TIMESTEP_CAP)
                 dTime = TIMESTEP_CAP;
 
-            //ProcessInput(dTime);
+            ProcessInput(dTime);
             Update(dTime);
             Render();
 

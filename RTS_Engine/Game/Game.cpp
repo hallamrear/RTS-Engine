@@ -59,13 +59,25 @@ bool Game::Initialise()
     
     terrain = GetWorld().CreateTerrain();
 
-    origin = GetWorld().SpawnEntity("TerrainOrigin");
+ /*   origin = GetWorld().SpawnEntity("TerrainOrigin");
     origin->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
     origin->SetModel(am.GetModel("1x1_Cube"));
-    origin->GetModel()->SetTexture(am.GetTexture("Car4"));
+    origin->GetModel()->SetTexture(am.GetTexture("Car4"));*/
+
+    Bennett::Entity* entity = nullptr;
+    Bennett::Terrain* t = (Bennett::Terrain*)terrain;
+
+    for (size_t i = 0; i < TERRAIN_CHUNK_COUNT; i++)
+    {
+        entity = GetWorld().SpawnEntity("Origin_" + std::to_string(i));
+        entity->SetPosition(glm::vec3(t->m_ChunkLocations[i].x, 0.0f, t->m_ChunkLocations[i].y));
+        entity->SetModel(am.GetModel("1x1_Cube"));
+        entity->GetModel()->SetTexture(am.GetTexture("Car4"));
+    }
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
     return true;
@@ -104,12 +116,12 @@ void Game::RunGameLoop()
         s += dTime * rotSpeed;
         s = fmod(s, 360.0f);
 
-        glm::vec3 position{};
-        position.x = r * cos(glm::radians(s)) * sin(t);
-        position.y = 0.0f;
-        position.z = r * sin(glm::radians(s)) * sin(t);
-        terrain->SetPosition(position);
-        origin->SetPosition(terrain->GetPosition());
+        //glm::vec3 position{};
+        //position.x = r * cos(glm::radians(s)) * sin(t);
+        //position.y = 0.0f;
+        //position.z = r * sin(glm::radians(s)) * sin(t);
+        //terrain->SetPosition(position);
+        //origin->SetPosition(terrain->GetPosition());
 
         Render();
 

@@ -23,7 +23,7 @@ namespace Bennett
 
 		for (size_t i = 0; i < TERRAIN_CHUNK_COUNT; i++)
 		{
-			m_ChunkLocations[i] = glm::vec2(0.0f, 0.0f);
+			m_ChunkLocations[i] = ChunkPosition();
 		}
 	}
 
@@ -40,11 +40,12 @@ namespace Bennett
 		{
 			int x = i / TERRAIN_WIDTH;
 			int z = i % TERRAIN_WIDTH;
-			m_ChunkLocations[i] = glm::vec2((x * TERRAIN_CELL_SIZE), (z * TERRAIN_CELL_SIZE * 0.5f));
+			m_ChunkLocations[i].x = (double)(x * TERRAIN_CELL_SIZE);
+			m_ChunkLocations[i].y = (double)(z * TERRAIN_CELL_SIZE);
 		}	
 		
-		size_t size = sizeof(glm::vec2) * TERRAIN_CHUNK_COUNT;
-		memcpy(renderer.UniformMatrixBuffer.TerrainChunkLocations, m_ChunkLocations, size);
+		size_t size = sizeof(ChunkPosition) * TERRAIN_CHUNK_COUNT;
+		memcpy(&renderer.UniformMatrixBuffer.TerrainChunkLocations, &m_ChunkLocations, size);
 
 		std::string src = ServiceLocator::GetResourceFolderLocation();
 
@@ -61,7 +62,7 @@ namespace Bennett
 		}
 
 		CustomPipelineDetails terrainDetails;
-		terrainDetails.Cullmode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
+		terrainDetails.Cullmode = VkCullModeFlagBits::VK_CULL_MODE_FRONT_BIT;
 		terrainDetails.PolygonMode = VkPolygonMode::VK_POLYGON_MODE_LINE;
 		terrainDetails.Topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
 		terrainDetails.InputAttributeDescription = TerrainVertex::GetAttributeDescription();
@@ -71,7 +72,9 @@ namespace Bennett
 
 		renderer.CreateCustomPipeline(m_TerrainPipeline, terrainDetails);
 
+		m_Texture = AssetManager::GetTexture("mina");
 		m_Texture = AssetManager::GetTexture("noiseTexture");
+		m_Texture = AssetManager::GetTexture("test");
 
 		CreateTerrainChunkMesh();
 
@@ -87,7 +90,7 @@ namespace Bennett
 
 			for (size_t i = 0; i < 160; i++)
 			{
-				vertices.push_back(TerrainVertex(0.0f, 0.0f, 0.0f));
+				vertices.push_back(TerrainVertex(rand() % 10, 0.0f, 0.0f));
 			}
 
 			VertexBuffer::Create(m_VertexBuffer, vertices);
@@ -115,7 +118,7 @@ namespace Bennett
 		const CustomPipeline* gp = renderer.GetCurrentGraphicsPipeline();
 		renderer.SetCustomGraphicsPipeline(m_TerrainPipeline);
 		renderer.PushDescriptorSet(m_Texture);
-		size_t size = sizeof(glm::vec2) * TERRAIN_CHUNK_COUNT;
+		size_t size = sizeof(ChunkPosition) * TERRAIN_CHUNK_COUNT;
 		memcpy(renderer.UniformMatrixBuffer.TerrainChunkLocations, m_ChunkLocations, size);
  		renderer.UpdateUniformBuffers();
 		m_VertexBuffer.Bind();

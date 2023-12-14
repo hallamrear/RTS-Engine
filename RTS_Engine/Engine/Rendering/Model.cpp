@@ -30,7 +30,6 @@ namespace Bennett
 			return;
 		}
 
-		//renderer.BindDescriptorSet();
 		renderer.PushDescriptorSet(&GetTexture());
 		renderer.UpdateUniformBuffers();
 

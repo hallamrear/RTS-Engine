@@ -14,7 +14,7 @@ namespace Bennett
 	{
 		glm::mat4 View;
 		glm::mat4 Projection;
-		glm::vec2 TerrainChunkLocations[TERRAIN_CHUNK_COUNT];
+		ChunkPosition TerrainChunkLocations[TERRAIN_CHUNK_COUNT];
 	};
 
 	struct BENNETT_ENGINE PushConstantBuffer

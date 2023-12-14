@@ -11,6 +11,8 @@ namespace Bennett
 	{
 		m_MouseSensitivity = 0.5f;
 		m_MouseDelta = glm::vec2(0.0f, 0.0f);
+		m_MovementSpeed = 300.0f;
+		m_RotationSpeed = 500.0f;
 	}
 
 	FreeCamera::~FreeCamera()

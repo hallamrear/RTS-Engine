@@ -65,6 +65,11 @@ namespace Bennett
 	void Camera::Translate(const glm::vec3& offset)
 	{
 		m_Position += offset;
+
+		if (ENABLE_LOG_CAMERA_LOCATION_PRINT)
+		{
+			Log(LOG_STATUS::LOG_SAFE, "Camera Position: %f, %f, %f\n", m_Position.x, m_Position.y, m_Position.z);
+		}
 	}
 
 	void Camera::Rotate(const glm::vec3& offset)
@@ -72,6 +77,11 @@ namespace Bennett
 		m_Rotation += offset;
 		ClampRotations();
 		UpdateBasisVectors();
+
+		if (ENABLE_LOG_CAMERA_LOCATION_PRINT)
+		{
+			Log(LOG_STATUS::LOG_SAFE, "Camera Rotation: %f, %f, %f\n", m_Rotation.x, m_Rotation.y, m_Rotation.z);
+		}
 	}
 
 	const glm::vec3& Camera::GetRotation() const
@@ -147,11 +157,21 @@ namespace Bennett
 	void Camera::SetPosition(const glm::vec3& position)
 	{
 		m_Position = position;
+
+		if (ENABLE_LOG_CAMERA_LOCATION_PRINT)
+		{
+			Log(LOG_STATUS::LOG_SAFE, "Camera Position: %f, %f, %f\n", m_Position.x, m_Position.y, m_Position.z);
+		}
 	}
 
 	void Camera::SetRotation(const glm::vec3& rotation)
 	{ 
 		m_Rotation = rotation;
+
+		if (ENABLE_LOG_CAMERA_LOCATION_PRINT)
+		{
+			Log(LOG_STATUS::LOG_SAFE, "Camera Rotation: %f, %f, %f\n", m_Rotation.x, m_Rotation.y, m_Rotation.z);
+		}
 	}
 
 	float Camera::GetFarPlaneDistance() const
