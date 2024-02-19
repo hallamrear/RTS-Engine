@@ -7,18 +7,20 @@
 #include <Rendering/Renderer.h>
 #include <Rendering/ShaderLoader.h>
 #include <cmath>
+#include <External/PerlinNoise.hpp>
 
 #define STB_PERLIN_IMPLEMENTATION
 #include <stb_perlin.h>
 
 namespace Bennett
 {
-	Terrain::Terrain(int size) : Entity("Terrain")
+	Terrain::Terrain() : Entity("Terrain")
 	{
 		m_Texture = nullptr;
 		m_Indices = std::vector<VertexIndex>();
 		m_Vertices = std::vector<TerrainVertex>();
 		m_VertexBuffer = {};
+		m_IndexBuffer = {};
 		m_TerrainPipeline = {};
 
 		for (size_t i = 0; i < TERRAIN_CHUNK_COUNT; i++)
@@ -32,9 +34,10 @@ namespace Bennett
 
 	}
 
-	void Terrain::Generate()
+	void Terrain::Generate(const long& seed)
 	{
 		Renderer& renderer = ServiceLocator::GetRenderer();
+		siv::PerlinNoise perlin;
 
 		for (int i = 0; i < TERRAIN_CHUNK_COUNT; i++)
 		{
@@ -42,6 +45,14 @@ namespace Bennett
 			int z = i % TERRAIN_WIDTH;
 			m_ChunkLocations[i].x = (double)(x * TERRAIN_CELL_SIZE);
 			m_ChunkLocations[i].y = (double)(z * TERRAIN_CELL_SIZE);
+
+			int gridX = i / (int)TERRAIN_CELL_SIZE;
+			int gridZ = i % (int)TERRAIN_CELL_SIZE;
+			glm::vec2 gridPosition = GridPoints[gridX][gridZ];
+
+			glm::vec3 samplePosition = glm::vec3(m_ChunkLocations[i].x + gridPosition.x, 0.0f, m_ChunkLocations[i].y + gridPosition.y);
+			double height = GetPointHeight(samplePosition);
+			samplePosition.y = height;
 		}	
 		
 		size_t size = sizeof(ChunkPosition) * TERRAIN_CHUNK_COUNT;
@@ -74,7 +85,7 @@ namespace Bennett
 
 		m_Texture = AssetManager::GetTexture("mina");
 		m_Texture = AssetManager::GetTexture("noiseTexture");
-		m_Texture = AssetManager::GetTexture("test");
+		m_Texture = AssetManager::GetTexture("noiseTexture2");
 
 		CreateTerrainChunkMesh();
 
@@ -82,6 +93,31 @@ namespace Bennett
 		Log(LOG_SAFE, "Generated %d chunks in terrain.\n", TERRAIN_CHUNK_COUNT);
 	}
 
+	double Terrain::GetPointHeight(const glm::vec3& position)
+	{
+		return 0.0;
+
+		//perlin.noise2D(samplePosition.x, samplePosition.y);
+	}
+
+	void Terrain::CreateTerrainChunkMesh()
+	{
+		if (m_VertexBuffer.Count() == -1 && m_IndexBuffer.Count() == -1)
+		{
+			std::vector<TerrainVertex> vertices(160, TerrainVertex());
+			//vertices.resize(160);
+			std::vector<unsigned int> indices;
+
+			/*for (size_t i = 0; i < 160; i++)
+			{
+				vertices.push_back(TerrainVertex(0.0f, 0.0f, 0.0f));
+			}*/
+
+			VertexBuffer::Create(m_VertexBuffer, vertices);
+		}
+	}
+
+	/*
 	void Terrain::CreateTerrainChunkMesh()
 	{
 		if (m_VertexBuffer.Count() == -1)
@@ -90,17 +126,18 @@ namespace Bennett
 
 			for (size_t i = 0; i < 160; i++)
 			{
-				vertices.push_back(TerrainVertex(rand() % 10, 0.0f, 0.0f));
+				vertices.push_back(TerrainVertex(0.0f, 0.0f, 0.0f));
 			}
 
 			VertexBuffer::Create(m_VertexBuffer, vertices);
 		}
 	}
+	*/
 
-	Terrain* Terrain::Create(int size)
+	Terrain* Terrain::Create(const long& seed)
 	{
-		Terrain* terrain = new Terrain(size);
-		terrain->Generate();
+		Terrain* terrain = new Terrain();
+		terrain->Generate(seed);
 		return terrain;
 	}
 
@@ -123,6 +160,8 @@ namespace Bennett
  		renderer.UpdateUniformBuffers();
 		m_VertexBuffer.Bind();
 		vkCmdDraw(renderer.GetCommandBuffer(), m_VertexBuffer.Count(), TERRAIN_CHUNK_COUNT, 0, 0);
+		//vkCmdDrawIndexed(renderer.GetCommandBuffer(), m_IndexBuffer.Count(), TERRAIN_CHUNK_COUNT, 0, 0, 0);
+
 		renderer.SetCustomGraphicsPipeline(*gp);
 		renderer.SetSolidGraphicsPipeline();
 		gp = nullptr;

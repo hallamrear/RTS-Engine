@@ -107,6 +107,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Collision\Collider\AABBCollider.cpp" />
+    <ClCompile Include="World\Terrain\GridBasedTerrain.cpp" />
     <ClCompile Include="Rendering\CustomPipelineObject.cpp" />
     <ClCompile Include="Rendering\Buffer.cpp" />
     <ClCompile Include="Rendering\IndexBuffer.cpp" />
@@ -155,6 +156,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\Collider\AABBCollider.h" />
+    <ClInclude Include="External\PerlinNoise.hpp" />
+    <ClInclude Include="World\Terrain\GridBasedTerrain.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />
     <ClInclude Include="Rendering\Buffer.h" />
     <ClInclude Include="Rendering\IndexBuffer.h" />
@@ -199,6 +202,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
+    <ClInclude Include="Defines\TerrainDefines.h" />
     <ClInclude Include="World\Terrain\TerrainVertex.h" />
     <ClInclude Include="World\Entity.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>

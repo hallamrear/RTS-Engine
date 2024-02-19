@@ -1,9 +1,10 @@
 #version 450
+#extension GL_EXT_scalar_block_layout : require
 
 int terrainWidth = 50;
 int chunkCount = terrainWidth * terrainWidth;
 
-layout(binding = 0) uniform UniformBufferObject
+layout(std430, binding = 0) uniform UniformBufferObject
 {
 	mat4 View;
 	mat4 Projection;
@@ -32,6 +33,7 @@ void main()
 	
 	vec3 gridPosition = vec3(0.0f, 0.0f, 0.0f);
 	gridPosition.x = floor(clampedIndex / 2.0f);
+	gridPosition.y = details.x * 1000.0f;
 	gridPosition.z = mod(clampedIndex, 2.0f);
 	gridPosition.z += floor(gl_VertexIndex / VERTICES_PER_RUN);
 	
@@ -45,7 +47,7 @@ void main()
 	UV.x = sumPosition.x / fullSize;
 	UV.y = sumPosition.z / fullSize;
 	vec4 sampledColour = texture(texSampler, UV);
-	sumPosition.y = sampledColour.r * 20.0f;			
+	sumPosition.y = sampledColour.r * 10.0f;			
 	
 	outPosition = worldPosition.xyz;
 	mat4 MVP =	UBO.Projection * UBO.View * PC.Model;

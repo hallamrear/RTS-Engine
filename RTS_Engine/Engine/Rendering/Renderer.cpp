@@ -1459,12 +1459,14 @@ namespace Bennett
 		queueCreateInfo.pQueuePriorities = &priority;
 
 		//Specifying used device features e.g. geometry shaders
-		VkPhysicalDeviceDescriptorIndexingFeatures indexing_features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT, nullptr };
+
+		VkPhysicalDeviceUniformBufferStandardLayoutFeatures ubopackingalignment_features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_UNIFORM_BUFFER_STANDARD_LAYOUT_FEATURES, nullptr };
+		VkPhysicalDeviceDescriptorIndexingFeatures indexing_features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT, &ubopackingalignment_features };
 		VkPhysicalDeviceFeatures2 bindlessFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2, &indexing_features };
 		vkGetPhysicalDeviceFeatures2(m_PhysicalDevice, &bindlessFeatures);
 		bindlessFeatures.features.samplerAnisotropy = VK_TRUE;
-		bool isBindlessSupported = indexing_features.descriptorBindingPartiallyBound && indexing_features.runtimeDescriptorArray;
-		
+		bool isBindlessSupported = indexing_features.descriptorBindingPartiallyBound && indexing_features.runtimeDescriptorArray && ubopackingalignment_features.uniformBufferStandardLayout;
+
 		if (isBindlessSupported == false)
 		{
 			Log("Bindless texturing not supported.", LOG_SERIOUS);

@@ -3,6 +3,9 @@
 
 namespace Bennett
 {
+	TerrainVertex::TerrainVertex()
+	{
+	}
 	TerrainVertex::TerrainVertex(const float& height, const float& normalPitch, const float& normalYaw)
 	{
 		m_Details.x = height;
@@ -12,7 +15,7 @@ namespace Bennett
 
 	TerrainVertex::~TerrainVertex()
 	{
-
+		m_Details = glm::vec3(0.0f);
 	}
 
 	VkVertexInputBindingDescription TerrainVertex::GetBindingDescription()

@@ -7,7 +7,7 @@ namespace Bennett
 {
     IndexBuffer::IndexBuffer() : Buffer()
     {
-        m_Count = -1;
+
     }
 
     IndexBuffer::~IndexBuffer()

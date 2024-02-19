@@ -7,7 +7,6 @@ namespace Bennett
 	class BENNETT_ENGINE VertexBuffer : public Buffer
 	{
 	private:
-		size_t m_Count;
 
 	public:
 		VertexBuffer();

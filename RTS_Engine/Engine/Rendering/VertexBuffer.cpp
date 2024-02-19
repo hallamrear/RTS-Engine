@@ -7,7 +7,7 @@ namespace Bennett
 {
 	VertexBuffer::VertexBuffer() : Buffer()
 	{
-		m_Count = -1;
+
 	}
 
 	VertexBuffer::~VertexBuffer()

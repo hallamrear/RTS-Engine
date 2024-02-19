@@ -14,6 +14,7 @@ namespace Bennett
 		glm::vec3 m_Details;
 
 	public:
+		TerrainVertex();
 		TerrainVertex(const float& height, const float& pitch, const float& yaw);
 		~TerrainVertex();
 

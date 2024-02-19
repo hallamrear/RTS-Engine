@@ -1,7 +1,7 @@
 #pragma once
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.h>
-#include <World/Terrain/Terrain.h>
+#include <Defines/TerrainDefines.h>
 #include <Rendering/CustomPipelineObject.h>
 #include <optional>
 
@@ -42,6 +42,7 @@ namespace Bennett
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 			VK_EXT_LINE_RASTERIZATION_EXTENSION_NAME,
 			VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
+			VK_KHR_UNIFORM_BUFFER_STANDARD_LAYOUT_EXTENSION_NAME,
 			"VK_EXT_descriptor_indexing"			
 
 		};

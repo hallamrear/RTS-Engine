@@ -11,6 +11,7 @@
 #include <System/Manager/AssetManager.h>
 #include <System/ServiceLocator.h>
 #include <World/Entity.h>
+#include <World/Terrain/Terrain.h>
 
 Game::Game()
 {
@@ -59,18 +60,37 @@ bool Game::Initialise()
     
     terrain = GetWorld().CreateTerrain();
 
- /*   origin = GetWorld().SpawnEntity("TerrainOrigin");
-    origin->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
-    origin->SetModel(am.GetModel("1x1_Cube"));
-    origin->GetModel()->SetTexture(am.GetTexture("Car4"));*/
+    //origin = GetWorld().SpawnEntity("TerrainOrigin");
+    //origin->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
+    //origin->SetModel(am.GetModel("1x1_Cube"));
+    //origin->GetModel()->SetTexture(am.GetTexture("Car4"));
 
     Bennett::Entity* entity = nullptr;
     Bennett::Terrain* t = (Bennett::Terrain*)terrain;
 
-    for (size_t i = 0; i < TERRAIN_CHUNK_COUNT; i++)
+    //for (size_t i = 0; i < TERRAIN_CHUNK_COUNT; i++)
+    //{
+    //    entity = GetWorld().SpawnEntity("Origin_" + std::to_string(i));
+    //    entity->SetPosition(glm::vec3(t->m_ChunkLocations[i].x, 0.0f, t->m_ChunkLocations[i].y));
+    //    entity->SetModel(am.GetModel("1x1_Cube"));
+    //    entity->GetModel()->SetTexture(am.GetTexture("Car4"));
+    //}
+
+    //Number of chunks * size of each cell
+    float terrainSize = TERRAIN_WIDTH * (TERRAIN_CELL_SIZE);
+    glm::vec3 pos = terrain->GetPosition();
+    glm::vec3 corners[4] =
     {
-        entity = GetWorld().SpawnEntity("Origin_" + std::to_string(i));
-        entity->SetPosition(glm::vec3(t->m_ChunkLocations[i].x, 0.0f, t->m_ChunkLocations[i].y));
+        pos,
+        glm::vec3(pos.x + terrainSize, pos.y, pos.z),
+        glm::vec3(pos.x, pos.y, pos.z + terrainSize),
+        glm::vec3(pos.x + terrainSize, pos.y, pos.z + terrainSize),
+    };
+
+    for (size_t i = 0; i < 4; i++)
+    {
+        entity = GetWorld().SpawnEntity("Corner_" + std::to_string(i));
+        entity->SetPosition(corners[i]);
         entity->SetModel(am.GetModel("1x1_Cube"));
         entity->GetModel()->SetTexture(am.GetTexture("Car4"));
     }
