@@ -47,14 +47,14 @@
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\bin\</IntDir>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
-    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(SolutionDir)External\tinygltf;$(SolutionDir)External\json;$(ExternalIncludePath)</ExternalIncludePath>
     <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)Builds\$(Platform)\$(Configuration)\$(ProjectName)\bin\</IntDir>
     <CopyLocalDeploymentContent>true</CopyLocalDeploymentContent>
-    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\tinyobj;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(ExternalIncludePath)</ExternalIncludePath>
+    <ExternalIncludePath>$(VULKAN_SDK)\Include;$(SolutionDir)External\mini;$(SolutionDir)External\stb;$(SolutionDir)External\tinyxml;$(SolutionDir)External\tinygltf;$(SolutionDir)External\json;$(ExternalIncludePath)</ExternalIncludePath>
     <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -157,6 +157,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   <ItemGroup>
     <ClInclude Include="Collision\Collider\AABBCollider.h" />
     <ClInclude Include="External\PerlinNoise.hpp" />
+    <ClInclude Include="External\tiny_gltf.h" />
     <ClInclude Include="World\Terrain\GridBasedTerrain.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />
     <ClInclude Include="Rendering\Buffer.h" />
@@ -280,6 +281,9 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="External\LICENSE" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

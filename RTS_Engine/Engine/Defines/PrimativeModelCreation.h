@@ -15,7 +15,7 @@ namespace Bennett
     {
         AssetManager& am = ServiceLocator::GetAssetManager();
 
-        std::vector<unsigned int> indices{};
+        std::vector<VertexIndex> indices{};
         std::vector<Vertex> vertices{};
 
 #pragma region 1x1 Cube

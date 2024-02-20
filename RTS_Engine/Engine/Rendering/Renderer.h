@@ -257,8 +257,10 @@ namespace Bennett
 		void CleanupRenderPass(VkDevice& device, VkRenderPass& renderpass);
 
 		//Pipeline
+		bool m_PipelineNeedsChanging;
 		CustomPipeline m_SolidPipeline;
 		CustomPipeline m_WireframePipeline;
+		static const CustomPipeline* m_PendingPipeline;
 		static const CustomPipeline* m_CurrentPipeline;
 		bool InitialiseGraphicsPipeline();
 
@@ -392,6 +394,7 @@ namespace Bennett
 
 		const CustomPipeline* GetCurrentGraphicsPipeline() const;
 		void SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const;
+		void SetCustomGraphicsPipelineNextFrame(const CustomPipeline& pipeline);
 		void SetSolidGraphicsPipeline() const;
 		void SetWireframeGraphicsPipeline() const;
 		void WaitForRendererIdle();

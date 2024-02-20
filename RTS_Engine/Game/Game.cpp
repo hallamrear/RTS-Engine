@@ -11,7 +11,6 @@
 #include <System/Manager/AssetManager.h>
 #include <System/ServiceLocator.h>
 #include <World/Entity.h>
-#include <World/Terrain/Terrain.h>
 
 Game::Game()
 {
@@ -26,7 +25,7 @@ Game::~Game()
     }
 }
 
-Bennett::Entity* origin = nullptr;
+Bennett::Entity* entity = nullptr;
 Bennett::Entity* terrain = nullptr;
 
 bool Game::Initialise()
@@ -57,43 +56,29 @@ bool Game::Initialise()
     }
 
     Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
-    
-    terrain = GetWorld().CreateTerrain();
 
-    //origin = GetWorld().SpawnEntity("TerrainOrigin");
-    //origin->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
-    //origin->SetModel(am.GetModel("1x1_Cube"));
-    //origin->GetModel()->SetTexture(am.GetTexture("Car4"));
-
-    Bennett::Entity* entity = nullptr;
-    Bennett::Terrain* t = (Bennett::Terrain*)terrain;
-
-    //for (size_t i = 0; i < TERRAIN_CHUNK_COUNT; i++)
+    //terrain = GetWorld().CreateTerrain();
+    //Bennett::Terrain* t = (Bennett::Terrain*)terrain;
+    ////Number of chunks * size of each cell
+    //float terrainSize = TERRAIN_WIDTH * (TERRAIN_CELL_SIZE);
+    //glm::vec3 pos = terrain->GetPosition();
+    //glm::vec3 corners[4] =
     //{
-    //    entity = GetWorld().SpawnEntity("Origin_" + std::to_string(i));
-    //    entity->SetPosition(glm::vec3(t->m_ChunkLocations[i].x, 0.0f, t->m_ChunkLocations[i].y));
-    //    entity->SetModel(am.GetModel("1x1_Cube"));
-    //    entity->GetModel()->SetTexture(am.GetTexture("Car4"));
-    //}
+    //    pos,
+    //    glm::vec3(pos.x + terrainSize, pos.y, pos.z),
+    //    glm::vec3(pos.x, pos.y, pos.z + terrainSize),
+    //    glm::vec3(pos.x + terrainSize, pos.y, pos.z + terrainSize),
+    //};
 
-    //Number of chunks * size of each cell
-    float terrainSize = TERRAIN_WIDTH * (TERRAIN_CELL_SIZE);
-    glm::vec3 pos = terrain->GetPosition();
-    glm::vec3 corners[4] =
-    {
-        pos,
-        glm::vec3(pos.x + terrainSize, pos.y, pos.z),
-        glm::vec3(pos.x, pos.y, pos.z + terrainSize),
-        glm::vec3(pos.x + terrainSize, pos.y, pos.z + terrainSize),
-    };
+    entity = GetWorld().SpawnEntity("Glitch");
+    entity->SetModel(am.GetModel("glitch.gltf"));
+    entity->GetModel()->SetTexture(am.GetTexture("glitch"));
+    entity->SetPosition(glm::vec3(0.0f, 3.0f, 0.0f));
 
-    for (size_t i = 0; i < 4; i++)
-    {
-        entity = GetWorld().SpawnEntity("Corner_" + std::to_string(i));
-        entity->SetPosition(corners[i]);
-        entity->SetModel(am.GetModel("1x1_Cube"));
-        entity->GetModel()->SetTexture(am.GetTexture("Car4"));
-    }
+    entity = GetWorld().SpawnEntity("shakedown");
+    entity->SetRotationEuler(glm::vec3(0.0f));
+    entity->SetModel(am.GetModel("shakedown.gltf"));
+    entity->GetModel()->SetTexture(am.GetTexture("shakedown"));
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -107,7 +92,7 @@ void Game::RunGameLoop()
 {
     auto lTime = std::chrono::steady_clock::now();
     auto cTime = lTime;
-    std::chrono::duration<float> clockDelta = { };
+    std::chrono::duration<double> clockDelta = { };
     float dTime = 0.0f;
 
     MSG msg{};
@@ -124,17 +109,22 @@ void Game::RunGameLoop()
         dTime = clockDelta.count();
 
         if (dTime > TIMESTEP_CAP)
+        {
+            printf("capped timestep\n");
             dTime = TIMESTEP_CAP;
+        }
 
         ProcessInput(dTime);
         Update(dTime);
 
-        float rotSpeed = 50.0f;
+        float rotSpeed = 10.0f;
         float r = 10.0f;    
         float t = glm::radians(90.0f);
         static float s = 0.0f;
         s += dTime * rotSpeed;
         s = fmod(s, 360.0f);
+
+        entity->SetRotationEuler(glm::vec3(0.0f, s, 0.0f));
 
         //glm::vec3 position{};
         //position.x = r * cos(glm::radians(s)) * sin(t);

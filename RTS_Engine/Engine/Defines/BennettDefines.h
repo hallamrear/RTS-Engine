@@ -11,3 +11,15 @@
 //Custom Defines
 #define BENNETT_ENGINE __declspec(dllexport)
 #define WIN32MSG UINT
+
+typedef signed short s16;
+typedef unsigned short u16;
+typedef unsigned short ushort;
+
+typedef signed int s32;
+typedef unsigned int u32;
+typedef unsigned int uint;
+
+typedef unsigned char uchar;
+
+typedef unsigned short VertexIndex;

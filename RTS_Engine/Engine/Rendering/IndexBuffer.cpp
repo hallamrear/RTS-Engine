@@ -17,7 +17,23 @@ namespace Bennett
 
     void IndexBuffer::Bind()
     {
-        vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+
+        switch (sizeof(VertexIndex))
+        {
+            case 2: //2 bytes USHORT
+                vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT16);
+                break;
+
+            case 4: //4 bytes UINT
+                vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+                break;
+
+            default:
+                Log(LOG_CRITICAL, "Unsupported Vertex Index size.\n");
+                break;
+        }
+
+        //VK_INDEX_TYPE_UINT32
     }
 
     const size_t& IndexBuffer::Count() const

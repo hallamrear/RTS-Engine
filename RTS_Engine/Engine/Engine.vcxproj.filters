@@ -338,5 +338,11 @@
     <ClInclude Include="World\Terrain\GridBasedTerrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="External\tiny_gltf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="External\LICENSE" />
   </ItemGroup>
 </Project>

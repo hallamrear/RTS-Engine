@@ -2,6 +2,7 @@
 
 #include "pch.h"
 #include <Rendering/Window.h>
+#include <Rendering/Renderer.h>
 #include <System/Manager/AssetManager.h>
 #include <System/ServiceLocator.h>
 #include <System/Engine.h>
@@ -59,15 +60,11 @@ bool Editor::Initialise()
         Log("Failed to initialise engine systems.", LOG_CRITICAL);
         return FALSE;
     }
-
+    
     Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
-
-    Entity* terrain = GetWorld().CreateTerrain();
-
-    Entity* origin = GetWorld().SpawnEntity("TerrainOrigin");
-    origin->SetPosition(glm::vec3(5.0f, 0.0f, 0.0f));
-    origin->SetModel(am.GetModel("1x1_Cube"));
-    origin->GetModel()->SetTexture(am.GetTexture("Car4"));
+    Bennett::Entity* entity = GetWorld().SpawnEntity("Glitch");
+    entity->SetModel(am.GetModel("glitch.gltf"));
+    entity->GetModel()->SetTexture(am.GetTexture("glitch"));
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -208,13 +205,13 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
             case ID_RENDERMODE_SOLID:
             {
-                //TODO : Implement
+                ServiceLocator::GetRenderer().SetSolidGraphicsPipeline();
             }
                 break;
 
             case ID_RENDERMODE_WIREFRAME:
             {
-                //TODO : Implement
+                ServiceLocator::GetRenderer().SetWireframeGraphicsPipeline();
             }
                 break;
 

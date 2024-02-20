@@ -22,7 +22,7 @@ namespace Bennett
 	public:
 		~AssetManager();
 
-		static Model* CreateModel(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices);
+		static Model* CreateModel(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices);
 		static Model* GetModel(const std::string& modelName);
 		static Texture* GetTexture(const std::string& textureName);
 	};

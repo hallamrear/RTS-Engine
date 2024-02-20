@@ -46,7 +46,7 @@ namespace Bennett
         m_TextureMap.clear();
     }
 
-    Model* AssetManager::CreateModel(const std::string& modelName, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+    Model* AssetManager::CreateModel(const std::string& modelName, const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices)
     {
         auto found = m_ModelMap.find(modelName);
 
@@ -77,9 +77,9 @@ namespace Bennett
             return found->second;
         }
 
-        std::string filepath = ServiceLocator::GetResourceFolderLocation() + modelName + ".obj";
+        std::string filepath = ServiceLocator::GetResourceFolderLocation() + modelName;
 
-        Model* model = ModelLoader::Load(filepath.c_str());
+        Model* model = ModelLoader::Load(filepath.c_str(), false);
         if (!model)
         {
             Log("Failed to load model", LOG_SERIOUS);

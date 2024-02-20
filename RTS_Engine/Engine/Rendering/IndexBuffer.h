@@ -3,8 +3,6 @@
 
 namespace Bennett
 {
-	typedef unsigned int VertexIndex;
-
 	class BENNETT_ENGINE IndexBuffer : public Buffer
 	{
 	private:

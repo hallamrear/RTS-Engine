@@ -18,6 +18,7 @@ namespace Bennett
 	UniformBufferObject Renderer::UniformMatrixBuffer = UniformBufferObject();
 	PushConstantBuffer Renderer::PushConstants = PushConstantBuffer();
 	const CustomPipeline* Renderer::m_CurrentPipeline = nullptr;
+	const CustomPipeline* Renderer::m_PendingPipeline = nullptr;
 
 	/// <summary>
 	/// Function comes from an extension 'VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME' so we need a variable to store the func addr.
@@ -41,6 +42,8 @@ namespace Bennett
 		m_CurrentRenderFrame = 0;
 		m_DebugTexture = new Texture();
 		m_CurrentPipeline = nullptr;
+		m_PendingPipeline = nullptr;
+		m_PipelineNeedsChanging = false;
 	}
 
 	Renderer::~Renderer()
@@ -290,6 +293,14 @@ namespace Bennett
 
 		BeginRenderPass();
 
+		if (m_PipelineNeedsChanging)
+		{
+			m_CurrentPipeline = m_PendingPipeline;
+			m_PendingPipeline = nullptr;
+			m_PipelineNeedsChanging = false;
+			assert(m_CurrentPipeline != nullptr);
+		}
+
 		assert(m_CurrentPipeline != nullptr);
 		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Pipeline);
 	}
@@ -404,10 +415,15 @@ namespace Bennett
 		memcpy(m_UniformBuffersMapped[m_CurrentRenderFrame], &UniformMatrixBuffer, sizeof(UniformMatrixBuffer));
 	}
 
+	void Renderer::SetCustomGraphicsPipelineNextFrame(const CustomPipeline& pipeline)
+	{
+		m_PendingPipeline = &pipeline;
+		m_PipelineNeedsChanging = true;
+	}
+
 	void Renderer::SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const
 	{
 		m_CurrentPipeline = &pipeline;
-		assert(m_CurrentPipeline != nullptr);
 		vkCmdBindPipeline(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Pipeline);
 	}
 
