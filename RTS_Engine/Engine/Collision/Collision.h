@@ -53,7 +53,7 @@ namespace Bennett
 		/// <returns>true if point is inside of the aabb. false if not.</returns>
 		inline static bool PointInAABB(const glm::vec3& point, const AABBCollider& aabb)
 		{
-			return PointInAABB(point, aabb.GetPosition(), aabb.GetExtents());
+			return PointInAABB(point, aabb.GetTransform().GetPosition(), aabb.GetExtents());
 		};
 
 		/// <summary>
@@ -326,8 +326,8 @@ namespace Bennett
 		inline static bool CheckCollision<AABBCollider, glm::vec3>(const AABBCollider& aabb, const glm::vec3& point)
 		{	
 			glm::vec3 halfExtents = aabb.GetExtents() / 2.0f;
-			glm::vec3 min = aabb.GetPosition() - halfExtents;
-			glm::vec3 max = aabb.GetPosition() + halfExtents;
+			glm::vec3 min = aabb.GetTransform().GetPosition() - halfExtents;
+			glm::vec3 max = aabb.GetTransform().GetPosition() + halfExtents;
 
 			//Check if the point is less than max and greater than min
 			if (point.x >= min.x && point.x < max.x &&

@@ -3,27 +3,33 @@
 #include <Collision/Collider/Collider.h>
 #include <Collision/Collider/SphereCollider.h>
 #include <Collision/Collider/AABBCollider.h>
+#include <Collision/Collider/OBBCollider.h>
 #include <System/InputMonitor.h>
 #include <System/Manager/AssetManager.h>
 #include <Defines/BennettInputDefines.h>
+#include <System/Logger.h>
 
 namespace Bennett
 {
-	Entity::Entity(const std::string& name, glm::vec3 scale, glm::vec3 position, glm::vec3 rotation) 
+	Entity::Entity(const std::string& name, const glm::vec3& scale, const glm::vec3& position, const glm::vec3& rotation)
 	{
 		//Setting data to stuff passed in.
 		m_Name = name;
-		m_Scale = scale;
-		m_Position = position;
-		m_Rotation = glm::quat(rotation);
+		m_Transform = Transform(scale, position, rotation);
+	}
+
+	Entity::Entity(const std::string& name, const Transform& transform)
+	{
+		m_Name = name;
+		m_Transform = transform;
 	}
 
 	Entity::~Entity()
 	{
-		if (inputMonitor)
+		if (m_InputMonitor)
 		{
-			delete inputMonitor;
-			inputMonitor = nullptr;
+			delete m_InputMonitor;
+			m_InputMonitor = nullptr;
 		}
 
 		if (m_Collider)
@@ -38,6 +44,8 @@ namespace Bennett
 
 	void Entity::Update(const float& deltaTime)
 	{
+		m_Transform.UpdateBasisVectors();
+
 		if (m_Collider)
 		{
 			m_Collider->Update(deltaTime);
@@ -46,12 +54,8 @@ namespace Bennett
 
 	void Entity::Render(const Renderer& renderer)
 	{
-		glm::mat4 matrix = glm::mat4(1.0f);
-		glm::mat4 scale = glm::scale(matrix, m_Scale);
-		glm::mat4 rotate = glm::toMat4(m_Rotation);
-		glm::mat4 translate = glm::translate(matrix, m_Position);
-		matrix = translate * rotate * scale;
-		renderer.PushConstants.ModelMatrix = matrix;
+		glm::mat4 model = m_Transform.GetModelMatrix();
+		renderer.PushConstants.ModelMatrix = model;
 		renderer.UpdatePushConstants();
 
 		if (m_Model != nullptr)
@@ -75,24 +79,41 @@ namespace Bennett
 		return m_Name;
 	}
 
+	void Entity::GenerateBroadPhaseColliderFromModel(ColliderType type)
+	{
+		if (m_Model == nullptr)
+		{
+			Log(LOG_SERIOUS, "Attempted to create a broad phase collider from model but no model is set.\n");
+			return;
+		}
+
+		glm::vec3 size{1.0f};
+
+		auto& meshes = m_Model->GetMeshes();
+		glm::vec3 max = meshes[0]->GetMaxExtents();
+		glm::vec3 min = meshes[0]->GetMinExtents();
+		size = max - min;
+		AddBroadPhaseCollider(type, size);
+	}
+
 	void Entity::AddBroadPhaseCollider(ColliderType type, glm::vec3 size)
 	{
+		DestroyCollider();
+
 		switch (type)
 		{
-		case Bennett::ColliderType::Unknown:
-			break;
 		case Bennett::ColliderType::Sphere:
-			DestroyCollider();
-			m_Collider = new SphereCollider(m_Position, size.x);
+			//m_Collider = new SphereCollider(m_Transform.GetPosition(), size.x);
 			break;
 		case Bennett::ColliderType::OBB:
-			DestroyCollider();
+			m_Collider = new OBBCollider(m_Transform, size);
 			break;
 		case Bennett::ColliderType::AABB:
-			DestroyCollider();
-			m_Collider = new AABBCollider(m_Position, size);
+			m_Collider = new AABBCollider(m_Transform, size);
 			break;
+		case Bennett::ColliderType::Unknown:
 		default:
+			Log(LOG_SERIOUS, "Attempted to create an unsupported collider type.\n");
 			break;
 		}
 	}
@@ -102,16 +123,6 @@ namespace Bennett
 
 	}
 
-	void Entity::UpdateBasisVectors()
-	{
-		glm::vec3 euler = glm::eulerAngles(m_Rotation);
-		m_ForwardVector.x = cos(glm::radians(euler.y)) * cos(glm::radians(euler.x));
-		m_ForwardVector.y = sin(glm::radians(euler.x));
-		m_ForwardVector.z = sin(glm::radians(euler.y)) * cos(glm::radians(euler.x));
-		m_ForwardVector = glm::normalize(m_ForwardVector);
-		m_RightVector = glm::normalize(glm::cross(m_ForwardVector, glm::vec3(0.0f, 1.0f, 0.0f)));
-		m_UpVector = glm::normalize(glm::cross(m_RightVector, m_ForwardVector));
-	}
 	void Entity::DestroyCollider()
 	{
 		if (m_Collider)

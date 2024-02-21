@@ -22,6 +22,11 @@ namespace Bennett
 		m_Meshes.clear();
 	}
 
+	const std::vector<Mesh*>& Model::GetMeshes() const
+	{
+		return m_Meshes;
+	}
+
 	void Model::Render(const Renderer& renderer) const
 	{
 		if (m_Meshes.size() <= 0)

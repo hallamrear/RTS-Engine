@@ -4,23 +4,47 @@
 
 namespace Bennett
 {
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices)
+	Mesh::Mesh()
 	{
-		if (VertexBuffer::Create(m_VertexBuffer, vertices) == false)
-		{
-			Log("Failed to create a vertex buffer.", LOG_STATUS::LOG_SERIOUS);
-		}
-
-		if (IndexBuffer::Create(m_IndexBuffer, indices) == false)
-		{
-			Log("Failed to create a index buffer.", LOG_STATUS::LOG_SERIOUS);
-		}
+		m_Exists = false;
 	}
-
+	
 	Mesh::~Mesh()
 	{
-		VertexBuffer::Destroy(m_VertexBuffer);
-		IndexBuffer::Destroy(m_IndexBuffer);
+		Destroy();
+	}
+
+	void Mesh::Create(const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices, 
+					  const glm::vec3& max, const glm::vec3& min)
+	{
+		m_MaxExtent = max;
+		m_MinExtent = min;
+
+		bool vbCreated = VertexBuffer::Create(m_VertexBuffer, vertices);
+		bool ibCreated = IndexBuffer::Create(m_IndexBuffer, indices);
+
+		if ((vbCreated == false) || (ibCreated == false))
+		{
+			Log("Failed to create a vertex or index buffer.", LOG_STATUS::LOG_SERIOUS);
+			Destroy();
+			m_Exists = false;
+			return;
+		}
+
+		m_Exists = true;
+	}
+
+	void Mesh::Destroy()
+	{
+		if (m_VertexBuffer.Exists())
+		{
+			VertexBuffer::Destroy(m_VertexBuffer);
+		}
+
+		if (m_IndexBuffer.Exists())
+		{
+			IndexBuffer::Destroy(m_IndexBuffer);
+		}
 	}
 
 	void Mesh::Render(const Renderer& renderer)

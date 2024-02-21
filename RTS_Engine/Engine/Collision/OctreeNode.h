@@ -27,7 +27,7 @@ namespace Bennett
 		Entity* m_NodeEntity = nullptr;
 		std::vector<T> m_DataObjects;
 		unsigned int m_Size = INT_MAX;
-		glm::vec3 m_Centre = glm::vec3(0);
+		Transform m_Centre = Transform();
 
 		Node* m_ParentNode = nullptr;
 		Node* m_ChildNodes[OCTREE_CHILD_NODE_COUNT];
@@ -69,7 +69,7 @@ namespace Bennett
 			m_ParentNode = parent;
 			m_Depth = depth;
 			m_Size = m_MaxSize / m_Depth;
-			m_Centre = glm::vec3(0.0f);
+			m_Centre = Transform();
 
 			if (m_Depth > 1)
 			{
@@ -78,14 +78,14 @@ namespace Bennett
 
 				switch (quadrant)
 				{
-				case POSX_POSY_POSZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(+halfSize, +halfSize, +halfSize); } break;
-				case POSX_POSY_NEGZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(+halfSize, +halfSize, -halfSize); } break;
-				case NEGX_POSY_NEGZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(-halfSize, +halfSize, -halfSize); } break;
-				case NEGX_POSY_POSZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(-halfSize, +halfSize, +halfSize); } break;
-				case POSX_NEGY_POSZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(+halfSize, -halfSize, +halfSize); } break;
-				case POSX_NEGY_NEGZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(+halfSize, -halfSize, -halfSize); } break;
-				case NEGX_NEGY_NEGZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(-halfSize, -halfSize, -halfSize); } break;
-				case NEGX_NEGY_POSZ: { m_Centre = m_ParentNode->m_Centre + glm::vec3(-halfSize, -halfSize, +halfSize); } break;
+				case POSX_POSY_POSZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(+halfSize, +halfSize, +halfSize)); } break;
+				case POSX_POSY_NEGZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(+halfSize, +halfSize, -halfSize)); } break;
+				case NEGX_POSY_NEGZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(-halfSize, +halfSize, -halfSize)); } break;
+				case NEGX_POSY_POSZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(-halfSize, +halfSize, +halfSize)); } break;
+				case POSX_NEGY_POSZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(+halfSize, -halfSize, +halfSize)); } break;
+				case POSX_NEGY_NEGZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(+halfSize, -halfSize, -halfSize)); } break;
+				case NEGX_NEGY_NEGZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(-halfSize, -halfSize, -halfSize)); } break;
+				case NEGX_NEGY_POSZ: { m_Centre.SetPosition(m_ParentNode->m_Centre.GetPosition() + glm::vec3(-halfSize, -halfSize, +halfSize)); } break;
 				default:
 					throw;
 					break;
@@ -101,8 +101,8 @@ namespace Bennett
 
 			std::string name = "N_" + std::to_string(depth) + "_" + std::to_string(quadrant);
 			m_NodeEntity = new Entity(name.c_str());
-			m_NodeEntity->SetPosition(m_Centre);
-			m_NodeEntity->SetScale(glm::vec3((float)m_Size));
+			m_NodeEntity->GetTransform().SetPosition(m_Centre.GetPosition());
+			m_NodeEntity->GetTransform().SetScale(glm::vec3((float)m_Size));
 		}
 
 		inline ~Node<T>()

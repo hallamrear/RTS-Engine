@@ -1,12 +1,13 @@
 #include <BennettPCH.h>
 #include <Rendering/Renderer.h>
+#include <glm/gtx/quaternion.hpp>
 #include <Collision/Collider/AABBCollider.h>
 #include <Rendering/Model.h>
 
 namespace Bennett
 {
-	AABBCollider::AABBCollider(glm::vec3& position, glm::vec3 extent)
-		: Collider(ColliderType::AABB), m_Position(position)
+	AABBCollider::AABBCollider(const Transform& transform, glm::vec3 extent)
+		: Collider(ColliderType::AABB), m_Transform(transform)
 	{
 		m_Extent = extent;
 	}
@@ -16,9 +17,9 @@ namespace Bennett
 
 	}
 
-	const glm::vec3& AABBCollider::GetPosition() const
+	const Transform& AABBCollider::GetTransform() const
 	{
-		return m_Position;
+		return m_Transform;
 	}
 
 	const glm::vec3& AABBCollider::GetExtents() const
@@ -34,14 +35,19 @@ namespace Bennett
 	void AABBCollider::Render(const Renderer& renderer)
 	{
 		glm::mat4 matrix = glm::mat4(1.0f);
-		matrix = glm::translate(matrix, m_Position);
-		matrix = glm::scale(matrix, glm::vec3(m_Extent));
+		glm::mat4 translate = glm::translate(matrix, m_Transform.GetPosition());
+		glm::mat4 scale = glm::scale(matrix, glm::vec3(m_Extent * m_Transform.GetScale()));
+		matrix = translate * scale;
 		renderer.PushConstants.ModelMatrix = matrix;
 		renderer.UpdatePushConstants();
+
+		renderer.SetWireframeGraphicsPipeline();
 
 		if (GetModel() != nullptr)
 		{
 			GetModel()->Render(renderer);
 		}
+
+		renderer.SetSolidGraphicsPipeline();
 	}
 }

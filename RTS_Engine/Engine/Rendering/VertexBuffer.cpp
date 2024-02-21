@@ -26,5 +26,5 @@ namespace Bennett
 		vkCmdBindVertexBuffers(ServiceLocator::GetRenderer().GetCommandBuffer(), 0, 1, &m_Buffer, offsets);    
 	}
 
-	//todo : destroy function
+	//todo : VertexBuffer::Destroy
 }

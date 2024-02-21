@@ -11,6 +11,7 @@ namespace Bennett
 		m_Buffer = VkBuffer{};
 		m_BufferMemory = VkDeviceMemory{};
 		m_Count = -1;
+		m_Exists = false;
 	}
 
 	Buffer::~Buffer()
@@ -94,6 +95,7 @@ namespace Bennett
 			vkUnmapMemory(renderer.GetDevice(), buffer.m_BufferMemory);
 		}
 
+		buffer.m_Exists = true;
 		return true;
 	}
 
@@ -103,6 +105,7 @@ namespace Bennett
 		vkDestroyBuffer(renderer.GetDevice(), buffer.m_Buffer, nullptr);
 		vkFreeMemory(renderer.GetDevice(), buffer.m_BufferMemory, nullptr);
 		buffer.m_Count = -1;
+		buffer.m_Exists = false;
 	}
 
 	void Buffer::Copy(VkBuffer& src, const VkBuffer& dst, const size_t& size)

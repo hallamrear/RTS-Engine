@@ -68,5 +68,5 @@ namespace Bennett
         return result;
     }
 
-    //todo : destroy function
+    //todo : IndexBuffer::Destroy;
 }

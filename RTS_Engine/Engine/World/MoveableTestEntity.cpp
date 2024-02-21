@@ -19,15 +19,15 @@ namespace Bennett
 		};
 
 		//Creating the object that tracks keypresses and giving it the list.
-		inputMonitor = new InputMonitor(keys);
+		m_InputMonitor = new InputMonitor(keys);
 	}
 
 	MoveableTestEntity::~MoveableTestEntity()
 	{
-		if (inputMonitor)
+		if (m_InputMonitor)
 		{
-			delete inputMonitor;
-			inputMonitor = nullptr;
+			delete m_InputMonitor;
+			m_InputMonitor = nullptr;
 		}
 	}
 
@@ -35,34 +35,34 @@ namespace Bennett
 	{
 		float movespeed = 5.0f;
 
-		if (inputMonitor->GetKeyState(BENNETT_KEY_I))
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_I))
 		{
-			Translate(GetForwardVector() * movespeed * deltaTime);
+			GetTransform().Translate(GetTransform().GetForwardVector() * movespeed * deltaTime);
 		}
 
-		if (inputMonitor->GetKeyState(BENNETT_KEY_K))
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_K))
 		{
-			Translate(-GetForwardVector() * movespeed * deltaTime);
+			GetTransform().Translate(-GetTransform().GetForwardVector() * movespeed * deltaTime);
 		}
 
-		if (inputMonitor->GetKeyState(BENNETT_KEY_J))
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_J))
 		{
-			Translate(-GetRightVector() * movespeed * deltaTime);
+			GetTransform().Translate(-GetTransform().GetRightVector() * movespeed * deltaTime);
 		}
 
-		if (inputMonitor->GetKeyState(BENNETT_KEY_L))
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_L))
 		{
-			Translate(GetRightVector() * movespeed * deltaTime);
+			GetTransform().Translate(GetTransform().GetRightVector() * movespeed * deltaTime);
 		}
 
-		if (inputMonitor->GetKeyState(BENNETT_KEY_O))
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_O))
 		{
-			Translate(GetUpVector() * movespeed * deltaTime);
+			GetTransform().Translate(GetTransform().GetUpVector() * movespeed * deltaTime);
 		}
 
-		if (inputMonitor->GetKeyState(BENNETT_KEY_U))
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_U))
 		{
-			Translate(-GetUpVector() * movespeed * deltaTime);
+			GetTransform().Translate(-GetTransform().GetUpVector() * movespeed * deltaTime);
 		}
 
 		Entity::Update(deltaTime);

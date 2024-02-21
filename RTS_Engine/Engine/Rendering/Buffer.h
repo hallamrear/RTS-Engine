@@ -8,6 +8,7 @@ namespace Bennett
 	private:
 		
 	protected:
+		bool m_Exists;
 		VkBuffer m_Buffer;
 		VkDeviceMemory m_BufferMemory;
 		int m_Count;
@@ -25,5 +26,7 @@ namespace Bennett
 		static void Copy(VkBuffer& src, const VkBuffer& dst, const size_t& size);
 		static bool Create(Buffer& buffer, const VkBufferCreateInfo& createInfo, void* bufferData);
 		static void Destroy(Buffer& buffer);
+
+		const bool& Exists() const { return m_Exists; };
 	};
 }

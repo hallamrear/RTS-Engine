@@ -34,8 +34,8 @@ namespace Bennett
             if(floor->HasModel())
                 floor->GetModel()->SetTexture(AssetManager::GetTexture("tank"));
 
-            floor->SetPosition(glm::vec3(5.0f, 0.0f, 5.0f));
-            floor->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
+            floor->GetTransform().SetPosition(glm::vec3(5.0f, 0.0f, 5.0f));
+            floor->GetTransform().SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
         }
 
         Entity* Terrain = world.CreateTerrain();

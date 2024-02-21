@@ -136,7 +136,7 @@ namespace Bennett
         return true;
     }
 
-    bool LoadVertexData(const tinygltf::Model& gltf, std::vector<Vertex>& modelData)
+    bool LoadVertexData(const tinygltf::Model& gltf, std::vector<Vertex>& modelData, glm::vec3& maxExtent, glm::vec3& minExtent)
     {     
         std::vector<glm::vec3> positions, normals;
         std::vector<glm::vec4> tangents;
@@ -166,8 +166,8 @@ namespace Bennett
         //This should be guarenteed to exist as it would be checked above.
         int posIndex = gltf.meshes[0].primitives[0].attributes.find("POSITION")->second;
         const tinygltf::Accessor& posAcc = gltf.accessors[posIndex];
-        glm::vec3 maxPos = { (float)posAcc.maxValues[0], (float)posAcc.maxValues[1], (float)posAcc.maxValues[2] };
-        glm::vec3 minPos = { (float)posAcc.minValues[0], (float)posAcc.minValues[1], (float)posAcc.minValues[2] };
+        maxExtent = { (float)posAcc.maxValues[0], (float)posAcc.maxValues[1], (float)posAcc.maxValues[2] };
+        minExtent = { (float)posAcc.minValues[0], (float)posAcc.minValues[1], (float)posAcc.minValues[2] };
 
         Vertex vertex;
         for (size_t i = 0; i < positions.size(); i++)
@@ -191,8 +191,10 @@ namespace Bennett
             int mode = gltf.meshes[i].primitives[0].mode;
             printf("Primitive mode [%u]\n", mode);
             
+            glm::vec3 max, min;
+
             std::vector<Vertex> modelData = std::vector<Vertex>();
-            bool loadedVertices = LoadVertexData(gltf, modelData);
+            bool loadedVertices = LoadVertexData(gltf, modelData, max, min);
             if (loadedVertices == false)
             {
                 Log(LOG_SERIOUS, "Failed to load vertex data.\n.");
@@ -211,23 +213,19 @@ namespace Bennett
                 return false;
             }      
 
-
-            size_t triCount = indices.size() / 3;
-            for (size_t i = 0; i < triCount; i++)
-            {
-
-            }
-
-
-
-
             //Should have full mesh data loaded.
-            Mesh* mesh = new Mesh(modelData, indices);
-            if (mesh)
+            Mesh* mesh = new Mesh();
+            mesh->Create(modelData, indices, max, min);
+            if (mesh->Exists())
             {
                 model.m_Meshes.push_back(mesh);
             }
-
+            else
+            {
+                delete mesh;
+                mesh = nullptr;
+                return false;
+            }
         }
 
         return true;
@@ -235,8 +233,22 @@ namespace Bennett
 
     Model* ModelLoader::Create(const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices)
     {
-        Model* model = new Model();
-        model->m_Meshes.push_back(new Mesh(vertices, indices));
+        Model* model = nullptr;
+
+        Mesh* mesh = new Mesh();
+        mesh->Create(vertices, indices);
+
+        if (mesh->Exists())
+        {
+            model = new Model();
+            model->m_Meshes.push_back(mesh);
+        }
+        else
+        {
+            delete mesh; 
+            mesh = nullptr;
+        }
+
         return model;
     }
 }

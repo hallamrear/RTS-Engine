@@ -107,6 +107,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Collision\Collider\AABBCollider.cpp" />
+    <ClCompile Include="Collision\Collider\OBBCollider.cpp" />
+    <ClCompile Include="System\Transform.cpp" />
     <ClCompile Include="World\Terrain\GridBasedTerrain.cpp" />
     <ClCompile Include="Rendering\CustomPipelineObject.cpp" />
     <ClCompile Include="Rendering\Buffer.cpp" />
@@ -141,8 +143,14 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Defines\MarchingCubesTriangulationTable.cpp" />
     <ClCompile Include="System\Loader\ModelLoader.cpp" />
     <ClCompile Include="World\MoveableTestEntity.cpp" />
-    <ClCompile Include="Collision\Octree.cpp" />
-    <ClCompile Include="Collision\OctreeNode.cpp" />
+    <ClCompile Include="Collision\Octree.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Collision\OctreeNode.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Defines\PrimativeModelCreation.cpp" />
     <ClCompile Include="Collision\Collider\Ray.cpp" />
     <ClCompile Include="Camera\ScriptedCamera.cpp" />
@@ -158,6 +166,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClInclude Include="Collision\Collider\AABBCollider.h" />
     <ClInclude Include="External\PerlinNoise.hpp" />
     <ClInclude Include="External\tiny_gltf.h" />
+    <ClInclude Include="Collision\Collider\OBBCollider.h" />
+    <ClInclude Include="System\Transform.h" />
     <ClInclude Include="World\Terrain\GridBasedTerrain.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />
     <ClInclude Include="Rendering\Buffer.h" />
@@ -240,8 +250,14 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="World\MoveableTestEntity.h" />
-    <ClInclude Include="Collision\Octree.h" />
-    <ClInclude Include="Collision\OctreeNode.h" />
+    <ClInclude Include="Collision\Octree.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Collision\OctreeNode.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Defines\PrimativeModelCreation.h" />
     <ClInclude Include="Collision\Collider\Ray.h" />
     <ClInclude Include="External\resource.h">

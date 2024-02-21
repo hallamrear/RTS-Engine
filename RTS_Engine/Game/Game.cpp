@@ -11,6 +11,7 @@
 #include <System/Manager/AssetManager.h>
 #include <System/ServiceLocator.h>
 #include <World/Entity.h>
+#include <System/Transform.h>
 
 Game::Game()
 {
@@ -25,7 +26,8 @@ Game::~Game()
     }
 }
 
-Bennett::Entity* entity = nullptr;
+Bennett::Entity* glitch = nullptr;
+Bennett::Entity* car = nullptr;
 Bennett::Entity* terrain = nullptr;
 
 bool Game::Initialise()
@@ -70,15 +72,18 @@ bool Game::Initialise()
     //    glm::vec3(pos.x + terrainSize, pos.y, pos.z + terrainSize),
     //};
 
-    entity = GetWorld().SpawnEntity("Glitch");
-    entity->SetModel(am.GetModel("glitch.gltf"));
-    entity->GetModel()->SetTexture(am.GetTexture("glitch"));
-    entity->SetPosition(glm::vec3(0.0f, 3.0f, 0.0f));
+    car = GetWorld().SpawnEntity("shakedown");
+    car->GetTransform().SetRotationEuler(glm::vec3(0.0f));
+    car->SetModel(am.GetModel("shakedown.gltf"));
+    car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+    car->GetModel()->SetTexture(am.GetTexture("shakedown"));
+    car->GetTransform().SetPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
 
-    entity = GetWorld().SpawnEntity("shakedown");
-    entity->SetRotationEuler(glm::vec3(0.0f));
-    entity->SetModel(am.GetModel("shakedown.gltf"));
-    entity->GetModel()->SetTexture(am.GetTexture("shakedown"));
+    glitch = GetWorld().SpawnEntity("Glitch");
+    glitch->SetModel(am.GetModel("glitch.gltf"));
+    glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::AABB);
+    glitch->GetModel()->SetTexture(am.GetTexture("glitch"));
+    glitch->GetTransform().SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -86,6 +91,15 @@ bool Game::Initialise()
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
     return true;
+}
+
+float easeInOutBack(float x)
+{
+    const float c1 = 1.70158;
+    const float c2 = c1 * 1.525;
+    return x < 0.5
+        ? (std::pow(2 * x, 2) * ((c2 + 1) * 2 * x - c2)) / 2
+        : (std::pow(2 * x - 2, 2) * ((c2 + 1) * (x * 2 - 2) + c2) + 2) / 2;
 }
 
 void Game::RunGameLoop()
@@ -124,7 +138,10 @@ void Game::RunGameLoop()
         s += dTime * rotSpeed;
         s = fmod(s, 360.0f);
 
-        entity->SetRotationEuler(glm::vec3(0.0f, s, 0.0f));
+        //glitch->GetTransform().SetScale(glm::vec3(sinf(s / 2.0f)));
+
+        glitch->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 4, 0.0f));
+        car->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 8, 0.0f));
 
         //glm::vec3 position{};
         //position.x = r * cos(glm::radians(s)) * sin(t);

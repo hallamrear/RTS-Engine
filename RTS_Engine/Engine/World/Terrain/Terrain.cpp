@@ -143,27 +143,27 @@ namespace Bennett
 
 	void Terrain::Render(const Renderer& renderer)
 	{
-		glm::mat4 matrix = glm::mat4(1.0f);
-		glm::mat4 scale = glm::scale(matrix, GetScale());
-		glm::mat4 rotate = glm::toMat4(GetRotation());
-		glm::vec3 pos = GetPosition();
-		glm::mat4 translate = glm::translate(matrix, pos);
-		matrix = translate * rotate * scale;
-		renderer.PushConstants.ModelMatrix = matrix;
-		renderer.UpdatePushConstants();
+		//glm::mat4 matrix = glm::mat4(1.0f);
+		//glm::mat4 scale = glm::scale(matrix, GetScale());
+		//glm::mat4 rotate = glm::toMat4(GetRotation());
+		//glm::vec3 pos = GetPosition();
+		//glm::mat4 translate = glm::translate(matrix, pos);
+		//matrix = translate * rotate * scale;
+		//renderer.PushConstants.ModelMatrix = matrix;
+		//renderer.UpdatePushConstants();
 
-		const CustomPipeline* gp = renderer.GetCurrentGraphicsPipeline();
-		renderer.SetCustomGraphicsPipeline(m_TerrainPipeline);
-		renderer.PushDescriptorSet(m_Texture);
-		size_t size = sizeof(ChunkPosition) * TERRAIN_CHUNK_COUNT;
-		memcpy(renderer.UniformMatrixBuffer.TerrainChunkLocations, m_ChunkLocations, size);
- 		renderer.UpdateUniformBuffers();
-		m_VertexBuffer.Bind();
-		vkCmdDraw(renderer.GetCommandBuffer(), m_VertexBuffer.Count(), TERRAIN_CHUNK_COUNT, 0, 0);
-		//vkCmdDrawIndexed(renderer.GetCommandBuffer(), m_IndexBuffer.Count(), TERRAIN_CHUNK_COUNT, 0, 0, 0);
+		//const CustomPipeline* gp = renderer.GetCurrentGraphicsPipeline();
+		//renderer.SetCustomGraphicsPipeline(m_TerrainPipeline);
+		//renderer.PushDescriptorSet(m_Texture);
+		//size_t size = sizeof(ChunkPosition) * TERRAIN_CHUNK_COUNT;
+		//memcpy(renderer.UniformMatrixBuffer.TerrainChunkLocations, m_ChunkLocations, size);
+ 	//	renderer.UpdateUniformBuffers();
+		//m_VertexBuffer.Bind();
+		//vkCmdDraw(renderer.GetCommandBuffer(), m_VertexBuffer.Count(), TERRAIN_CHUNK_COUNT, 0, 0);
+		////vkCmdDrawIndexed(renderer.GetCommandBuffer(), m_IndexBuffer.Count(), TERRAIN_CHUNK_COUNT, 0, 0, 0);
 
-		renderer.SetCustomGraphicsPipeline(*gp);
-		renderer.SetSolidGraphicsPipeline();
-		gp = nullptr;
+		//renderer.SetCustomGraphicsPipeline(*gp);
+		//renderer.SetSolidGraphicsPipeline();
+		//gp = nullptr;
 	}
 }

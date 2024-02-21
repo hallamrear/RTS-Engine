@@ -20,6 +20,8 @@ namespace Bennett
 	public:
 		~Model();
 
+		const std::vector<Mesh*>& GetMeshes() const;
+
 		inline const Texture& GetTexture()		   const { return *m_Texture; };
 		void SetTexture(const Texture* texture);
 		bool HasTexture() const { return m_Texture != nullptr; };
