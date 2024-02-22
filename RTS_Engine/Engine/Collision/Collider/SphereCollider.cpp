@@ -4,16 +4,10 @@
 
 namespace Bennett
 {
-	SphereCollider::SphereCollider(glm::vec3& position, const float& radius)
-		: Collider(ColliderType::Sphere), m_Position(position)
+	SphereCollider::SphereCollider(const Transform& transform, const float& radius, const glm::vec3& offset)
+		: Collider(ColliderType::Sphere, transform, offset)
 	{
-		SetRadius(radius / 2.0f);
-	}
-
-	SphereCollider::SphereCollider(glm::vec3& position)
-		: Collider(ColliderType::Sphere), m_Position(position)
-	{
-		SetRadius(0.5f);
+		SetRadius(radius);
 	}
 
 	SphereCollider::~SphereCollider()
@@ -26,16 +20,11 @@ namespace Bennett
 		m_Radius = radius;
 	}
 
-	void SphereCollider::Update(const float& deltaTime)
-	{
-		
-	}
-	
 	void SphereCollider::Render(const Renderer& renderer)
 	{
 		glm::mat4 matrix = glm::mat4(1.0f);
-		matrix = glm::translate(matrix, m_Position);
-		matrix = glm::scale(matrix, glm::vec3(m_Radius * 2));
+		matrix = glm::translate(matrix, GetTransform().GetPosition());
+		matrix = glm::scale(matrix, glm::vec3(m_Radius));
 		renderer.PushConstants.ModelMatrix = matrix;
 		renderer.UpdatePushConstants();
 

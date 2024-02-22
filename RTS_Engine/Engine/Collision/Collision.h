@@ -86,7 +86,7 @@ namespace Bennett
 		/// <returns>true if point is inside of the SphereCollider. false if not.</returns>
 		inline static bool PointInSphere(const glm::vec3& point, const SphereCollider& sphere)
 		{
-			return PointInSphere(point, sphere.GetPosition(), sphere.GetRadius());
+			return PointInSphere(point, sphere.GetTransform().GetPosition(), sphere.GetRadius());
 		};
 
 		/// <summary>
@@ -134,7 +134,7 @@ namespace Bennett
 		/// <returns>Boolean value expressing whether ray intersects with sphere.</returns>
 		inline static bool RayToSphere(const Ray& ray, const SphereCollider& sphere)
 		{
-			return RayToSphere(ray.GetStart(), ray.GetDirection(), sphere.GetPosition(), sphere.GetRadius());
+			return RayToSphere(ray.GetStart(), ray.GetDirection(), sphere.GetTransform().GetPosition(), sphere.GetRadius());
 		};
 
 		/// <summary>
@@ -164,7 +164,7 @@ namespace Bennett
 		/// <returns>Boolean value expressing whether ray intersects with sphere.</returns>
 		inline static bool RayToSphere(const glm::vec3& rayStart, const glm::vec3& rayDirection, const SphereCollider& sphere)
 		{
-			return RayToSphere(rayStart, rayDirection, sphere.GetPosition(), sphere.GetRadius());
+			return RayToSphere(rayStart, rayDirection, sphere.GetTransform().GetPosition(), sphere.GetRadius());
 		};
 #pragma endregion
 
@@ -197,7 +197,7 @@ namespace Bennett
 		template<>
 		inline static bool CheckCollision<SphereCollider, glm::vec3>(const SphereCollider& sphere, const glm::vec3& point)
 		{
-			glm::vec3 direction = sphere.GetPosition() - point;
+			glm::vec3 direction = sphere.GetTransform().GetPosition() - point;
 			//dot product of 2 identical vectors returns the square of the magnitude.
 			float distanceSquared = glm::dot(direction, direction);
 			float radiusSquared = sphere.GetRadius() * sphere.GetRadius();
@@ -231,7 +231,7 @@ namespace Bennett
 				return true;
 
 			//Create a vector from the ray's start to the sphere's center
-			glm::vec3  rayToSphereCenter = sphere.GetPosition() - ray.GetStart();
+			glm::vec3  rayToSphereCenter = sphere.GetTransform().GetPosition() - ray.GetStart();
 
 			//Project this vector onto the ray's direction vector
 			float projectedDistance = glm::dot(ray.GetStart(), ray.GetDirection());
@@ -256,7 +256,7 @@ namespace Bennett
 		template<>
 		inline static bool CheckCollision<SphereCollider, AABBCollider>(const SphereCollider& sphere, const AABBCollider& aabb)
 		{
-			const glm::vec3 spherePosition = sphere.GetPosition();
+			const glm::vec3 spherePosition = sphere.GetTransform().GetPosition();
 			glm::vec3 boxMin = aabb.GetMinBounds();
 			glm::vec3 boxMax = aabb.GetMaxBounds();
 
@@ -291,7 +291,7 @@ namespace Bennett
 		template<>
 		inline static bool CheckCollision<SphereCollider, SphereCollider>(const SphereCollider& colliderA, const SphereCollider& colliderB)
 		{
-			const glm::vec3 positionDiff = colliderA.GetPosition() - colliderB.GetPosition();
+			const glm::vec3 positionDiff = colliderA.GetTransform().GetPosition() - colliderB.GetTransform().GetPosition();
 
 			const float distanceSquared = 
 			   ((positionDiff.x) * (positionDiff.x) +

@@ -1,6 +1,7 @@
 #include <BennettPCH.h>
 #include <World/MoveableTestEntity.h>
 #include <System/InputMonitor.h>
+#include <Collision/Collider/Collider.h>
 
 namespace Bennett
 {
@@ -16,6 +17,8 @@ namespace Bennett
 			BENNETT_KEY_L,
 			BENNETT_KEY_O,
 			BENNETT_KEY_U,
+			BENNETT_KEY_M,
+			BENNETT_KEY_N,
 		};
 
 		//Creating the object that tracks keypresses and giving it the list.
@@ -55,12 +58,22 @@ namespace Bennett
 			GetTransform().Translate(GetTransform().GetRightVector() * movespeed * deltaTime);
 		}
 
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_U))
+		{
+			GetTransform().Rotate(glm::vec3(0.0f, -10 * movespeed * deltaTime, 0.0f));
+		}
+
 		if (m_InputMonitor->GetKeyState(BENNETT_KEY_O))
+		{
+			GetTransform().Rotate(glm::vec3(0.0f, +10 * movespeed * deltaTime, 0.0f));
+		}
+
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_M))
 		{
 			GetTransform().Translate(GetTransform().GetUpVector() * movespeed * deltaTime);
 		}
 
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_U))
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_N))
 		{
 			GetTransform().Translate(-GetTransform().GetUpVector() * movespeed * deltaTime);
 		}

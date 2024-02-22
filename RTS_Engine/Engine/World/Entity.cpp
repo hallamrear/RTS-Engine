@@ -79,7 +79,7 @@ namespace Bennett
 		return m_Name;
 	}
 
-	void Entity::GenerateBroadPhaseColliderFromModel(ColliderType type)
+	void Entity::GenerateBroadPhaseColliderFromModel(const ColliderType& type)
 	{
 		if (m_Model == nullptr)
 		{
@@ -87,29 +87,28 @@ namespace Bennett
 			return;
 		}
 
-		glm::vec3 size{1.0f};
-
 		auto& meshes = m_Model->GetMeshes();
 		glm::vec3 max = meshes[0]->GetMaxExtents();
 		glm::vec3 min = meshes[0]->GetMinExtents();
-		size = max - min;
-		AddBroadPhaseCollider(type, size);
+		glm::vec3 extent = max - min;
+		glm::vec3 offset = (max + min) / 2.0f;
+		AddBroadPhaseCollider(type, extent, offset);
 	}
 
-	void Entity::AddBroadPhaseCollider(ColliderType type, glm::vec3 size)
+	void Entity::AddBroadPhaseCollider(const ColliderType& type, const glm::vec3& size, const glm::vec3& offset)
 	{
 		DestroyCollider();
 
 		switch (type)
 		{
 		case Bennett::ColliderType::Sphere:
-			//m_Collider = new SphereCollider(m_Transform.GetPosition(), size.x);
+			m_Collider = new SphereCollider(m_Transform, size.x, offset);
 			break;
 		case Bennett::ColliderType::OBB:
-			m_Collider = new OBBCollider(m_Transform, size);
+			m_Collider = new OBBCollider(m_Transform, size, offset);
 			break;
 		case Bennett::ColliderType::AABB:
-			m_Collider = new AABBCollider(m_Transform, size);
+			m_Collider = new AABBCollider(m_Transform, size, offset);
 			break;
 		case Bennett::ColliderType::Unknown:
 		default:
@@ -118,9 +117,9 @@ namespace Bennett
 		}
 	}
 
-	void Entity::AddNarrowPhaseCollider(ColliderType type, glm::vec3 size)
+	void Entity::AddNarrowPhaseCollider(const ColliderType& type, const glm::vec3& size, const glm::vec3& offset)
 	{
-
+		
 	}
 
 	void Entity::DestroyCollider()

@@ -49,8 +49,8 @@ namespace Bennett
 
 		inline Transform& GetTransform() { return m_Transform; };
 
-		void GenerateBroadPhaseColliderFromModel(ColliderType type);
-		void AddBroadPhaseCollider(ColliderType type, glm::vec3 size);
-		void AddNarrowPhaseCollider(ColliderType type, glm::vec3 size);
+		void GenerateBroadPhaseColliderFromModel(const ColliderType& type);
+		void AddBroadPhaseCollider(const ColliderType& type, const glm::vec3& size, const glm::vec3& offset = glm::vec3(0.0f));
+		void AddNarrowPhaseCollider(const ColliderType& type, const glm::vec3& size, const glm::vec3& offset = glm::vec3(0.0f));
 	};
 }

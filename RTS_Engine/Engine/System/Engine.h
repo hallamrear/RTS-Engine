@@ -35,6 +35,9 @@ namespace Bennett
 		inline void SetIsRunning(bool state) { m_IsRunning = state; };
 		inline static void SetInFocus(bool state) 
 		{
+			if (m_InFocus == state)
+				return;
+
 			m_InFocus = state;
 
 			if (ENABLE_LOG_FOCUS)

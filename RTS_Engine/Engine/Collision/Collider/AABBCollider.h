@@ -4,30 +4,34 @@
 
 namespace Bennett
 {
-	class AABBCollider :
+	class BENNETT_ENGINE AABBCollider :
 		public Collider
 	{
 	protected:
-		const Transform& m_Transform;
-		glm::vec3  m_Extent;
+		static std::array<glm::vec3, 8> m_BaseCorners;
+
+		std::array<glm::vec3, 8> m_Corners;
+		glm::vec3 m_Extent;
+
+		virtual void UpdateTranslatedCornerPositions();
 
 	public:
-		AABBCollider(const Transform& transform, glm::vec3 extent);
+		AABBCollider(const Transform& transform, const glm::vec3& extents, const glm::vec3& offset = glm::vec3(0.0f));
 		~AABBCollider();
 
-		const Transform& GetTransform() const;
+		const std::array<glm::vec3, 8>& GetCorners() const;
 		const glm::vec3& GetExtents() const;
 
 		inline glm::vec3 GetMinBounds() const
 		{
 			glm::vec3 halfExtents = m_Extent / 2.0f;
-			return m_Transform.GetPosition() - halfExtents;
+			return GetTransform().GetPosition() - halfExtents;
 		}
 
 		inline glm::vec3 GetMaxBounds() const
 		{
 			glm::vec3 halfExtents = m_Extent / 2.0f;
-			return m_Transform.GetPosition() + halfExtents;
+			return GetTransform().GetPosition() + halfExtents;
 		};
 
 		virtual void Update(const float& deltaTime);

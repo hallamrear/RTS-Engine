@@ -4,10 +4,17 @@
 
 namespace Bennett
 {
-	Collider::Collider(const ColliderType& type)
+	Collider::Collider(const ColliderType& type, const Transform& transform, const glm::vec3& offset)
+		: m_Transform(transform)
 	{
 		m_Type = type;
+		m_Offset = offset;
 		SetModel();
+	}
+
+	const Transform& Collider::GetTransform() const
+	{
+		return m_Transform;
 	}
 
 	Model* Collider::GetModel() const
@@ -31,13 +38,15 @@ namespace Bennett
 		case Bennett::ColliderType::Sphere:
 			m_Model = AssetManager::GetModel("1x1_Sphere");
 			break;
+		case Bennett::ColliderType::AABB:
 		case Bennett::ColliderType::OBB:
 			m_Model = AssetManager::GetModel("1x1_Cube");
 			break;
-		case Bennett::ColliderType::AABB:
-			m_Model = AssetManager::GetModel("1x1_Cube");
-			break;
 		}
+	}
+
+	void Collider::Update(const float& deltaTime)
+	{
 
 	}
 }

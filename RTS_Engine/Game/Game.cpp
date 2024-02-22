@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Game.h"
 #include <chrono>
+#include <array>
 #include <Collision/Collider/AABBCollider.h>
 #include <Collision/Collider/Ray.h>
 #include <Collision/Collider/SphereCollider.h>
@@ -26,8 +27,12 @@ Game::~Game()
     }
 }
 
+std::array<Bennett::Entity*, 8> cornerEntities{};
+Bennett::AABBCollider* collider;
 Bennett::Entity* glitch = nullptr;
 Bennett::Entity* car = nullptr;
+Bennett::Entity* glitchPosition = nullptr;
+Bennett::Entity* carPosition = nullptr;
 Bennett::Entity* terrain = nullptr;
 
 bool Game::Initialise()
@@ -72,18 +77,36 @@ bool Game::Initialise()
     //    glm::vec3(pos.x + terrainSize, pos.y, pos.z + terrainSize),
     //};
 
-    car = GetWorld().SpawnEntity("shakedown");
+
+
+    car = GetWorld().SpawnTestEntity("shakedown");
     car->GetTransform().SetRotationEuler(glm::vec3(0.0f));
     car->SetModel(am.GetModel("shakedown.gltf"));
     car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
     car->GetModel()->SetTexture(am.GetTexture("shakedown"));
     car->GetTransform().SetPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
+    carPosition = GetWorld().SpawnEntity("car position");
+    carPosition->SetModel(am.GetModel("1x1_Cube"));
+    carPosition->GetTransform().SetPosition(car->GetTransform().GetPosition());
 
     glitch = GetWorld().SpawnEntity("Glitch");
     glitch->SetModel(am.GetModel("glitch.gltf"));
     glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::AABB);
     glitch->GetModel()->SetTexture(am.GetTexture("glitch"));
     glitch->GetTransform().SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+
+    glitchPosition = GetWorld().SpawnEntity("glitch position");
+    glitchPosition->SetModel(am.GetModel("1x1_Cube"));
+    glitchPosition->GetTransform().SetPosition(glitch->GetTransform().GetPosition());
+
+    collider = (Bennett::AABBCollider*)car->GetCollider();
+
+    for (size_t i = 0; i < 8; i++)
+    {
+        cornerEntities[i] = GetWorld().SpawnEntity(std::to_string(i));
+        cornerEntities[i]->SetModel(am.GetModel("1x1_Cube"));
+        cornerEntities[i]->GetTransform().SetScale(glm::vec3(0.125f));
+    }
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -131,6 +154,12 @@ void Game::RunGameLoop()
         ProcessInput(dTime);
         Update(dTime);
 
+        const auto& c = collider->GetCorners();
+        for (size_t i = 0; i < 8; i++)
+        {
+            cornerEntities[i]->GetTransform().SetPosition(c[i]);
+        }
+
         float rotSpeed = 10.0f;
         float r = 10.0f;    
         float t = glm::radians(90.0f);
@@ -138,10 +167,20 @@ void Game::RunGameLoop()
         s += dTime * rotSpeed;
         s = fmod(s, 360.0f);
 
-        //glitch->GetTransform().SetScale(glm::vec3(sinf(s / 2.0f)));
+        glm::vec3 off = glm::vec3(glm::vec3((sinf(s / 5.0f) * 2.0f), 0.0f, 0.0f));
+        //collider->SetOffset(off);
 
-        glitch->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 4, 0.0f));
-        car->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 8, 0.0f));
+        if (glitch)
+        {
+            glitch->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 4, 0.0f));
+            //glitch->GetTransform().SetScale(glm::vec3((sinf(s / 2.0f) * 0.8f) + 1.0f));
+        }
+        
+        if (car)
+        {
+            //car->GetTransform().SetScale(glm::vec3((sinf(s / 2.0f) * 0.5f) + 1.0f));
+            //car->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 8, 0.0f));
+        }
 
         //glm::vec3 position{};
         //position.x = r * cos(glm::radians(s)) * sin(t);
