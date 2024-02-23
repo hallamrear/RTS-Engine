@@ -19,16 +19,18 @@ namespace Bennett
 
 	void OBBCollider::UpdateTranslatedCornerPositions()
 	{
+		const glm::mat4 identity = glm::mat4(1.0f);
 		const Transform& transform = GetTransform();
-		const glm::vec3& colliderOffset = GetOffset();
-		const glm::vec3& colliderExtent = GetExtents();
-		const glm::vec3 scaledExtents = transform.GetScale() * colliderExtent;
+		const glm::vec3 scaledExtents = transform.GetScale() * GetExtents();
+		glm::mat4 movement = glm::translate(identity, GetOffset());
+		glm::mat4 scaling = glm::scale(identity, scaledExtents);
+		glm::mat4 colliderOffset = transform.GetModelMatrix() * movement * scaling;
 
+		glm::vec4 position = glm::vec4(0.0f);
 		for (size_t i = 0; i < 8; i++)
 		{
-			glm::vec3 rotatedPoint = glm::rotate(transform.GetRotation(), m_BaseCorners[i]);
-			//rotatedPoint = glm::translate(rotatedPoint, scaledExtents);
-			m_Corners[i] = transform.GetPosition() + colliderOffset + (rotatedPoint * scaledExtents);
+			position = glm::vec4(m_BaseCorners[i], 1.0f);
+			m_Corners[i] = (colliderOffset) * position;
 		}
 	}
 
@@ -36,12 +38,13 @@ namespace Bennett
 	{
 		const Transform& transform = GetTransform();
 		glm::mat4 matrix = glm::mat4(1.0f);
-		glm::mat4 translate = glm::translate(matrix, transform.GetPosition() + GetOffset());
-		glm::mat4 rotate = glm::toMat4(transform.GetRotation());
+		glm::mat4 translate = glm::translate(matrix, GetOffset());
+		//Do not need to rotate as the rotation is done by the base matrix.
+		glm::mat4 rotate = glm::mat4(1.0f); // glm::toMat4(transform.GetRotation());
 		glm::mat4 scale = glm::scale(matrix, glm::vec3(m_Extent * transform.GetScale()));
 		matrix = translate * rotate * scale;
 
-		renderer.PushConstants.ModelMatrix = matrix;
+		renderer.PushConstants.ModelMatrix = transform.GetModelMatrix() * matrix;
 		renderer.UpdatePushConstants();
 
 		renderer.SetWireframeGraphicsPipeline();

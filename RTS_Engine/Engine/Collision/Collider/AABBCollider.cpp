@@ -42,8 +42,8 @@ namespace Bennett
 
 	void AABBCollider::UpdateTranslatedCornerPositions()
 	{
-		const glm::vec3 entityPosition = GetTransform().GetPosition();
-		const glm::vec3& entityScale = GetTransform().GetScale();
+		const glm::vec3  entityPosition = GetTransform().GetPosition();
+		const glm::vec3& entityScale	= GetTransform().GetScale();
 		const glm::vec3& colliderOffset = GetOffset();
 		const glm::vec3& colliderExtent = GetExtents();
 

@@ -89,9 +89,9 @@ bool Game::Initialise()
     carPosition->SetModel(am.GetModel("1x1_Cube"));
     carPosition->GetTransform().SetPosition(car->GetTransform().GetPosition());
 
-    glitch = GetWorld().SpawnEntity("Glitch");
+    glitch = GetWorld().SpawnTestEntity("Glitch");
     glitch->SetModel(am.GetModel("glitch.gltf"));
-    glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::AABB);
+    glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
     glitch->GetModel()->SetTexture(am.GetTexture("glitch"));
     glitch->GetTransform().SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
 
@@ -173,13 +173,15 @@ void Game::RunGameLoop()
         if (glitch)
         {
             glitch->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 4, 0.0f));
-            //glitch->GetTransform().SetScale(glm::vec3((sinf(s / 2.0f) * 0.8f) + 1.0f));
+            glitch->GetTransform().SetScale(glm::vec3((sinf(s / 2.0f) * 0.8f) + 1.0f));
+            glitchPosition->GetTransform().SetPosition(glitch->GetTransform().GetPosition());
         }
         
         if (car)
         {
-            //car->GetTransform().SetScale(glm::vec3((sinf(s / 2.0f) * 0.5f) + 1.0f));
-            //car->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 8, 0.0f));
+            carPosition->GetTransform().SetPosition(car->GetTransform().GetPosition());
+            car->GetTransform().SetScale(glm::vec3((sinf(s / 2.0f) * 0.5f) + 1.0f));
+            car->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 8, 0.0f));
         }
 
         //glm::vec3 position{};
