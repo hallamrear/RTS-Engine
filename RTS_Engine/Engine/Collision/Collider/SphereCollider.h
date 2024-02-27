@@ -17,6 +17,8 @@ namespace Bennett
         void SetRadius(const float& radius);
         inline const float& GetRadius() const { return m_Radius; };
 
+        glm::vec3 GetSupportVertex(const glm::vec3& direction) const;
+
         void Render(const Renderer& renderer);
     };
 }

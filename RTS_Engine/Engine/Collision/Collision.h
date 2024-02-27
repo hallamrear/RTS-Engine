@@ -9,172 +9,47 @@ namespace Bennett
 {
 	class OBBCollider;
 
-	class Collision
+	struct BENNETT_ENGINE CollisionDetails
+	{
+		float Depth;
+		glm::vec3 Normal;
+	};
+
+	class BENNETT_ENGINE EPA
 	{
 	private:
 
-	#pragma region Old Collision Functions
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<GLM::VEC3, AABBCOLLIDER>()
-		/// 
-		/// Tests whether a point is inside an axis aligned bounding box.
-		/// </summary>
-		/// <param name="point">Point to test</param>
-		/// <param name="center">Centre point of the aabb</param>
-		/// <param name="extents">The full width, height and depth of the aabb.</param>
-		/// <returns>true if point is inside of the aabb. false if not.</returns>
-		inline static bool PointInAABB(const glm::vec3& point, const glm::vec3& center, const glm::vec3& extents)
-		{
-			glm::vec3 halfExtents = extents / 2.0f;
-			glm::vec3 min = center - halfExtents;
-			glm::vec3 max = center + halfExtents;
+	public:
+		static void GetCollisionDetails(const std::vector<glm::vec3>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
+	};
 
-			//Check if the point is less than max and greater than min
-			if (point.x >= min.x && point.x < max.x &&
-				point.y >= min.y && point.y < max.y &&
-				point.z >= min.z && point.z < max.z)
-			{
-				return true;
-			}
-
-			//If not, then return false
-			return false;
-		};
-
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<GLM::VEC3, AABBCOLLIDER>()
-		/// 
-		/// Tests whether a point is inside an axis aligned bounding box.
-		/// </summary>
-		/// <param name="point">Point to test</param>
-		/// <param name="aabb">Box to test if point is inside</param>
-		/// <returns>true if point is inside of the aabb. false if not.</returns>
-		inline static bool PointInAABB(const glm::vec3& point, const AABBCollider& aabb)
-		{
-			return PointInAABB(point, aabb.GetTransform().GetPosition(), aabb.GetExtents());
-		};
-
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<GLM::VEC3, SphereCollider>()
-		/// 
-		/// Tests whether a point is inside a sphere.
-		/// </summary>
-		/// <param name="point">Point to test</param>
-		/// <param name="sphere">Sphere used to test if point is inside</param>
-		/// <returns>true if point is inside of the sphere. false if not.</returns>
-		inline static bool PointInSphere(const glm::vec3& point, const glm::vec3& sphereCenter, const float& sphereRadius)
-		{
-			glm::vec3 direction = sphereCenter - point;
-			//dot product of 2 identical vectors returns the square of the magnitude.
-			float distanceSquared = glm::dot(direction, direction);
-			float radiusSquared = sphereRadius * sphereRadius;
-			//Avoiding using a sqrt and pythag by working in squares.
-			return (distanceSquared < radiusSquared);
-		};
-
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<GLM::VEC3, SphereCollider>()
-		/// 
-		/// Tests whether a point is inside a sphere.
-		/// </summary>
-		/// <param name="point">Point to test</param>
-		/// <param name="sphere">SphereCollider used to test if point is inside</param>
-		/// <returns>true if point is inside of the SphereCollider. false if not.</returns>
-		inline static bool PointInSphere(const glm::vec3& point, const SphereCollider& sphere)
-		{
-			return PointInSphere(point, sphere.GetTransform().GetPosition(), sphere.GetRadius());
-		};
-
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<Ray, SphereCollider>()
-		/// 
-		/// Tests whether a ray intersects with a sphere.
-		/// </summary>
-		/// <param name="rayStart">Start of ray to test</param>
-		/// <param name="rayDirection">Direction of ray to test</param>
-		/// <param name="sphereCenter">Center of sphere to test</param>
-		/// <param name="sphereRadius">Radius of sphere to test</param>
-		/// <returns>Boolean value expressing whether ray intersects with sphere.</returns>
-		inline static bool RayToSphere(const glm::vec3& rayStart, const glm::vec3& rayDirection, const glm::vec3& sphereCenter, const float& sphereRadius)
-		{
-			//If the ray starts inside the sphere, return early.
-			if (PointInSphere(rayStart, sphereCenter, sphereRadius))
-				return true;
-
-			//Create a vector from the ray's start to the sphere's center
-			glm::vec3  rayToSphereCenter = sphereCenter - rayStart;
-
-			//Project this vector onto the ray's direction vector
-			float projectedDistance = glm::dot(rayStart, rayDirection);
-
-			//Ray is pointing away so return early.
-			if (projectedDistance < 0.0f)
-				return false;
-
-			//Calculate the closest point to the sphere
-			glm::vec3 closestPoint = (rayStart + (rayDirection * projectedDistance));
-
-			//Check if that point is inside the sphere
-			return (PointInSphere(closestPoint, sphereCenter, sphereRadius));
-		};
-
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<Ray, SphereCollider>()
-		/// 
-		/// Tests whether a ray intersects with a sphere.
-		/// </summary>
-		/// <param name="ray">Ray to test</param>
-		/// <param name="sphere">Sphere collider to test</param>
-		/// <returns>Boolean value expressing whether ray intersects with sphere.</returns>
-		inline static bool RayToSphere(const Ray& ray, const SphereCollider& sphere)
-		{
-			return RayToSphere(ray.GetStart(), ray.GetDirection(), sphere.GetTransform().GetPosition(), sphere.GetRadius());
-		};
-
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<Ray, SphereCollider>()
-		/// 
-		/// Tests whether a ray intersects with a sphere.
-		/// </summary>
-		/// <param name="ray">Ray to test</param>
-		/// <param name="sphereCenter">Center of sphere to test</param>
-		/// <param name="sphereRadius">Radius of sphere to test</param>
-		/// <returns>Boolean value expressing whether ray intersects with sphere.</returns>
-		inline static bool RayToSphere(const Ray& ray, const glm::vec3& sphereCenter, const float& sphereRadius)
-		{
-			return RayToSphere(ray.GetStart(), ray.GetDirection(), sphereCenter, sphereRadius);
-		};
-
-		/// <summary>
-		/// 
-		/// SEE CHECKCOLLISION<Ray, SphereCollider>()
-		/// 
-		/// Tests whether a ray intersects with a sphere.
-		/// </summary>
-		/// <param name="rayStart">Start of ray to test</param>
-		/// <param name="rayDirection">Direction of ray to test</param>
-		/// <param name="sphere">Sphere collider to test</param>
-		/// <returns>Boolean value expressing whether ray intersects with sphere.</returns>
-		inline static bool RayToSphere(const glm::vec3& rayStart, const glm::vec3& rayDirection, const SphereCollider& sphere)
-		{
-			return RayToSphere(rayStart, rayDirection, sphere.GetTransform().GetPosition(), sphere.GetRadius());
-		};
-#pragma endregion
+	class BENNETT_ENGINE GJK
+	{
+	private:
+		static bool Line(std::vector<glm::vec3>& simplex, glm::vec3& direction);
+		static bool Triangle(std::vector<glm::vec3>& simplex, glm::vec3& direction);
+		static bool Tetrahedron(std::vector<glm::vec3>& simplex, glm::vec3& direction);
+		static bool UpdateSimplex(std::vector<glm::vec3>& simplex, glm::vec3& direction);
 
 	public:
+		static bool CheckCollision(const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
+	};
+
+	class BENNETT_ENGINE Collision
+	{
+
+	private:
+		static void GetNormalAxesOfBoundingBox(const Collider& collider, std::array<glm::vec3, 6>& axes);
+		
+	public:
+
 		template<class A, class B>
 		inline static bool CheckCollision(const A& colliderA, const B& colliderB)
 		{
 			Log("Check collision function of two colliders that are not supported yet. Returning false.", LOG_SERIOUS);
 			return false;
-		};	
+		};
+
 		
 		/// <summary>
 		/// Tests whether a point is inside a sphere.
@@ -432,7 +307,7 @@ namespace Bennett
 		inline static bool CheckCollision<OBBCollider, OBBCollider>(const OBBCollider& colliderA, const OBBCollider& colliderB)
 		{
 			//TODO : Implement
-			throw;
+			//return GJK::CheckCollision((Collider&)colliderA, (Collider&)colliderB);
 			return false;
 		};
 

@@ -164,6 +164,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\Collider\AABBCollider.h" />
+    <ClInclude Include="Defines\HelperFunctions.h" />
     <ClInclude Include="External\PerlinNoise.hpp" />
     <ClInclude Include="External\tiny_gltf.h" />
     <ClInclude Include="Collision\Collider\OBBCollider.h" />

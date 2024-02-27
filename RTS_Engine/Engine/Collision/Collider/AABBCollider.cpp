@@ -42,16 +42,20 @@ namespace Bennett
 
 	void AABBCollider::UpdateTranslatedCornerPositions()
 	{
-		const glm::vec3  entityPosition = GetTransform().GetPosition();
-		const glm::vec3& entityScale	= GetTransform().GetScale();
-		const glm::vec3& colliderOffset = GetOffset();
-		const glm::vec3& colliderExtent = GetExtents();
+		const glm::mat4 identity = glm::mat4(1.0f);
+		const glm::mat4 pTransform = glm::translate(identity, GetTransform().GetPosition());
+		const glm::mat4 pScale = glm::scale(identity, GetTransform().GetScale());
+		const glm::mat4 parent = pTransform * pScale;
 
-		const glm::vec3 scaledExtents = entityScale * colliderExtent;
+		const glm::mat4 translate = glm::translate(identity, GetOffset());
+		const glm::mat4 scale = glm::scale(identity, GetExtents());
+		const glm::mat4 model = translate * scale;
+
+		glm::mat4 transform = parent * model;
 
 		for (size_t i = 0; i < 8; i++)
 		{
-			m_Corners[i] = entityPosition + colliderOffset + m_BaseCorners[i] * scaledExtents;
+			m_Corners[i] = transform * glm::vec4(m_BaseCorners[i], 1.0f);
 		}
 	}
 
@@ -62,11 +66,17 @@ namespace Bennett
 
 	void AABBCollider::Render(const Renderer& renderer)
 	{
+		const glm::mat4 identity = glm::mat4(1.0f);
+		const glm::mat4 pTransform = glm::translate(identity, GetTransform().GetPosition());
+		const glm::mat4 pScale = glm::scale(identity, GetTransform().GetScale());
+		const glm::mat4 parent = pTransform * pScale;
+
 		glm::mat4 matrix = glm::mat4(1.0f);
-		glm::mat4 translate = glm::translate(matrix, GetTransform().GetPosition() + GetOffset());
-		glm::mat4 scale = glm::scale(matrix, glm::vec3(m_Extent * GetTransform().GetScale()));
+		glm::mat4 translate = glm::translate(matrix, GetOffset());
+		glm::mat4 scale = glm::scale(matrix, glm::vec3(m_Extent));
 		matrix = translate * scale;
-		renderer.PushConstants.ModelMatrix = matrix;
+
+		renderer.PushConstants.ModelMatrix = parent * matrix;
 		renderer.UpdatePushConstants();
 
 		renderer.SetWireframeGraphicsPipeline();
@@ -77,5 +87,23 @@ namespace Bennett
 		}
 
 		renderer.SetSolidGraphicsPipeline();
+	}
+
+	glm::vec3 AABBCollider::GetSupportVertex(const glm::vec3& direction) const
+	{
+		glm::vec3 maxPoint;
+		float maxDistance = -FLT_MAX;
+
+		for (int i = 0; i < 8; i++)
+		{
+			float distance = glm::dot(m_Corners[i], direction);
+			if (distance >= maxDistance)
+			{
+				maxDistance = distance;
+				maxPoint = m_Corners[i];
+			}
+		}
+
+		return maxPoint;
 	}
 }

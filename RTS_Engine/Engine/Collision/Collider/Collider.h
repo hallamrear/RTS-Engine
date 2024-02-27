@@ -23,16 +23,19 @@ namespace Bennett
 	private:
 		const Transform& m_Transform;
 		glm::vec3 m_Offset;
-		ColliderType m_Type = ColliderType::Unknown;
+		virtual void SetType(const ColliderType& type) {};
 		Model* m_Model;
-		void SetModel();
 
 	protected:
+		ColliderType m_Type = ColliderType::Unknown;
 		Collider(const ColliderType& type, const Transform& transform, const glm::vec3& offset = glm::vec3(0.0f));
 		Model* GetModel() const;
+		void   SetModel();
 
 	public:
 		~Collider();
+
+		virtual glm::vec3 GetSupportVertex(const glm::vec3& direction) const = 0;
 
 		const Transform& GetTransform() const;
 		const ColliderType& GetType() const { return m_Type; };

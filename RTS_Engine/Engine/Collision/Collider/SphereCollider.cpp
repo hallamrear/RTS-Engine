@@ -20,12 +20,20 @@ namespace Bennett
 		m_Radius = radius;
 	}
 
+	glm::vec3 SphereCollider::GetSupportVertex(const glm::vec3& direction) const
+	{
+		return GetTransform().GetPosition() + GetOffset() + (glm::normalize(direction) * m_Radius);
+	}
+
 	void SphereCollider::Render(const Renderer& renderer)
 	{
-		glm::mat4 matrix = glm::mat4(1.0f);
-		matrix = glm::translate(matrix, GetTransform().GetPosition());
-		matrix = glm::scale(matrix, glm::vec3(m_Radius));
-		renderer.PushConstants.ModelMatrix = matrix;
+		const glm::mat4 parent = GetTransform().GetModelMatrix();
+		const glm::mat4 identity = glm::mat4(1.0f);
+		const glm::mat4 translate = glm::translate(identity, GetOffset());
+		const glm::mat4 scale = glm::scale(identity, glm::vec3(m_Radius));
+		const glm::mat4 model = translate * scale;
+
+		renderer.PushConstants.ModelMatrix = parent * model;
 		renderer.UpdatePushConstants();
 
 		if (GetModel() != nullptr)

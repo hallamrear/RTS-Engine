@@ -102,13 +102,21 @@ namespace Bennett
 		switch (type)
 		{
 		case Bennett::ColliderType::Sphere:
-			m_Collider = new SphereCollider(m_Transform, size.x, offset);
+		{
+			float r = std::fmaxf(size.x, size.y);
+			r = std::fmaxf(r, size.z);
+			m_Collider = new SphereCollider(m_Transform, r, offset);
+		}
 			break;
 		case Bennett::ColliderType::OBB:
+		{
 			m_Collider = new OBBCollider(m_Transform, size, offset);
+		}
 			break;
 		case Bennett::ColliderType::AABB:
+		{
 			m_Collider = new AABBCollider(m_Transform, size, offset);
+		}
 			break;
 		case Bennett::ColliderType::Unknown:
 		default:

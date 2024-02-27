@@ -9,7 +9,6 @@ namespace Bennett
 	{
 	protected:
 		static std::array<glm::vec3, 8> m_BaseCorners;
-
 		std::array<glm::vec3, 8> m_Corners;
 		glm::vec3 m_Extent;
 
@@ -36,5 +35,7 @@ namespace Bennett
 
 		virtual void Update(const float& deltaTime);
 		virtual void Render(const Renderer& renderer);
+
+		virtual glm::vec3 GetSupportVertex(const glm::vec3& direction) const;
 	};
 }
