@@ -176,7 +176,7 @@ namespace Bennett
 				{
 					AABBCollider* aabb = m_ChildNodes[i]->m_Collider;
 
-					if (Collision::CheckCollision<glm::vec3, AABBCollider>(entity->GetPosition(), *aabb))
+					if (Collision::CheckCollision(entity->GetCollider(), *aabb))
 					{
 						m_ChildNodes[i]->AddDataToNode(data);
 						break;
@@ -217,7 +217,7 @@ namespace Bennett
 
 					AABBCollider* aabb = m_ChildNodes[i]->m_Collider;
 
-					if (Collision::CheckCollision<glm::vec3, AABBCollider>(entity->GetPosition(), *aabb))
+					if (Collision::CheckCollision(entity->GetCollider(), *aabb))
 					{
 						break;
 					}

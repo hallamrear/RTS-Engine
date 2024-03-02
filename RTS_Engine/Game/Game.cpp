@@ -93,24 +93,30 @@ bool Game::Initialise()
     check->SetModel(am.GetModel("1x1_Cube"));
     check->GetModel()->SetTexture(am.GetTexture("red"));
 
-   /* ground = GetWorld().SpawnEntity("Floor");
+    ground = GetWorld().SpawnEntity("Floor");
     ground->SetModel(am.GetModel("1x1_Cube"));
     ground->GetModel()->SetTexture(am.GetTexture("mina"));
-    ground->GetTransform().SetScale(glm::vec3(10.0f, 0.5f, 10.0f));
-    ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);*/
+    ground->GetTransform().SetScale(glm::vec3(20.0f, 0.5f, 20.0f));
+    ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 
     car = GetWorld().SpawnTestEntity("shakedown");
     car->GetTransform().SetRotationEuler(glm::vec3(0.0f));
     car->SetModel(am.GetModel("shakedown.gltf"));
     car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
     car->GetModel()->SetTexture(am.GetTexture("shakedown"));
-    car->GetTransform().SetPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
+    car->GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
 
     glitch = GetWorld().SpawnEntity("Glitch");
     glitch->SetModel(am.GetModel("glitch.gltf"));
     glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
     glitch->GetModel()->SetTexture(am.GetTexture("glitch"));
     glitch->GetTransform().SetPosition(glm::vec3(2.0f, 0.0f, 0.0f));
+
+    glitch = GetWorld().SpawnEntity("tools");
+    glitch->SetModel(am.GetModel("tools.gltf"));
+    glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+    glitch->GetModel()->SetTexture(am.GetTexture("tools"));
+    glitch->GetTransform().SetPosition(glm::vec3(-2.0f, 0.0f, 0.0f));
 
     for (size_t i = 0; i < 8; i++)
     {
@@ -169,7 +175,7 @@ void Game::RunGameLoop()
         Render();
 
         if (car->GetCollider()->GetType()    != ColliderType::Sphere &&
-            glitch->GetCollider()->GetType() != ColliderType::Sphere)
+            ground->GetCollider()->GetType() != ColliderType::Sphere)
         {
             auto c = (AABBCollider*)(car->GetCollider());
             auto corners = c->GetCorners();
@@ -179,7 +185,7 @@ void Game::RunGameLoop()
                 cCornerEntities[i]->GetTransform().SetPosition(corners[i]);
             }
 
-            c = (Bennett::AABBCollider*)(glitch->GetCollider());
+            c = (Bennett::AABBCollider*)(ground->GetCollider());
             corners = c->GetCorners();
             for (size_t i = 0; i < 8; i++)
             {
@@ -200,6 +206,8 @@ void Game::RunGameLoop()
             glitch->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 4, 0.0f));
             //glitch->GetTransform().SetScale(glm::vec3((sinf(s / 2.0f) * 0.8f) + 1.0f));
         }
+        
+        car->GetTransform().Translate(glm::vec3(0.0f, -9.81f, 0.0f) * dTime);
         
         if (car)
         {
@@ -222,26 +230,14 @@ void Game::RunGameLoop()
             //car->GetTransform().SetRotationEuler(glm::vec3(0.0f, s / 8, 0.0f));
         }
 
-        if (glitch->GetCollider() != nullptr && car->GetCollider() != nullptr)
+        if (ground->GetCollider() != nullptr && car->GetCollider() != nullptr)
         {
-            //if (Collision::CheckCollision<ColliderType::OBB, ColliderType::OBB>((const OBBCollider&)*glitch->GetCollider(), (const OBBCollider&)*car->GetCollider()))
-            if(GJK::CheckCollision(*(Collider*)glitch->GetCollider(), *(Collider*)car->GetCollider(), &details))
-            //if (GJK::CheckCollision(*ground->GetCollider(), *car->GetCollider(), &details))
+            //if (Collision::CheckCollision(*glitch->GetCollider(), *car->GetCollider(), &details))
+            if (Collision::CheckCollision(*ground->GetCollider(), *car->GetCollider(), &details))
             {
-                Log(LOG_SAFE, "Collision detected.\n");
-                Log(LOG_SAFE, "Collision:\nNormal (%f, %f, %f)\nDepth: %f\n", details.Normal.x, details.Normal.y, details.Normal.z, details.Depth);
-                check->GetModel()->SetTexture(am.GetTexture("green"));
-
                 car->GetTransform().Translate(details.Normal * (details.Depth * 0.5f));
-
                 //car->GetTransform().Translate(details.Normal * (details.Depth * 0.5f));
                 //glitch->GetTransform().Translate(details.Normal * (details.Depth * -0.5f));
-
-            }
-            else
-            {
-                Log(LOG_MINIMAL, "No collision.\n");
-                check->GetModel()->SetTexture(am.GetTexture("red"));
             }
         }
 

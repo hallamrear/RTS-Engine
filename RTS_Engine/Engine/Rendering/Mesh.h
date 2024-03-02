@@ -25,7 +25,7 @@ namespace Bennett
 		const glm::vec3& GetMaxExtents() const { return m_MaxExtent; };
 		const glm::vec3& GetMinExtents() const { return m_MinExtent; };
 
-		void Create(const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices, const glm::vec3& max = glm::vec3(1.0f, 1.0f, 1.0f), const glm::vec3& min = glm::vec3(-1.0f, -1.0f, -1.0f));
+		void Create(const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices, const glm::vec3& max = glm::vec3(0.5f, 0.5f, 0.5f), const glm::vec3& min = glm::vec3(-0.5f, -0.5f, -0.5f));
 		const bool& Exists() const { return m_Exists; };
 		void Destroy();
 

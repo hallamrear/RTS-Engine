@@ -7,7 +7,15 @@
 
 namespace Bennett
 {
+	typedef Collider Collider2D;
+
 	class OBBCollider;
+
+	struct BENNETT_ENGINE CollisionDetails2D
+	{
+		float Depth;
+		glm::vec2 Normal;
+	};
 
 	struct BENNETT_ENGINE CollisionDetails
 	{
@@ -20,7 +28,10 @@ namespace Bennett
 	private:
 
 	public:
-		static void GetCollisionDetails(const std::vector<glm::vec3>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
+		static int GetFaceNormals(std::vector<glm::vec3>& normals, std::vector<float>& distances, const std::vector<glm::vec3>& simplex, const std::vector<size_t>& faces);
+		static void AddEdgeIfUnique(std::vector<std::pair<size_t, size_t>>& edgeList, const std::vector<size_t>& faceList, const size_t& indexA, const size_t& indexB);
+		static void GetCollisionDetails(std::vector<glm::vec3>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
+		static void Get2DCollisionDetails(std::vector<glm::vec2>& simplex, const Collider2D& colliderA, const Collider2D& colliderB, CollisionDetails2D* manifold);
 	};
 
 	class BENNETT_ENGINE GJK
@@ -43,14 +54,14 @@ namespace Bennett
 		
 	public:
 
-		template<class A, class B>
-		inline static bool CheckCollision(const A& colliderA, const B& colliderB)
+		//template<class A, class B>
+		inline static bool CheckCollision(const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr)
 		{
-			Log("Check collision function of two colliders that are not supported yet. Returning false.", LOG_SERIOUS);
-			return false;
+			return GJK::CheckCollision(colliderA, colliderB, manifold);
 		};
 
-		
+		/*
+
 		/// <summary>
 		/// Tests whether a point is inside a sphere.
 		/// </summary>
@@ -230,25 +241,6 @@ namespace Bennett
 			return false;
 		};
 
-		template<>													
-		inline static bool CheckCollision<AABBCollider, AABBCollider>(const AABBCollider& colliderA, const AABBCollider& colliderB)
-		{
-			glm::vec3 colliderAMax = colliderA.GetMaxBounds();
-			glm::vec3 colliderAMin = colliderA.GetMinBounds();
-
-			glm::vec3 colliderBMax = colliderB.GetMaxBounds();
-			glm::vec3 colliderBMin = colliderB.GetMinBounds();
-
-			return (
-				colliderAMin.x <= colliderBMax.x &&
-				colliderAMax.x >= colliderBMin.x &&
-				colliderAMin.y <= colliderBMax.y &&
-				colliderAMax.y >= colliderBMin.y &&
-				colliderAMin.z <= colliderBMax.z &&
-				colliderAMax.z >= colliderBMin.z
-				);
-		};
-
 		template<>
 		inline static bool CheckCollision<AABBCollider, OBBCollider>(const AABBCollider& aabb, const OBBCollider& obb)
 		{
@@ -316,6 +308,8 @@ namespace Bennett
 		{
 			return CheckCollision<SphereCollider, OBBCollider>(sphere, obb);
 		};
+
+		*/
 	};
 
 }
