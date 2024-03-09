@@ -21,18 +21,6 @@ namespace Bennett
 		const std::array<glm::vec3, 8>& GetCorners() const;
 		const glm::vec3& GetExtents() const;
 
-		inline glm::vec3 GetMinBounds() const
-		{
-			glm::vec3 halfExtents = m_Extent / 2.0f;
-			return GetTransform().GetPosition() - halfExtents;
-		}
-
-		inline glm::vec3 GetMaxBounds() const
-		{
-			glm::vec3 halfExtents = m_Extent / 2.0f;
-			return GetTransform().GetPosition() + halfExtents;
-		};
-
 		virtual void Update(const float& deltaTime);
 		virtual void Render(const Renderer& renderer);
 

@@ -4,10 +4,14 @@
 #define TIMESTEP_CAP 1.0f
 #define WINDOW_WIDTH 1280.0f
 #define WINDOW_HEIGHT 720.0f
-#define COLLISION_EPA_ITERATION_CAP 100
 //When changing this value, be sure to change the hard-coded version in any shaders.
 #define MAX_LOADED_TEXTURES 64
 #define MAX_LOADSTRING 100
+
+//Physics and Collision defines.
+#define COLLISION_EPA_ITERATION_CAP 100
+#define RIGIDBODY_DEFAULT_MASS 100
+#define PHYSICS_GRAVITY_FORCE glm::vec3(0.0f, -9.81f, 0.0f)
 
 //Custom Defines
 #define BENNETT_ENGINE __declspec(dllexport)

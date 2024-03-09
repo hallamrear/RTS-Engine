@@ -108,6 +108,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   <ItemGroup>
     <ClCompile Include="Collision\Collider\AABBCollider.cpp" />
     <ClCompile Include="Collision\Collider\OBBCollider.cpp" />
+    <ClCompile Include="Collision\CollisionStructures.cpp" />
+    <ClCompile Include="Physics\RigidbodyPhysics.cpp" />
     <ClCompile Include="System\Transform.cpp" />
     <ClCompile Include="World\Terrain\GridBasedTerrain.cpp" />
     <ClCompile Include="Rendering\CustomPipelineObject.cpp" />
@@ -164,10 +166,12 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\Collider\AABBCollider.h" />
+    <ClInclude Include="Collision\CollisionStructures.h" />
     <ClInclude Include="Defines\HelperFunctions.h" />
     <ClInclude Include="External\PerlinNoise.hpp" />
     <ClInclude Include="External\tiny_gltf.h" />
     <ClInclude Include="Collision\Collider\OBBCollider.h" />
+    <ClInclude Include="Physics\RigidbodyPhysics.h" />
     <ClInclude Include="System\Transform.h" />
     <ClInclude Include="World\Terrain\GridBasedTerrain.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />

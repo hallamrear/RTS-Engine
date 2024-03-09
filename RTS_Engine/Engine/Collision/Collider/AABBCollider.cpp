@@ -51,11 +51,9 @@ namespace Bennett
 		const glm::mat4 scale = glm::scale(identity, GetExtents());
 		const glm::mat4 model = translate * scale;
 
-		glm::mat4 transform = parent * model;
-
 		for (size_t i = 0; i < 8; i++)
 		{
-			m_Corners[i] = transform * glm::vec4(m_BaseCorners[i], 1.0f);
+			m_Corners[i] = parent * model * glm::vec4(m_BaseCorners[i], 1.0f);
 		}
 	}
 
@@ -79,14 +77,17 @@ namespace Bennett
 		renderer.PushConstants.ModelMatrix = parent * matrix;
 		renderer.UpdatePushConstants();
 
-		renderer.SetWireframeGraphicsPipeline();
-
-		if (GetModel() != nullptr)
+		if (ENABLE_DRAW_COLLIDERS_OUTLINE)
 		{
-			GetModel()->Render(renderer);
-		}
+			renderer.SetWireframeGraphicsPipeline();
 
-		renderer.SetSolidGraphicsPipeline();
+			if (GetModel() != nullptr)
+			{
+				GetModel()->Render(renderer);
+			}
+
+			renderer.SetSolidGraphicsPipeline();
+		}
 	}
 
 	glm::vec3 AABBCollider::GetSupportVertex(const glm::vec3& direction) const

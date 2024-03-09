@@ -75,7 +75,7 @@ namespace Bennett
 	template<class T>
 	inline void Octree<T>::Render(const Renderer& renderer)
 	{
-		if (DRAW_OCTREE)
+		if (ENABLE_DRAW_OCTREE_OUTLINE)
 		{
 			if (m_RootNode)
 			{

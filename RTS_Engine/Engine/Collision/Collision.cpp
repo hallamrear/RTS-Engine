@@ -6,13 +6,13 @@ using namespace Bennett::Helper;
 
 namespace Bennett
 {
-	bool GJK::Line(std::vector<glm::vec3>& simplex, glm::vec3& direction)
+	bool GJK::Line(std::vector<SupportVertex>& simplex, glm::vec3& direction)
 	{
-		glm::vec3 a = simplex[0];
-		glm::vec3 b = simplex[1];
+		SupportVertex a = simplex[0];
+		SupportVertex b = simplex[1];
 
-		glm::vec3 ab = b - a;
-		glm::vec3 ao = -a;
+		glm::vec3 ab = b.MinkowskiDifference - a.MinkowskiDifference;
+		glm::vec3 ao = -a.MinkowskiDifference;
 
 		if (SameDirection(ab, ao))
 		{
@@ -28,15 +28,15 @@ namespace Bennett
 		return false;
 	};
 
-	bool GJK::Triangle(std::vector<glm::vec3>& simplex, glm::vec3& direction)
+	bool GJK::Triangle(std::vector<SupportVertex>& simplex, glm::vec3& direction)
 	{
-		glm::vec3 a = simplex[0];
-		glm::vec3 b = simplex[1];
-		glm::vec3 c = simplex[2];
+		SupportVertex a = simplex[0];
+		SupportVertex b = simplex[1];
+		SupportVertex c = simplex[2];
 
-		glm::vec3 ab = b - a;
-		glm::vec3 ac = c - a;
-		glm::vec3 ao = -a;
+		glm::vec3 ab = b.MinkowskiDifference - a.MinkowskiDifference;
+		glm::vec3 ac = c.MinkowskiDifference - a.MinkowskiDifference;
+		glm::vec3 ao = -a.MinkowskiDifference;
 
 		glm::vec3 abc = cross(ab, ac);
 
@@ -81,17 +81,17 @@ namespace Bennett
 		return false;
 	};
 
-	bool GJK::Tetrahedron(std::vector<glm::vec3>& simplex, glm::vec3& direction)
+	bool GJK::Tetrahedron(std::vector<SupportVertex>& simplex, glm::vec3& direction)
 	{
-		glm::vec3 a = simplex[0];
-		glm::vec3 b = simplex[1];
-		glm::vec3 c = simplex[2];
-		glm::vec3 d = simplex[3];
+		SupportVertex a = simplex[0];
+		SupportVertex b = simplex[1];
+		SupportVertex c = simplex[2];
+		SupportVertex d = simplex[3];
 
-		glm::vec3 ab = b - a;
-		glm::vec3 ac = c - a;
-		glm::vec3 ad = d - a;
-		glm::vec3 ao = -a;
+		glm::vec3 ab = b.MinkowskiDifference - a.MinkowskiDifference;
+		glm::vec3 ac = c.MinkowskiDifference - a.MinkowskiDifference;
+		glm::vec3 ad = d.MinkowskiDifference - a.MinkowskiDifference;
+		glm::vec3 ao = -a.MinkowskiDifference;
 
 		//Construct new edges for top point of tetrahedron
 		glm::vec3 abc = cross(ab, ac);
@@ -123,7 +123,7 @@ namespace Bennett
 		return true;
 	};
 
-	bool GJK::UpdateSimplex(std::vector<glm::vec3>& simplex, glm::vec3& direction)
+	bool GJK::UpdateSimplex(std::vector<SupportVertex>& simplex, glm::vec3& direction)
 	{
 		switch (simplex.size())
 		{
@@ -150,21 +150,21 @@ namespace Bennett
 
 		//Get support vertex in initial direction.
 		direction = glm::vec3(1.0f, 0.0f, 0.0f);
-		glm::vec3 support = Helper::Collision::GetSupportVertex(colliderA, colliderB, direction);
+		SupportVertex support = Collision::GetSupportVertex(colliderA, colliderB, direction);
 
-		std::vector<glm::vec3> simplex;
+		std::vector<SupportVertex> simplex;
 		simplex = { support };
 
 		//Get a new direction in the opposite direction for the first loop.
-		direction = -support;
+		direction = -support.MinkowskiDifference;
 
 		while (true)
 		{
-			support = Helper::Collision::GetSupportVertex(colliderA, colliderB, direction);
+			support = Collision::GetSupportVertex(colliderA, colliderB, direction);
 
 			//returns if the new point is not in front of the search direction
 			//this would exit if the direction finds a vertex that was already the furthest one along it.
-			if (glm::dot(support, direction) <= 0)
+			if (glm::dot(support.MinkowskiDifference, direction) <= 0)
 			{
 				return false;
 			}
@@ -177,15 +177,35 @@ namespace Bennett
 			{
 				if (manifold != nullptr)
 				{
-					EPA::GetCollisionDetails(simplex, colliderA, colliderB, manifold);
+					EPA_Result CSO = EPA::GetCollisionDetails(simplex, colliderA, colliderB, manifold);
+
+					////This is our closest point to the origin on the CSO’s boundary.
+					glm::vec3 PointOnTri = (manifold->Normal * manifold->Depth);
+					//
+					//Compute the barycentric coordinates of this closest point in the CSO triangle.
+					glm::vec3 BaryCentPointOnTri = CalculateBarycentricPositionOnTriangle(PointOnTri, CSO.tri.points[0].MinkowskiDifference, CSO.tri.points[1].MinkowskiDifference, CSO.tri.points[2].MinkowskiDifference);
+				
+					//Linearly combining the original points with the same barycentric coordinates as coefficients
+					//Ap = x Aa + y Ab + z Ac
+					//Bp = x Ba + y Bb + z Bc
+					glm::vec3 HitPointA = (BaryCentPointOnTri.x * CSO.tri.points[0].SupportVertexA) + (BaryCentPointOnTri.y * CSO.tri.points[1].SupportVertexA) + (BaryCentPointOnTri.z * CSO.tri.points[2].SupportVertexA);
+					glm::vec3 HitPointB = (BaryCentPointOnTri.x * CSO.tri.points[0].SupportVertexB) + (BaryCentPointOnTri.y * CSO.tri.points[1].SupportVertexB) + (BaryCentPointOnTri.z * CSO.tri.points[2].SupportVertexB);
+
+					manifold->CollisionPoints[0].HitPoint = HitPointA;
+					manifold->CollisionPoints[0].Subject = &colliderA;
+					manifold->CollisionPoints[1].HitPoint = HitPointB;
+					manifold->CollisionPoints[1].Subject = &colliderB;
 
 					if (ENABLE_LOG_COLLISION_MANIFOLD_PRINT)
 					{
-						printf("Manifold details:\n\tNormal: {%f, %f, %f}\n\tDepth: %f\n",
+						printf(
+							"Manifold details:\n\tNormal: {%f, %f, %f}\n\tDepth: %f\n\tHit Point A: {% f, % f, % f}\n\tHit Point B: {% f, % f, % f}\n\n",
 							manifold->Normal.x,
 							manifold->Normal.y,
 							manifold->Normal.z,
-							manifold->Depth
+							manifold->Depth,
+							HitPointA.x, HitPointA.y, HitPointA.z,
+							HitPointB.x, HitPointB.y, HitPointB.z
 						);
 					}
 				}
@@ -230,16 +250,16 @@ namespace Bennett
 		}
 	};
 
-	int EPA::GetFaceNormals(std::vector<glm::vec3>& normals, std::vector<float>& distances, const std::vector<glm::vec3>& simplex, const std::vector<size_t>& faces)
+	int EPA::GetFaceNormals(std::vector<glm::vec3>& normals, std::vector<float>& distances, const std::vector<SupportVertex>& simplex, const std::vector<size_t>& faces)
 	{
 		int minIndex = 0;
 		float minDistance = FLT_MAX;
 
 		for (int i = 0; i < faces.size(); i += 3)
 		{
-			glm::vec3 a = simplex[faces[i + 0]];
-			glm::vec3 b = simplex[faces[i + 1]];
-			glm::vec3 c = simplex[faces[i + 2]];
+			glm::vec3 a = simplex[faces[i + 0]].MinkowskiDifference;
+			glm::vec3 b = simplex[faces[i + 1]].MinkowskiDifference;
+			glm::vec3 c = simplex[faces[i + 2]].MinkowskiDifference;
 
 			glm::vec3 lineAB = b - a;
 			glm::vec3 lineAC = c - a;
@@ -286,22 +306,24 @@ namespace Bennett
 		}
 	}
 
-	void EPA::GetCollisionDetails(std::vector<glm::vec3>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold)
+	EPA_Result EPA::GetCollisionDetails(std::vector<SupportVertex>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold)
 	{
+		EPA_Result result{};
+
 		if (manifold == nullptr)
 		{
 			Log(LOG_SERIOUS, "Called EPA::GetCollisionDetails with a nullptr manifold.\n");
-			return;
+			return result;
 		}
 
 		if (simplex.size() < 4)
 		{
 			Log(LOG_SERIOUS, "Called EPA::GetCollisionDetails with a simplex containing less than a 3d object.\n");
-			return;
+			return result;
 		}
 
 		//Construct a new polytope (fancy word for 3d simplex) that we can add to without adjusting the original.
-		std::vector<glm::vec3> polytope(simplex.begin(), simplex.end());
+		std::vector<SupportVertex> polytope(simplex.begin(), simplex.end());
 
 		int iterations = 0;
 
@@ -332,23 +354,24 @@ namespace Bennett
 			minDistance = faceDistances[minIndex];
 			
 			//Once we have the furthest edge normal, get the support vertex in that direction.
-			glm::vec3 supportVertex = Helper::Collision::GetSupportVertex(colliderA, colliderB, minNormal);
+			SupportVertex supportVertex = Collision::GetSupportVertex(colliderA, colliderB, minNormal);
 			//if this point is further out in the direction, we insert this vertex into the simplex and test again.
-			float supportDistance = glm::dot(minNormal, supportVertex);
+			float supportDistance = glm::dot(minNormal, supportVertex.MinkowskiDifference);
 
 			if (abs(supportDistance - minDistance) > 0.001f)
 			{
 				minDistance = FLT_MAX;
 
-				//Expanding polytrope in 3D does not just require adding a vertex, it needs to repair the faces.
-				//just adding a face however, may result in multiple identical support points.
+				//Expanding polytrope in 3D does not just require adding a vertex
+				//it needs to repair the faces. just adding a face however, 
+				//may result in multiple identical support points.
 
 				std::vector<std::pair<size_t, size_t>> uniqueEdgeList = std::vector<std::pair<size_t, size_t>>();
 
 				for (size_t i = 0; i < faceNormals.size(); i++)
 				{
 					//Not just removing current face, but also every face pointing in that direciton.
-					if (SameDirection(faceNormals[i], supportVertex))
+					if (SameDirection(faceNormals[i], supportVertex.MinkowskiDifference))
 					{
 						size_t faceIndex = i * 3;
 
@@ -418,8 +441,24 @@ namespace Bennett
 		}
 
 		//Return the normal and depth (add a tiny amount to avoid multiple collisions).
-		manifold->Normal = minNormal;
+		manifold->Normal = glm::normalize(minNormal);
 		manifold->Depth = minDistance + 0.001f;
+
+		EPA_Result::Triangle triangle;
+		for (size_t i = 0; i < 3; i++)
+		{
+			size_t triFaceIndex = (minIndex * 3) + i;
+			triangle.points[i] = (polytope[polytopeFaces[triFaceIndex]]);
+		}
+
+		glm::vec3 norm = glm::cross(triangle.points[1].MinkowskiDifference - triangle.points[0].MinkowskiDifference, triangle.points[2].MinkowskiDifference - triangle.points[0].MinkowskiDifference);
+		norm = glm::normalize(norm);
+
+		triangle.normal = Helper::GetNormalOfTriangle(triangle.points[0].MinkowskiDifference, triangle.points[1].MinkowskiDifference, triangle.points[2].MinkowskiDifference);
+
+		result.tri = triangle;
+
+		return result;
 	}
 
 	void EPA::Get2DCollisionDetails(std::vector<glm::vec2>& simplex, const Collider2D& colliderA, const Collider2D& colliderB, CollisionDetails2D* manifold)
@@ -476,14 +515,14 @@ namespace Bennett
 			}
 
 			//Once we have the furthest edge normal, get the support vertex in that direction.
-			glm::vec2 supportVertex = Helper::Collision::GetSupportVertex2D(colliderA, colliderB, minNormal);
+			SupportVertex2D supportVertex = Collision::GetSupportVertex2D(colliderA, colliderB, minNormal);
 			//if this point is further out in the direction, we insert this vertex into the simplex and test again.
-			float supportDistance = glm::dot(minNormal, supportVertex);
+			float supportDistance = glm::dot(minNormal, supportVertex.MinkowskiDifference);
 
 			if (abs(supportDistance - minDistance) > 0.001f)
 			{
 				minDistance = FLT_MAX;
-				simplex.insert(simplex.begin() + minIndex, supportVertex);
+				simplex.insert(simplex.begin() + minIndex, supportVertex.MinkowskiDifference);
 			}
 
 			//if this point is not further out, the furthest has been found and it can be returned.

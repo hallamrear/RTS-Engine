@@ -1,4 +1,5 @@
 #pragma once
+#include <Collision/CollisionStructures.h>
 #include <Collision/Collider/AABBCollider.h>
 #include <Collision/Collider/SphereCollider.h>
 #include <Collision/Collider/Ray.h>
@@ -8,39 +9,28 @@
 namespace Bennett
 {
 	typedef Collider Collider2D;
-
 	class OBBCollider;
-
-	struct BENNETT_ENGINE CollisionDetails2D
-	{
-		float Depth;
-		glm::vec2 Normal;
-	};
-
-	struct BENNETT_ENGINE CollisionDetails
-	{
-		float Depth;
-		glm::vec3 Normal;
-	};
 
 	class BENNETT_ENGINE EPA
 	{
 	private:
+		static int GetFaceNormals(std::vector<glm::vec3>& normals, std::vector<float>& distances, const std::vector<SupportVertex>& simplex, const std::vector<size_t>& faces);
+		static void AddEdgeIfUnique(std::vector<std::pair<size_t, size_t>>& edgeList, const std::vector<size_t>& faceList, const size_t& indexA, const size_t& indexB);
 
 	public:
-		static int GetFaceNormals(std::vector<glm::vec3>& normals, std::vector<float>& distances, const std::vector<glm::vec3>& simplex, const std::vector<size_t>& faces);
-		static void AddEdgeIfUnique(std::vector<std::pair<size_t, size_t>>& edgeList, const std::vector<size_t>& faceList, const size_t& indexA, const size_t& indexB);
-		static void GetCollisionDetails(std::vector<glm::vec3>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
+		//static void GetCollisionDetails(std::vector<glm::vec3>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
+		static EPA_Result GetCollisionDetails(std::vector<SupportVertex>& simplex, const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
 		static void Get2DCollisionDetails(std::vector<glm::vec2>& simplex, const Collider2D& colliderA, const Collider2D& colliderB, CollisionDetails2D* manifold);
+
 	};
 
 	class BENNETT_ENGINE GJK
 	{
 	private:
-		static bool Line(std::vector<glm::vec3>& simplex, glm::vec3& direction);
-		static bool Triangle(std::vector<glm::vec3>& simplex, glm::vec3& direction);
-		static bool Tetrahedron(std::vector<glm::vec3>& simplex, glm::vec3& direction);
-		static bool UpdateSimplex(std::vector<glm::vec3>& simplex, glm::vec3& direction);
+		static bool Line(std::vector<SupportVertex>& simplex, glm::vec3& direction);
+		static bool Triangle(std::vector<SupportVertex>& simplex, glm::vec3& direction);
+		static bool Tetrahedron(std::vector<SupportVertex>& simplex, glm::vec3& direction);
+		static bool UpdateSimplex(std::vector<SupportVertex>& simplex, glm::vec3& direction);
 
 	public:
 		static bool CheckCollision(const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr);
@@ -48,13 +38,27 @@ namespace Bennett
 
 	class BENNETT_ENGINE Collision
 	{
-
 	private:
 		static void GetNormalAxesOfBoundingBox(const Collider& collider, std::array<glm::vec3, 6>& axes);
 		
 	public:
 
-		//template<class A, class B>
+		inline static SupportVertex GetSupportVertex(const Collider& colliderA, const Collider& colliderB, const glm::vec3& direction)
+		{
+			glm::vec3 dirNorm = glm::normalize(direction);
+			glm::vec3 invDirNorm = dirNorm * -1.0f;
+			return SupportVertex(colliderA.GetSupportVertex(dirNorm), colliderB.GetSupportVertex(invDirNorm));
+		};
+
+		inline static SupportVertex2D GetSupportVertex2D(const Collider2D& colliderA, const Collider2D& colliderB, const glm::vec2& direction)
+		{
+			//TODO : Implement GetSupportVertex2D
+			//glm::vec2 dirNorm = glm::normalize(direction);
+			//glm::vec2 invDirNorm = dirNorm * -1.0f;
+			//return SupportVertex2D(colliderA.GetSupportVertex(dirNorm), colliderB.GetSupportVertex(invDirNorm));
+			return SupportVertex2D(glm::vec2(), glm::vec2());
+		};
+
 		inline static bool CheckCollision(const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr)
 		{
 			return GJK::CheckCollision(colliderA, colliderB, manifold);
@@ -311,5 +315,4 @@ namespace Bennett
 
 		*/
 	};
-
 }

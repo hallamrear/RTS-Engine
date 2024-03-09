@@ -33,7 +33,7 @@ namespace Bennett
 
 		void SetPosition(const glm::vec3& position);
 		void SetRotation(const glm::quat& quaternion);
-		void SetRotationEuler(const glm::vec3& eulerAngles);
+		void SetRotation(const glm::vec3& eulerAngles);
 		void SetScale(const glm::vec3& scale);
 		void Translate(const glm::vec3& positionAdjustment);
 		void Rotate(const glm::vec3& rotationAdjustmentEuler);

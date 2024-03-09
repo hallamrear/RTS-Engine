@@ -36,9 +36,16 @@ namespace Bennett
 		renderer.PushConstants.ModelMatrix = parent * model;
 		renderer.UpdatePushConstants();
 
-		if (GetModel() != nullptr)
+		if (ENABLE_DRAW_COLLIDERS_OUTLINE)
 		{
-			GetModel()->Render(renderer);
+			renderer.SetWireframeGraphicsPipeline();
+
+			if (GetModel() != nullptr)
+			{
+				GetModel()->Render(renderer);
+			}
+
+			renderer.SetSolidGraphicsPipeline();
 		}
 	}
 }

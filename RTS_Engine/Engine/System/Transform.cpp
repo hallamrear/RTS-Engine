@@ -57,9 +57,9 @@ namespace Bennett
 	{ 
 		m_Rotation = quaternion; 
 		UpdateBasisVectors();
-	};
+	}
 
-	void Transform::SetRotationEuler(const glm::vec3& eulerAngles)
+	void Transform::SetRotation(const glm::vec3& eulerAngles)
 	{ 
 		m_Rotation = glm::quat(eulerAngles); 
 		UpdateBasisVectors(); 

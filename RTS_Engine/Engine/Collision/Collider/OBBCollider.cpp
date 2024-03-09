@@ -24,13 +24,13 @@ namespace Bennett
 		const glm::mat4& parent = GetTransform().GetModelMatrix();
 		glm::mat4 movement = glm::translate(identity, GetOffset());
 		glm::mat4 scaling = glm::scale(identity, GetExtents());
-		glm::mat4 model = parent * (movement * scaling);
+		glm::mat4 model = (movement * scaling);
 
 		glm::vec4 position = glm::vec4(0.0f);
 		for (size_t i = 0; i < 8; i++)
 		{
 			position = glm::vec4(m_BaseCorners[i], 1.0f);
-			m_Corners[i] = model * position;
+			m_Corners[i] = parent * model * position;
 		}
 	}
 
@@ -46,13 +46,16 @@ namespace Bennett
 		renderer.PushConstants.ModelMatrix = transform.GetModelMatrix() * matrix;
 		renderer.UpdatePushConstants();
 		
-		renderer.SetWireframeGraphicsPipeline();
-		
-		if (GetModel() != nullptr)
+		if (ENABLE_DRAW_COLLIDERS_OUTLINE)
 		{
-			GetModel()->Render(renderer);
+			renderer.SetWireframeGraphicsPipeline();
+
+			if (GetModel() != nullptr)
+			{
+				GetModel()->Render(renderer);
+			}
+
+			renderer.SetSolidGraphicsPipeline();
 		}
-		
-		renderer.SetSolidGraphicsPipeline();
 	}
 }
