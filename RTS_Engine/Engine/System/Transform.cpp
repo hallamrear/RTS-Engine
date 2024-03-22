@@ -1,5 +1,6 @@
 #include "BennettPCH.h"
 #include "Transform.h"
+#include <glm/gtc/quaternion.hpp>
 
 namespace Bennett
 {
@@ -15,7 +16,7 @@ namespace Bennett
 	{
 		m_Scale = scale;
 		m_Position = position;
-		m_Rotation = glm::quat(rotation);
+		m_Rotation = glm::quat(glm::radians(rotation));
 		UpdateBasisVectors();
 	}
 
@@ -29,12 +30,11 @@ namespace Bennett
 	void Transform::UpdateBasisVectors()
 	{
 		glm::vec3 euler = glm::eulerAngles(m_Rotation);
-		m_ForwardVector.x = cos(glm::radians(euler.y)) * cos(glm::radians(euler.x));
-		m_ForwardVector.y = sin(glm::radians(euler.x));
-		m_ForwardVector.z = sin(glm::radians(euler.y)) * cos(glm::radians(euler.x));
-		m_ForwardVector = glm::normalize(m_ForwardVector);
-		m_RightVector = glm::normalize(glm::cross(m_ForwardVector, glm::vec3(0.0f, 1.0f, 0.0f)));
-		m_UpVector = glm::normalize(glm::cross(m_RightVector, m_ForwardVector));
+		glm::mat4 rotation = (GetRotationMatrix());
+		glm::mat4 identity = glm::mat4(1.0f);
+		m_ForwardVector = glm::normalize(rotation * glm::vec4(0.0f, 0.0f, 1.0f, 0.0f));
+		m_LeftVector = glm::normalize(rotation * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+		m_UpVector = glm::normalize(rotation * glm::vec4(0.0f, 1.0f, 0.0f, 0.0f));
 	}
 
 	glm::mat4x4 Transform::GetModelMatrix() const
@@ -45,6 +45,11 @@ namespace Bennett
 		glm::mat4 translate = glm::translate(matrix, m_Position);
 		matrix = translate * rotate * scale;
 		return matrix;
+	}
+
+	glm::mat4x4 Transform::GetRotationMatrix() const
+	{
+		return glm::toMat4(m_Rotation);
 	}
 
 	void Transform::SetPosition(const glm::vec3& position) 
@@ -61,7 +66,7 @@ namespace Bennett
 
 	void Transform::SetRotation(const glm::vec3& eulerAngles)
 	{ 
-		m_Rotation = glm::quat(eulerAngles); 
+		m_Rotation = glm::quat(glm::radians(eulerAngles)); 
 		UpdateBasisVectors(); 
 	};
 
@@ -77,6 +82,10 @@ namespace Bennett
 		UpdateBasisVectors();
 	};
 
+	/// <summary>
+	/// Rotate the transform by the vec3 euler angles (in degrees).
+	/// </summary>
+	/// <param name="rotationAdjustmentEuler"></param>
 	void Transform::Rotate(const glm::vec3& rotationAdjustmentEuler)
 	{
 		Rotate(glm::quat(glm::radians(rotationAdjustmentEuler)));
@@ -86,6 +95,7 @@ namespace Bennett
 	void Transform::Rotate(const glm::quat& rotationAdjustmentQuat)
 	{
 		m_Rotation *= rotationAdjustmentQuat;
+		m_Rotation = glm::normalize(m_Rotation);
 		UpdateBasisVectors();
 	};
 
@@ -96,7 +106,7 @@ namespace Bennett
 	};
 
 	const glm::vec3& Transform::GetForwardVector() const { return m_ForwardVector; };
-	const glm::vec3& Transform::GetRightVector() const { return m_RightVector; };
+	const glm::vec3& Transform::GetLeftVector() const { return m_LeftVector; };
 	const glm::vec3& Transform::GetUpVector() const { return m_UpVector; };
 	const glm::vec3& Transform::GetPosition()      const { return m_Position; };
 	const glm::quat& Transform::GetRotation()      const { return m_Rotation; };

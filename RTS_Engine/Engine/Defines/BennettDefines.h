@@ -8,10 +8,21 @@
 #define MAX_LOADED_TEXTURES 64
 #define MAX_LOADSTRING 100
 
+//Engine Defines
+#define BENNETT_LEFT_VECTOR		glm::vec3(+1.0f, 0.0f, 0.0f)
+#define BENNETT_UP_VECTOR		glm::vec3( 0.0f,+1.0f, 0.0f)
+#define BENNETT_FORWARD_VECTOR	glm::vec3( 0.0f, 0.0f,+1.0f)
+#define BENNETT_RIGHT_VECTOR	glm::vec3(-1.0f, 0.0f, 0.0f)
+#define BENNETT_DOWN_VECTOR		glm::vec3( 0.0f,-1.0f, 0.0f)
+#define BENNETT_BACK_VECTOR		glm::vec3( 0.0f, 0.0f,-1.0f)
+
 //Physics and Collision defines.
 #define COLLISION_EPA_ITERATION_CAP 100
 #define RIGIDBODY_DEFAULT_MASS 100
 #define PHYSICS_GRAVITY_FORCE glm::vec3(0.0f, -9.81f, 0.0f)
+
+//Renderer Defines
+#define MAX_DEBUG_LINE_COUNT 100
 
 //Custom Defines
 #define BENNETT_ENGINE __declspec(dllexport)

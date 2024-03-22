@@ -34,6 +34,9 @@ namespace Bennett
 	
 	void Engine::Update(const float& DeltaTime)
 	{
+		if (!m_InFocus)
+			return;
+
 		if (ENABLE_LOG_DELTATIME_AND_FPS)
 		{
 			Log("DT: " + std::to_string(DeltaTime), LOG_SAFE);

@@ -41,6 +41,25 @@ namespace Bennett
 			return result;
 		};
 
+		static bool Create(VertexBuffer& buffer, const VkBufferCreateInfo& bufferInfo, void* dataPtr, const size_t& dataCount)
+		{
+			bool result = false;
+
+			if (dataCount > 0)
+			{
+				result = Buffer::Create(buffer, bufferInfo, dataPtr);
+				buffer.m_Count = dataCount;
+			}
+
+			if (!result)
+			{
+				Log(LOG_MINIMAL, "Failed to create vertex buffer.\n");
+			}
+
+			return result;
+		};
+
+
 		void Bind() override;
 	};
 }

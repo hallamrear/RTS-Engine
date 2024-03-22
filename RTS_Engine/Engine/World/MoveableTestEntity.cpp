@@ -2,6 +2,7 @@
 #include <World/MoveableTestEntity.h>
 #include <System/InputMonitor.h>
 #include <Collision/Collider/Collider.h>
+#include <Rendering/Renderer.h>
 
 namespace Bennett
 {
@@ -21,6 +22,8 @@ namespace Bennett
 			BENNETT_KEY_U,
 			BENNETT_KEY_M,
 			BENNETT_KEY_N,
+			BENNETT_KEY_Y,
+			BENNETT_KEY_H,
 		};
 
 		//Creating the object that tracks keypresses and giving it the list.
@@ -77,22 +80,32 @@ namespace Bennett
 
 			if (m_InputMonitor->GetKeyState(BENNETT_KEY_J))
 			{
-				GetTransform().Translate(-GetTransform().GetRightVector() * movespeed * deltaTime);
+				GetTransform().Translate(GetTransform().GetLeftVector() * movespeed * deltaTime);
 			}
 
 			if (m_InputMonitor->GetKeyState(BENNETT_KEY_L))
 			{
-				GetTransform().Translate(GetTransform().GetRightVector() * movespeed * deltaTime);
+				GetTransform().Translate(-GetTransform().GetLeftVector() * movespeed * deltaTime);
 			}
 
 			if (m_InputMonitor->GetKeyState(BENNETT_KEY_U))
 			{
-				GetTransform().Rotate(glm::vec3(0.0f, -10 * movespeed * deltaTime, 0.0f));
+				GetTransform().Rotate(glm::vec3(0.0f, +10 * movespeed * deltaTime, 0.0f));
 			}
 
 			if (m_InputMonitor->GetKeyState(BENNETT_KEY_O))
 			{
-				GetTransform().Rotate(glm::vec3(0.0f, +10 * movespeed * deltaTime, 0.0f));
+				GetTransform().Rotate(glm::vec3(0.0f, -10 * movespeed * deltaTime, 0.0f));
+			}
+
+			if (m_InputMonitor->GetKeyState(BENNETT_KEY_Y))
+			{
+				GetTransform().Rotate(glm::vec3(-10 * movespeed * deltaTime, 0.0f, 0.0f));
+			}
+
+			if (m_InputMonitor->GetKeyState(BENNETT_KEY_H))
+			{
+				GetTransform().Rotate(glm::vec3(+10 * movespeed * deltaTime, 0.0f, 0.0f));
 			}
 
 			if (m_InputMonitor->GetKeyState(BENNETT_KEY_M))
@@ -106,12 +119,16 @@ namespace Bennett
 			}
 		}
 
-		m_Rigidbody->Update(deltaTime);
+		//m_Rigidbody->Update(deltaTime);
 		Entity::Update(deltaTime);
 	}
 
 	void MoveableTestEntity::Render(const Renderer& renderer)
 	{
+		renderer.DrawDebugLine(GetTransform().GetPosition(), GetTransform().GetForwardVector(), 5.0f);
+		renderer.DrawDebugLine(GetTransform().GetPosition(), GetTransform().GetLeftVector(), 5.0f);
+		renderer.DrawDebugLine(GetTransform().GetPosition(), GetTransform().GetUpVector(), 5.0f);
+
 		Entity::Render(renderer);
 	}
 }

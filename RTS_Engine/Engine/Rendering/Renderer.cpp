@@ -20,6 +20,9 @@ namespace Bennett
 	const CustomPipeline* Renderer::m_CurrentPipeline = nullptr;
 	const CustomPipeline* Renderer::m_PendingPipeline = nullptr;
 
+	std::vector<Vertex> Renderer::m_DebugLineList = std::vector<Vertex>();
+	int Renderer::m_CurrentDebugLineCount = 0;
+
 	/// <summary>
 	/// Function comes from an extension 'VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME' so we need a variable to store the func addr.
 	/// </summary>
@@ -81,12 +84,45 @@ namespace Bennett
 		INIT_CHECK(CreateUniformBuffers())
 		INIT_CHECK(CreateCommandBuffer())
 		INIT_CHECK(CreateSyncObjects())
+		INIT_CHECK(CreateRenderingDebugAssets())
 
+		return true;
+	}
+
+	bool Renderer::CreateRenderingDebugAssets()
+	{
 		if (m_DebugTexture->Loaded())
 		{
 			Texture::Destroy(*m_DebugTexture);
 		}
 		Texture::Create(*m_DebugTexture, ServiceLocator::GetResourceFolderLocation() + "Required/debug.png");
+
+		CustomPipelineDetails lineRenderingPipelineDetails{};
+		lineRenderingPipelineDetails.Cullmode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
+		lineRenderingPipelineDetails.PolygonMode = VkPolygonMode::VK_POLYGON_MODE_LINE;
+		lineRenderingPipelineDetails.Topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+
+		bool pipelineSuccessful = CreateCustomPipeline(m_DebugLinePipeline, lineRenderingPipelineDetails);
+		if (pipelineSuccessful != true)
+		{
+			Log("Failed to create debug line rendering graphics custom pipeline.", LOG_SERIOUS);
+			return false;
+		}
+
+		m_DebugLineList = std::vector<Vertex>();
+		m_DebugLineList.resize(MAX_DEBUG_LINE_COUNT * 2);
+		m_CurrentDebugLineCount = 0;
+
+		VkBufferCreateInfo bufferInfo{};
+		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		bufferInfo.size = sizeof(Vertex) * MAX_DEBUG_LINE_COUNT * 2;
+		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		if (VertexBuffer::Create(m_DebugLineVertexBuffer, bufferInfo, (void*)m_DebugLineList.data(), m_DebugLineList.size()) == false)
+		{
+			return false;
+		}
 
 		return true;
 	}
@@ -250,8 +286,6 @@ namespace Bennett
 		createInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 		createInfo.magFilter = VK_FILTER_LINEAR;
 		createInfo.minFilter = VK_FILTER_LINEAR;
-		
-
 		createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 		createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 		createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
@@ -310,9 +344,43 @@ namespace Bennett
 		return m_CurrentPipeline;
 	}
 
+	void Renderer::DrawAllPendingLines()
+	{
+		if (m_CurrentDebugLineCount > 0)
+		{
+			VkCommandBuffer debugLineDrawCommandBuffer = BeginSingleTimeCommands();
+			//Update line list vertex buffer with pending lines.
+			vkCmdUpdateBuffer(
+				debugLineDrawCommandBuffer,
+				m_DebugLineVertexBuffer.Object(),
+				0,
+				(sizeof(Vertex) * m_CurrentDebugLineCount * 2),
+				m_DebugLineList.data());
+
+			EndSingleTimeCommands(debugLineDrawCommandBuffer);
+
+			//Draw all.
+			const CustomPipeline& tempPipeline = *m_CurrentPipeline;
+			SetCustomGraphicsPipeline(m_DebugLinePipeline);
+			m_DebugLineVertexBuffer.Bind();
+			PushConstants.ModelMatrix = glm::mat4(1.0f);
+			UpdatePushConstants();
+			PushDescriptorSet(nullptr);
+			UpdateUniformBuffers();
+			vkCmdDraw(GetCommandBuffer(), m_CurrentDebugLineCount * 2, 1, 0, 0);
+			SetCustomGraphicsPipeline(tempPipeline);
+
+			//Reset the memory index.
+			m_CurrentDebugLineCount = 0;
+		}
+	}
+
 	void Renderer::EndFrame()
 	{
+		DrawAllPendingLines();
+
 		EndRenderPass();
+
 		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame]) != VK_SUCCESS)
 		{
 			Log("Failed to record command buffer.", LOG_CRITICAL);
@@ -419,6 +487,12 @@ namespace Bennett
 	{
 		m_PendingPipeline = &pipeline;
 		m_PipelineNeedsChanging = true;
+	}
+
+	void Renderer::SetCustomGraphicsPipeline(const CustomPipeline& pipeline, const VkCommandBuffer& commandBuffer) const
+	{
+		m_CurrentPipeline = &pipeline;
+		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Pipeline);
 	}
 
 	void Renderer::SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const
@@ -569,6 +643,25 @@ namespace Bennett
 	{
 		vkDestroyFence(device, fence, nullptr);
 		fence = VK_NULL_HANDLE;
+	}
+
+	void Renderer::DrawDebugLine(const glm::vec3& start, const glm::vec3& end) const
+	{
+		if (m_CurrentDebugLineCount == MAX_DEBUG_LINE_COUNT)
+		{
+			Log("Trying to draw too many debug lines in one frame. Max is 100.\n", LOG_STATUS::LOG_MINIMAL);
+			return;
+		}
+
+		m_DebugLineList[(m_CurrentDebugLineCount * 2) + 0] = start;
+		m_DebugLineList[(m_CurrentDebugLineCount * 2) + 1] = end;
+		m_CurrentDebugLineCount++;
+	}
+
+	void Renderer::DrawDebugLine(const glm::vec3& start, const glm::vec3& dir, const float& length) const
+	{
+		glm::vec3 end = start + (dir * length);
+		DrawDebugLine(start, end);
 	}
 
 	const VkDevice& Renderer::GetDevice() const
@@ -759,13 +852,13 @@ namespace Bennett
 
 		if (renderTexture == nullptr)
 		{
-			Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			//Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
 			renderTexture = m_DebugTexture;
 		}
 
 		if (!renderTexture->Loaded())
 		{
-			Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			//Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
 			renderTexture = m_DebugTexture;
 		}
 

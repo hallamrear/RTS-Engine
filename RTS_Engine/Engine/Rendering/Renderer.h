@@ -3,12 +3,14 @@
 #include <vulkan/vulkan.h>
 #include <Defines/TerrainDefines.h>
 #include <Rendering/CustomPipelineObject.h>
+#include <Rendering/VertexBuffer.h>
 #include <optional>
 
 namespace Bennett
 {
 	class Texture;
 	class Window;
+	class Vertex;
 
 	struct BENNETT_ENGINE UniformBufferObject
 	{
@@ -26,6 +28,11 @@ namespace Bennett
 	{
 	private:
 		friend class Texture;
+
+		CustomPipeline m_DebugLinePipeline;
+		VertexBuffer m_DebugLineVertexBuffer;
+		static std::vector<Vertex> m_DebugLineList;
+		static int m_CurrentDebugLineCount;
 
 		const Window* m_AttachedWindow;
 		Texture* m_DebugTexture;
@@ -127,6 +134,7 @@ namespace Bennett
 		bool m_IsInitialised;
 
 		bool InitialiseCoreVulkanSystem(const Window& window, HINSTANCE hInstance);
+		bool CreateRenderingDebugAssets();
 
 		VkViewport m_Viewport;
 		VkRect2D m_ScissorRect;
@@ -364,6 +372,8 @@ namespace Bennett
 		/// <param name="fence"></param>
 		void CleanupFence(VkDevice& device, VkFence& fence);
 
+		void DrawAllPendingLines();
+
 	public:
 		static UniformBufferObject UniformMatrixBuffer;
 		static PushConstantBuffer  PushConstants;
@@ -393,11 +403,15 @@ namespace Bennett
 		void EndFrame();
 
 		const CustomPipeline* GetCurrentGraphicsPipeline() const;
-		void SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const;
+		void SetCustomGraphicsPipeline(const CustomPipeline& pipeline) const;	
+		void SetCustomGraphicsPipeline(const CustomPipeline& pipeline, const VkCommandBuffer& commandBuffer) const;
 		void SetCustomGraphicsPipelineNextFrame(const CustomPipeline& pipeline);
 		void SetSolidGraphicsPipeline() const;
 		void SetWireframeGraphicsPipeline() const;
 		void WaitForRendererIdle();
+
+		void DrawDebugLine(const glm::vec3& start, const glm::vec3& end) const;
+		void DrawDebugLine(const glm::vec3& start, const glm::vec3& dir, const float& length) const;
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);

@@ -10,7 +10,7 @@ namespace Bennett
 		glm::vec3 m_Position;
 		glm::quat m_Rotation;
 		glm::vec3 m_ForwardVector;
-		glm::vec3 m_RightVector;
+		glm::vec3 m_LeftVector;
 		glm::vec3 m_UpVector;
 
 	public:
@@ -21,9 +21,10 @@ namespace Bennett
 		void UpdateBasisVectors();
 
 		glm::mat4x4 GetModelMatrix() const;
+		glm::mat4x4	GetRotationMatrix() const;
 
 		const glm::vec3& GetForwardVector() const;
-		const glm::vec3& GetRightVector() const;
+		const glm::vec3& GetLeftVector() const;
 		const glm::vec3& GetUpVector() const;
 		const glm::vec3& GetPosition() const;
 		const glm::quat& GetRotation() const;
