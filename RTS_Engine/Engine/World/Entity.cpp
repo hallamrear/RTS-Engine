@@ -11,17 +11,28 @@
 
 namespace Bennett
 {
+	EntityID Entity::m_EntityIDCounter = 0;
+
 	Entity::Entity(const std::string& name, const glm::vec3& scale, const glm::vec3& position, const glm::vec3& rotation)
 	{
 		//Setting data to stuff passed in.
 		m_Name = name;
 		m_Transform = Transform(scale, position, rotation);
+		m_Collider = nullptr;
+		m_InputMonitor = nullptr;
+		m_Model = nullptr;
+		m_ID = m_EntityIDCounter;
+		m_EntityIDCounter++;
 	}
 
 	Entity::Entity(const std::string& name, const Transform& transform)
 	{
 		m_Name = name;
 		m_Transform = transform;
+		m_Collider = nullptr;
+		m_InputMonitor = nullptr;
+		m_ID = m_EntityIDCounter;
+		m_EntityIDCounter++;
 	}
 
 	Entity::~Entity()
@@ -77,6 +88,11 @@ namespace Bennett
 	const std::string& Entity::GetName() const
 	{
 		return m_Name;
+	}
+
+	const EntityID& Entity::GetID() const
+	{
+		return m_ID;
 	}
 
 	void Entity::GenerateBroadPhaseColliderFromModel(const ColliderType& type)

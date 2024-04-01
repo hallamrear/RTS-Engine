@@ -6,6 +6,8 @@
 
 namespace Bennett
 {
+	typedef unsigned int EntityID;
+
 	enum class ColliderType;
 	class Model;
 	class Renderer;
@@ -14,6 +16,8 @@ namespace Bennett
 	class BENNETT_ENGINE Entity
 	{
 	private:
+		static EntityID m_EntityIDCounter;
+		EntityID m_ID;
 		std::string m_Name;
 		Transform m_Transform;
 		Model* m_Model;
@@ -46,6 +50,7 @@ namespace Bennett
 		bool HasCollider()  const { return m_Model != nullptr; };
 
 		const std::string& GetName() const;
+		const EntityID& GetID() const;
 
 		inline Transform& GetTransform() { return m_Transform; };
 

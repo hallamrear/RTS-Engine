@@ -45,6 +45,10 @@ Entity* tools = nullptr;
 MoveableTestEntity* glitch = nullptr;
 MoveableTestEntity* car = nullptr;
 
+InputMonitor* inputMonitor = nullptr;
+
+std::vector<std::pair<glm::vec3, glm::vec3>> lines;
+
 bool Game::Initialise()
 {
     srand(time(NULL));
@@ -75,6 +79,15 @@ bool Game::Initialise()
     }
 
     AssetManager& am = ServiceLocator::GetAssetManager();
+
+    lines = std::vector<std::pair<glm::vec3, glm::vec3>>();
+
+    std::vector<int> keys =
+    {
+        BENNETT_KEY_T,			 //Draw cam Line
+    };
+
+    inputMonitor = new InputMonitor(keys);
 
    /* ground = GetWorld().SpawnEntity("Floor");
     ground->SetModel(am.GetModel("1x1_Cube"));
@@ -128,6 +141,8 @@ bool Game::Initialise()
     return true;
 }
 
+bool pressedLast = false;
+
 void Game::RunGameLoop()
 {
     AssetManager& am = ServiceLocator::GetAssetManager();
@@ -154,9 +169,12 @@ void Game::RunGameLoop()
 
         if (dTime > TIMESTEP_CAP)
         {
-            printf("capped timestep\n");
+            Log(LOG_STATUS::LOG_MINIMAL, "Capped timestep to %f\n", TIMESTEP_CAP);
             dTime = TIMESTEP_CAP;
         }
+
+        std::string dtStr = std::to_string(dTime);
+        m_Window->SetTitle(dtStr.c_str());
 
         ProcessInput(dTime);
         Update(dTime);
@@ -173,6 +191,20 @@ void Game::RunGameLoop()
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f));
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f));
    
+        if (inputMonitor->GetKeyState(BENNETT_KEY_T))
+        {
+            if (pressedLast == false)
+            {
+                glm::vec3 start = GetCameraController().GetCurrentCamera().GetPosition();
+                glm::vec3 end = GetCameraController().GetCurrentCamera().GetForwardVector() * 10.0f;
+                lines.push_back(std::make_pair(start, start + end));
+            }
+            pressedLast = true;
+        }
+        else
+        {
+            pressedLast = false;
+        }
                               
         //if (ground->GetCollider() != nullptr && car->GetCollider() != nullptr)
         //{
@@ -228,6 +260,12 @@ void Game::RunGameLoop()
         //    }
         //}
         
+        for (size_t i = 0; i < lines.size(); i++)
+        {
+            ServiceLocator::GetRenderer().DrawDebugLine(
+                lines[i].first,
+                lines[i].second);
+        }
 
         lTime = cTime;
     }
