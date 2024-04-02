@@ -67,6 +67,16 @@ namespace Bennett
 	{
 		glm::mat4 model = m_Transform.GetModelMatrix();
 		renderer.PushConstants.ModelMatrix = model;
+
+		if (HasTexture())
+		{
+			renderer.PushDescriptorSet(&GetTexture());
+		}
+		else
+		{
+			renderer.PushDescriptorSet(&renderer.GetDebugTexture());
+		}
+
 		renderer.UpdatePushConstants();
 
 		if (m_Model != nullptr)
@@ -153,5 +163,10 @@ namespace Bennett
 			delete m_Collider;
 			m_Collider = nullptr;
 		}
+	}
+
+	void Entity::SetTexture(Texture* texture)
+	{
+		m_Texture = texture;
 	}
 }

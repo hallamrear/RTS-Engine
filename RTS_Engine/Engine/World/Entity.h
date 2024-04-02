@@ -21,12 +21,16 @@ namespace Bennett
 		std::string m_Name;
 		Transform m_Transform;
 		Model* m_Model;
+		const Texture* m_Texture;
 		Collider* m_Collider;
 
 	protected:
 		class InputMonitor* m_InputMonitor;
 
+		inline const Texture& GetTexture()		   const { return *m_Texture; };
+
 		void DestroyCollider();
+
 
 	public:
 		Entity(const std::string& name,
@@ -46,13 +50,17 @@ namespace Bennett
 		void SetModel(Model* model);
 		bool HasModel()   const { return m_Model != nullptr; };
 
+		void SetTexture(Texture* texture);
+		bool HasTexture()   const { return m_Texture != nullptr; };
+
 		Collider* GetCollider() const { if (m_Collider) return m_Collider; else return nullptr; };
-		bool HasCollider()  const { return m_Model != nullptr; };
+		bool HasCollider()  const { return m_Collider != nullptr; };
 
 		const std::string& GetName() const;
 		const EntityID& GetID() const;
 
 		inline Transform& GetTransform() { return m_Transform; };
+		inline const Transform& GetTransform() const { return m_Transform; };
 
 		void GenerateBroadPhaseColliderFromModel(const ColliderType& type);
 		void AddBroadPhaseCollider(const ColliderType& type, const glm::vec3& size, const glm::vec3& offset = glm::vec3(0.0f));

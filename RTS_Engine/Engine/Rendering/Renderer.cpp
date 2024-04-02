@@ -664,6 +664,11 @@ namespace Bennett
 		DrawDebugLine(start, end);
 	}
 
+	const Texture& Renderer::GetDebugTexture() const
+	{
+		return *m_DebugTexture;
+	}
+
 	const VkDevice& Renderer::GetDevice() const
 	{
 		return m_Device;

@@ -22,9 +22,24 @@ namespace Bennett
 	public:
 		~AssetManager();
 
+		template<class T>
+		static T* GetAsset(const std::string& referenceName);
+
 		static Model* CreateModel(const std::string& name, const std::vector<Vertex>& vertices, const std::vector<VertexIndex>& indices);
 		static Model* GetModel(const std::string& modelName);
 		static Texture* GetTexture(const std::string& textureName);
 	};
+
+	template<>
+	inline Model* AssetManager::GetAsset<Model>(const std::string& referenceName)
+	{
+		return GetModel(referenceName);
+	}
+
+	template<>
+	inline Texture* AssetManager::GetAsset<Texture>(const std::string& referenceName)
+	{
+		return GetTexture(referenceName);
+	}
 }
 

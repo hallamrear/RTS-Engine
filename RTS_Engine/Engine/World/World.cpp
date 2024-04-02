@@ -4,7 +4,6 @@
 #include <World/World.h>
 #include <World/Terrain/Terrain.h>
 #include <World/MoveableTestEntity.h>
-#include <Collision/Octree.h>
 
 namespace Bennett
 {
@@ -31,18 +30,11 @@ namespace Bennett
     World::World()
     {
         m_Entities = std::unordered_map<std::string, Entity*>();
-        m_Octree = new Octree<Entity*>();
         m_IsLoaded = false;
     }
 
     World::~World()
     {
-        if (m_Octree)
-        {
-            delete m_Octree;
-            m_Octree = nullptr;
-        }
-
         for (auto itr = m_Entities.begin(); itr != m_Entities.end(); /*it++*/)
         {
             Entity* entity = itr->second;
@@ -172,26 +164,17 @@ namespace Bennett
 
     void World::Update(const float& deltaTime)
     {
-        //m_Octree->Clear();
-        for (auto& ent : m_Entities)
+        for (auto& entity : m_Entities)
         {
-        //    m_Octree->AddDataObject(ent.second);
-            ent.second->Update(deltaTime);
+            entity.second->Update(deltaTime);
         }
-        //m_Octree->Update(deltaTime);
     }
 
     void World::Render(const Renderer& renderer)
     {
-        //m_Octree->Render(renderer);
-        for (auto& ent : m_Entities)
+        for (auto& entity : m_Entities)
         {
-            ent.second->Render(renderer);
+            entity.second->Render(renderer);
         }
-    }
-
-    Octree<Entity*>& World::GetOctree()
-    {
-        return *m_Octree;
     }
 }

@@ -144,15 +144,7 @@ namespace Bennett
 				ServiceLocator::GetRenderer().RecreateSwapChain();
 			}
 
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F5))
-			{
-				GetWorld().GetOctree().DecreaseMaxDepth();
-			}
-
-			if (m_EngineControls->GetKeyState(BENNETT_KEY_F6))
-			{
-				GetWorld().GetOctree().IncreaseMaxDepth();
-			}
+			
 		}
 	}
 

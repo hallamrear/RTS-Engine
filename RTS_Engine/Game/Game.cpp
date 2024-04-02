@@ -31,20 +31,7 @@ Game::~Game()
     }
 }
 
-std::array<Entity*, 15> axis{};
-
-Entity* corner = nullptr;
-AABBCollider* collider;
 Entity* ground = nullptr;
-Entity* check = nullptr;
-Entity* check_two = nullptr;
-Entity* tools = nullptr;
-
-//Entity* glitch = nullptr;
-//Entity* car = nullptr;
-MoveableTestEntity* glitch = nullptr;
-MoveableTestEntity* car = nullptr;
-
 InputMonitor* inputMonitor = nullptr;
 
 std::vector<std::pair<glm::vec3, glm::vec3>> lines;
@@ -84,54 +71,26 @@ bool Game::Initialise()
 
     std::vector<int> keys =
     {
-        BENNETT_KEY_T,			 //Draw cam Line
+        BENNETT_KEY_T, //Draw cam Line
     };
 
     inputMonitor = new InputMonitor(keys);
 
-   /* ground = GetWorld().SpawnEntity("Floor");
+
+    for (size_t i = 0; i < 100; i++)
+    {
+        ground = GetWorld().SpawnEntity(std::to_string(i));
+        ground->SetModel(am.GetModel("1x1_Cube"));
+        ground->GetTransform().SetScale(glm::vec3(1.0f));
+        ground->GetTransform().Translate(glm::vec3(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
+        ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+    }
+
+    ground = GetWorld().SpawnEntity("Floor");
     ground->SetModel(am.GetModel("1x1_Cube"));
     ground->GetTransform().SetScale(glm::vec3(20.0f, 1.0f, 20.0f));
     ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
-    ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);    */
-
-    check = GetWorld().SpawnEntity("Check");
-    check->GetTransform().SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
-    check->GetTransform().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-    //check->GetTransform().SetScale(glm::vec3(0.05f));
-    check->SetModel(am.GetModel("1x1_Cube"));
-    
-    check_two = GetWorld().SpawnEntity("Check_2");
-    check_two->GetTransform().SetPosition(glm::vec3(-10.0f, 0.0f, 0.0f));
-    check_two->GetTransform().SetPosition(glm::vec3(10.0f, 0.0f, 0.0f));
-    check_two->GetTransform().SetScale(glm::vec3(0.05f));
-    check_two->SetModel(am.GetModel("1x1_Cube"));
-    
-    car = (MoveableTestEntity*)GetWorld().SpawnTestEntity("shakedown");
-    car->GetTransform().SetRotation(glm::vec3(0.0f));
-    car->SetModel(am.GetModel("shakedown.gltf"));
-    car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
-    car->GetModel()->SetTexture(am.GetTexture("shakedown"));
-    car->GetTransform().SetPosition(glm::vec3(-2.0f, 0.0f, 2.0f));
-    car->GetRigidbody()->SetGravityEnabled(false);
-    
-    //glitch = (MoveableTestEntity*)GetWorld().SpawnTestEntity("Car4");
-    //glitch->SetModel(am.GetModel("Car4.gltf"));
-    //glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
-    //glitch->GetModel()->SetTexture(am.GetTexture("Car4"));
-    //glitch->GetTransform().SetPosition(glm::vec3(2.0f, 0.0f, -2.0f));
-    //glitch->GetTransform().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    //glitch->GetRigidbody()->SetGravityEnabled(false);
-    //glitch->SetMovementEnabled(false);
-    
-    //glitch = (MoveableTestEntity*)GetWorld().SpawnTestEntity("Car3");
-    //glitch->SetModel(am.GetModel("Car3.gltf"));
-    //glitch->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
-    //glitch->GetModel()->SetTexture(am.GetTexture("Car3"));
-    //glitch->GetTransform().SetPosition(glm::vec3(2.0f, 0.0f, 2.0f));
-    //glitch->GetTransform().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    //glitch->GetRigidbody()->SetGravityEnabled(false);
-    //glitch->SetMovementEnabled(false);
+    ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));

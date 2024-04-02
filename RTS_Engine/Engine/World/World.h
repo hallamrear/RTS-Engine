@@ -1,14 +1,12 @@
 #pragma once
 #include <unordered_map>
+#include <Collision/Octree.h>
 
 namespace Bennett
 {
 	class Renderer;
 	class Entity;
 	class Terrain;
-
-	template<class T>
-	class Octree;
 
 	class BENNETT_ENGINE World
 	{
@@ -17,7 +15,6 @@ namespace Bennett
 
 		bool m_IsLoaded;
 		std::unordered_map<std::string, Entity*> m_Entities;
-		Octree<Entity*>* m_Octree;
 
 	protected:
 		void DeleteAllEntities();
@@ -35,8 +32,6 @@ namespace Bennett
 		void DestroyEntity(Entity* entity);
 
 		const bool IsLoaded() const;
-
-		Octree<Entity*>& GetOctree();
 
 		void Update(const float& DeltaTime);
 		void Render(const Renderer& renderer);

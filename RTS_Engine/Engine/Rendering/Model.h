@@ -11,7 +11,6 @@ namespace Bennett
 	class BENNETT_ENGINE Model
 	{
 	friend class ModelLoader;
-		const Texture* m_Texture;
 
 	protected:
 		std::vector<Mesh*> m_Meshes;
@@ -21,10 +20,6 @@ namespace Bennett
 		~Model();
 
 		const std::vector<Mesh*>& GetMeshes() const;
-
-		inline const Texture& GetTexture()		   const { return *m_Texture; };
-		void SetTexture(const Texture* texture);
-		bool HasTexture() const { return m_Texture != nullptr; };
 
 		void Render(const Renderer& renderer) const;
 	};

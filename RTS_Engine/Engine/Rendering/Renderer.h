@@ -412,6 +412,7 @@ namespace Bennett
 
 		void DrawDebugLine(const glm::vec3& start, const glm::vec3& end) const;
 		void DrawDebugLine(const glm::vec3& start, const glm::vec3& dir, const float& length) const;
+		const Texture& GetDebugTexture() const;
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);

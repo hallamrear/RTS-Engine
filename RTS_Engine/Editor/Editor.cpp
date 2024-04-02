@@ -64,7 +64,7 @@ bool Editor::Initialise()
     Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
     Bennett::Entity* entity = GetWorld().SpawnEntity("Glitch");
     entity->SetModel(am.GetModel("glitch.gltf"));
-    entity->GetModel()->SetTexture(am.GetTexture("glitch"));
+    entity->SetTexture(am.GetTexture("glitch"));
 
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
