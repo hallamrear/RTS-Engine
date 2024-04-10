@@ -71,11 +71,48 @@ bool Game::Initialise()
 
     std::vector<int> keys =
     {
-        BENNETT_KEY_T, //Draw cam Line
+        BENNETT_MOUSE_LEFT, //Draw cam Line
     };
 
     inputMonitor = new InputMonitor(keys);
 
+    GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
+
+#ifdef TEST_TERRAIN
+    if(TEST_TERRAIN)
+        InitTestTerrainScene();
+#endif
+
+#ifdef TEST_OCTREE
+    if (TEST_OCTREE)
+        InitTestOctreeScene();
+#endif
+
+#ifdef TEST_ENTITIES
+    if (TEST_ENTITIES)
+        InitTestEntitiesScene();
+#endif
+
+  
+    return true;
+}
+
+void Game::InitTestTerrainScene()
+{
+
+}
+
+void Game::InitTestEntitiesScene()
+{
+
+}
+
+void Game::InitTestOctreeScene()
+{
+    AssetManager& am = ServiceLocator::GetAssetManager();
 
     for (size_t i = 0; i < 100; i++)
     {
@@ -91,13 +128,6 @@ bool Game::Initialise()
     ground->GetTransform().SetScale(glm::vec3(20.0f, 1.0f, 20.0f));
     ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
     ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
-
-    GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
-    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-    GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
-
-    return true;
 }
 
 bool pressedLast = false;
@@ -150,7 +180,7 @@ void Game::RunGameLoop()
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f));
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, 5.0f));
    
-        if (inputMonitor->GetKeyState(BENNETT_KEY_T))
+        if (inputMonitor->GetKeyState(BENNETT_MOUSE_LEFT))
         {
             if (pressedLast == false)
             {
