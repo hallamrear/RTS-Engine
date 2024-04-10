@@ -111,7 +111,6 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Collision\CollisionStructures.cpp" />
     <ClCompile Include="Physics\RigidbodyPhysics.cpp" />
     <ClCompile Include="System\Transform.cpp" />
-    <ClCompile Include="World\Terrain\GridBasedTerrain.cpp" />
     <ClCompile Include="Rendering\CustomPipelineObject.cpp" />
     <ClCompile Include="Rendering\Buffer.cpp" />
     <ClCompile Include="Rendering\IndexBuffer.cpp" />
@@ -136,7 +135,6 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Collision\Collision.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="System\Engine.cpp" />
-    <ClCompile Include="World\Terrain\TerrainVertex.cpp" />
     <ClCompile Include="World\Entity.cpp" />
     <ClCompile Include="System\Manager\FileManagement.cpp" />
     <ClCompile Include="Camera\FreeCamera.cpp" />
@@ -173,7 +171,6 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClInclude Include="Collision\Collider\OBBCollider.h" />
     <ClInclude Include="Physics\RigidbodyPhysics.h" />
     <ClInclude Include="System\Transform.h" />
-    <ClInclude Include="World\Terrain\GridBasedTerrain.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />
     <ClInclude Include="Rendering\Buffer.h" />
     <ClInclude Include="Rendering\IndexBuffer.h" />
@@ -219,7 +216,6 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="Defines\TerrainDefines.h" />
-    <ClInclude Include="World\Terrain\TerrainVertex.h" />
     <ClInclude Include="World\Entity.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>

@@ -15,6 +15,7 @@
 #include <System/Transform.h>
 
 #include <World/MoveableTestEntity.h>
+#include <World/Terrain/Terrain.h>
 
 using namespace Bennett;
 
@@ -31,6 +32,7 @@ Game::~Game()
     }
 }
 
+Terrain* terrain = nullptr;
 Entity* ground = nullptr;
 InputMonitor* inputMonitor = nullptr;
 
@@ -102,7 +104,8 @@ bool Game::Initialise()
 
 void Game::InitTestTerrainScene()
 {
-
+    terrain = GetWorld().CreateTerrain();
+    terrain->Generate("testTerrain.xml");
 }
 
 void Game::InitTestEntitiesScene()

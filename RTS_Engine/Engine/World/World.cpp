@@ -51,7 +51,7 @@ namespace Bennett
         }
     }
 
-    Entity* World::CreateTerrain()
+    Terrain* World::CreateTerrain()
     {
         auto itr = m_Entities.find("Terrain");
 
@@ -61,8 +61,8 @@ namespace Bennett
             DestroyEntity(itr->second);
         }
 
-        Entity* terrain = Terrain::Create(8);
-        m_Entities.insert(std::make_pair("Terrain", terrain));
+        Terrain* terrain = new Terrain();
+        m_Entities.insert(std::make_pair(terrain->GetName(), terrain));
         
         if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
         {

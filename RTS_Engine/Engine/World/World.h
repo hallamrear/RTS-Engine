@@ -23,7 +23,7 @@ namespace Bennett
 		World();
 		~World();
 
-		Entity* CreateTerrain();
+		Terrain* CreateTerrain();
 
 		Entity* SpawnTestEntity(const std::string& name);
 		Entity* SpawnEntity(const std::string& name);

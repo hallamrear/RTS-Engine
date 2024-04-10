@@ -168,13 +168,7 @@
     <ClCompile Include="Rendering\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="World\Terrain\TerrainVertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\CustomPipelineObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="World\Terrain\GridBasedTerrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Transform.cpp">
@@ -335,9 +329,6 @@
     <ClInclude Include="Rendering\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="World\Terrain\TerrainVertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\CustomPipelineObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -345,9 +336,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="External\PerlinNoise.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="World\Terrain\GridBasedTerrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="External\tiny_gltf.h">

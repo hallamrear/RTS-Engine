@@ -38,7 +38,7 @@ namespace Bennett
             floor->GetTransform().SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
         }
 
-        Entity* Terrain = world.CreateTerrain();
+        Terrain* Terrain = world.CreateTerrain();
 
         world.m_IsLoaded = true;
     }
