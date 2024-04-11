@@ -16,6 +16,16 @@ namespace Bennett
 		float LineWidth = 2.0f;
 		VkVertexInputBindingDescription InputBindingDescription = Vertex::GetBindingDescription();
 		std::vector<VkVertexInputAttributeDescription> InputAttributeDescription = Vertex::GetAttributeDescription();
+
+		CustomPipelineDetails()
+		{
+
+		}
+
+		~CustomPipelineDetails()
+		{
+
+		}
 	};
 
 	class CustomPipeline

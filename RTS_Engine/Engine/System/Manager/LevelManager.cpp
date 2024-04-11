@@ -11,6 +11,8 @@ namespace Bennett
 {
     void LevelManager::LoadLevel(const std::string& levelName, World& world)
     {
+        return;
+
         if (world.IsLoaded())
         {
             UnloadLevel(world);
@@ -25,7 +27,7 @@ namespace Bennett
             return;
         }
             
-        std::string terrainName = "";
+        /* std::string terrainName = "";
         terrainName = document.FirstChildElement("Level")->FirstChildElement("TerrainName")->GetText();
         if (terrainName != "")
         {
@@ -37,8 +39,7 @@ namespace Bennett
             floor->GetTransform().SetPosition(glm::vec3(5.0f, 0.0f, 5.0f));
             floor->GetTransform().SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
         }
-
-        Terrain* Terrain = world.CreateTerrain();
+        */
 
         world.m_IsLoaded = true;
     }

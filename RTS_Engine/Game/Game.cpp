@@ -13,11 +13,10 @@
 #include <System/ServiceLocator.h>
 #include <World/Entity.h>
 #include <System/Transform.h>
-
 #include <World/MoveableTestEntity.h>
-#include <World/Terrain/Terrain.h>
 
 using namespace Bennett;
+
 
 Game::Game()
 {
@@ -32,7 +31,6 @@ Game::~Game()
     }
 }
 
-Terrain* terrain = nullptr;
 Entity* ground = nullptr;
 InputMonitor* inputMonitor = nullptr;
 
@@ -83,6 +81,10 @@ bool Game::Initialise()
     GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
+
+#define TEST_TERRAIN false
+#define TEST_OCTREE true
+
 #ifdef TEST_TERRAIN
     if(TEST_TERRAIN)
         InitTestTerrainScene();
@@ -104,8 +106,7 @@ bool Game::Initialise()
 
 void Game::InitTestTerrainScene()
 {
-    terrain = GetWorld().CreateTerrain();
-    terrain->Generate("testTerrain.xml");
+
 }
 
 void Game::InitTestEntitiesScene()
@@ -119,10 +120,9 @@ void Game::InitTestOctreeScene()
 
     for (size_t i = 0; i < 100; i++)
     {
-        ground = GetWorld().SpawnEntity(std::to_string(i));
+        glm::vec3 position = glm::vec3(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
+        ground = GetWorld().SpawnEntity(std::to_string(i), glm::vec3(1.0f), position, glm::vec3(0.0f));
         ground->SetModel(am.GetModel("1x1_Cube"));
-        ground->GetTransform().SetScale(glm::vec3(1.0f));
-        ground->GetTransform().Translate(glm::vec3(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50));
         ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
     }
 

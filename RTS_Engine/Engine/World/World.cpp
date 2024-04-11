@@ -2,8 +2,8 @@
 #include <Rendering/Renderer.h>
 #include <World/Entity.h>
 #include <World/World.h>
-#include <World/Terrain/Terrain.h>
 #include <World/MoveableTestEntity.h>
+#include <WorldChunk.h>
 
 namespace Bennett
 {
@@ -25,6 +25,65 @@ namespace Bennett
         }
 
         m_Entities.clear();
+    }
+
+    void World::AddEntityToSpatialGrid(const Entity& entity)
+    {
+        glm::vec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
+
+        auto itr = m_SpatialGrid.find(id);
+
+        //Found id in grid.
+        if (itr != m_SpatialGrid.end())
+        {
+            if (itr->second != nullptr)
+            {
+                itr->second->AddEntity(entity);
+                return;
+            }
+            else
+            {
+                Log(LOG_SERIOUS, "Found grid cell %i, %i in spatial grid but world chunk did not exist.\n", (int)id.x, (int)id.y);
+            }
+        }
+        else
+        {
+            Log(LOG_MINIMAL, "Failed to find ID %i, %i in spatial grid.\n", (int)id.x, (int)id.y);
+            Log(LOG_MINIMAL, "Creating new chunk.\n");
+            WorldChunk* chunk = WorldChunk::Create(id);
+            m_SpatialGrid.insert(std::make_pair(id, chunk));
+            Log(LOG_MINIMAL, "Created chunk %i, %i.\n", (int)id.x, (int)id.y);
+        }
+
+    }
+
+    void World::RemoveEntityFromSpatialGrid(const Entity& entity)
+    {
+        glm::vec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
+
+        auto itr = m_SpatialGrid.find(id);
+
+        //Found id in grid.
+        if (itr != m_SpatialGrid.end())
+        {
+            if (itr->second != nullptr)
+            {
+                itr->second->RemoveEntity(entity);
+            }
+            else
+            {
+                Log(LOG_MINIMAL, "Found grid cell %i, %i in spatial grid but world chunk did not exist.\n", (int)id.x, (int)id.y);
+            }
+        }
+        else
+        {
+            Log(LOG_MINIMAL, "Failed to find ID %i, %i in spatial grid for removal of %s and so has not be safely removed.\n", (int)id.x, (int)id.y, entity.GetName());
+        }
+    }
+
+    glm::ivec2 World::GetChunkIDOfPosition(const glm::vec3& position)
+    {
+        return glm::ivec2(position.x / WorldChunkSize, position.z / WorldChunkSize);
     }
 
     World::World()
@@ -51,50 +110,6 @@ namespace Bennett
         }
     }
 
-    Terrain* World::CreateTerrain()
-    {
-        auto itr = m_Entities.find("Terrain");
-
-        if (itr != m_Entities.end())
-        {
-            Log("World: Tried to create an entity with a name that already exists.", LOG_MINIMAL);
-            DestroyEntity(itr->second);
-        }
-
-        Terrain* terrain = new Terrain();
-        m_Entities.insert(std::make_pair(terrain->GetName(), terrain));
-        
-        if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
-        {
-            Log("World: Created a terrain entity.", LOG_SAFE);
-        }
-
-        return terrain;
-    }
-
-    Entity* World::SpawnTestEntity(const std::string& name)
-    {
-        MoveableTestEntity* entity = nullptr;
-        auto itr = m_Entities.find(name);
-
-        if (itr == m_Entities.end())
-        {
-            entity = new MoveableTestEntity(name);
-            m_Entities.insert(std::make_pair(name, entity));
-
-            if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
-            {
-                Log("World: Created an entity called \"" + name + "\"", LOG_SAFE);
-            }
-        }
-        else
-        {
-            Log("World: Tried to create an entity with a name that already exists.", LOG_MINIMAL);
-        }
-
-        return (Entity*)entity;
-    }
-
     Entity* World::SpawnEntity(const std::string& name)
     {
         return SpawnEntity(name, glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f));
@@ -111,6 +126,8 @@ namespace Bennett
         auto itr = m_Entities.find(entity->GetName());
         if (itr != m_Entities.end())
         {
+            RemoveEntityFromSpatialGrid(*entity);
+
             delete itr->second;
             itr->second = nullptr;
             m_Entities.erase(itr);
@@ -135,6 +152,8 @@ namespace Bennett
         {
             entity = new Entity(name, scale, position, rotation);
             m_Entities.insert(std::make_pair(name, entity));
+
+            AddEntityToSpatialGrid(*entity);
 
             if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
             {
@@ -168,6 +187,11 @@ namespace Bennett
         {
             entity.second->Update(deltaTime);
         }
+
+        for (auto& chunk : m_SpatialGrid)
+        {
+            chunk.second->Update(deltaTime);
+        }
     }
 
     void World::Render(const Renderer& renderer)
@@ -175,6 +199,11 @@ namespace Bennett
         for (auto& entity : m_Entities)
         {
             entity.second->Render(renderer);
+        }
+
+        for (auto& chunk : m_SpatialGrid)
+        {
+            chunk.second->Render(renderer);
         }
     }
 }

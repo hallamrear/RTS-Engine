@@ -90,9 +90,6 @@
     <ClCompile Include="Camera\StandardCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="World\Terrain\Terrain.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="System\Loader\TextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -183,6 +180,9 @@
     <ClCompile Include="Collision\CollisionStructures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WorldChunk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\Collision.h">
@@ -244,9 +244,6 @@
     </ClInclude>
     <ClInclude Include="External\resource.h">
       <Filter>Header Files\PCH and External Headers</Filter>
-    </ClInclude>
-    <ClInclude Include="World\Terrain\Terrain.h">
-      <Filter>Header Files\World</Filter>
     </ClInclude>
     <ClInclude Include="World\World.h">
       <Filter>Header Files\World</Filter>
@@ -354,6 +351,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Collision\CollisionStructures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WorldChunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

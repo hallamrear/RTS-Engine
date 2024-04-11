@@ -135,6 +135,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Collision\Collision.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="System\Engine.cpp" />
+    <ClCompile Include="WorldChunk.cpp" />
     <ClCompile Include="World\Entity.cpp" />
     <ClCompile Include="System\Manager\FileManagement.cpp" />
     <ClCompile Include="Camera\FreeCamera.cpp" />
@@ -157,7 +158,6 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="System\ServiceLocator.cpp" />
     <ClCompile Include="Collision\Collider\SphereCollider.cpp" />
     <ClCompile Include="Camera\StandardCamera.cpp" />
-    <ClCompile Include="World\Terrain\Terrain.cpp" />
     <ClCompile Include="System\Loader\TextureLoader.cpp" />
     <ClCompile Include="External\tinyxml2.cpp" />
     <ClCompile Include="World\World.cpp" />
@@ -216,6 +216,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="Defines\TerrainDefines.h" />
+    <ClInclude Include="WorldChunk.h" />
     <ClInclude Include="World\Entity.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
@@ -275,10 +276,6 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     </ClInclude>
     <ClInclude Include="Collision\Collider\SphereCollider.h" />
     <ClInclude Include="Camera\StandardCamera.h">
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="World\Terrain\Terrain.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
