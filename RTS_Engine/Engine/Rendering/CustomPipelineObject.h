@@ -14,6 +14,7 @@ namespace Bennett
 		VkPolygonMode PolygonMode = VkPolygonMode::VK_POLYGON_MODE_FILL;
 		VkCullModeFlagBits Cullmode = VkCullModeFlagBits::VK_CULL_MODE_BACK_BIT;
 		float LineWidth = 2.0f;
+		bool PrimitiveRestartEnabled = VK_FALSE;
 		VkVertexInputBindingDescription InputBindingDescription = Vertex::GetBindingDescription();
 		std::vector<VkVertexInputAttributeDescription> InputAttributeDescription = Vertex::GetAttributeDescription();
 

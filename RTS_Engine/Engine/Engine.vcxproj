@@ -135,7 +135,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Collision\Collision.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="System\Engine.cpp" />
-    <ClCompile Include="WorldChunk.cpp" />
+    <ClCompile Include="World\WorldChunk.cpp" />
     <ClCompile Include="World\Entity.cpp" />
     <ClCompile Include="System\Manager\FileManagement.cpp" />
     <ClCompile Include="Camera\FreeCamera.cpp" />
@@ -160,6 +160,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Camera\StandardCamera.cpp" />
     <ClCompile Include="System\Loader\TextureLoader.cpp" />
     <ClCompile Include="External\tinyxml2.cpp" />
+    <ClCompile Include="World\Terrain\TerrainChunk.cpp" />
     <ClCompile Include="World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -215,8 +216,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="Defines\TerrainDefines.h" />
-    <ClInclude Include="WorldChunk.h" />
+    <ClInclude Include="World\Terrain\TerrainChunk.h" />
+    <ClInclude Include="World\WorldChunk.h" />
     <ClInclude Include="World\Entity.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>

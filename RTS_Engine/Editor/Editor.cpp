@@ -69,6 +69,8 @@ bool Editor::Initialise()
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
     GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
+
+    return true;
 }
 
 bool Editor::CreateWindows()

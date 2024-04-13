@@ -180,7 +180,10 @@
     <ClCompile Include="Collision\CollisionStructures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WorldChunk.cpp">
+    <ClCompile Include="World\WorldChunk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Terrain\TerrainChunk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -329,9 +332,6 @@
     <ClInclude Include="Rendering\CustomPipelineObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Defines\TerrainDefines.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="External\PerlinNoise.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -353,7 +353,10 @@
     <ClInclude Include="Collision\CollisionStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WorldChunk.h">
+    <ClInclude Include="World\WorldChunk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Terrain\TerrainChunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

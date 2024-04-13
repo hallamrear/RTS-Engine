@@ -1,7 +1,6 @@
 #pragma once
 #define VK_USE_PLATFORM_WIN32_KHR
 #include <vulkan/vulkan.h>
-#include <Defines/TerrainDefines.h>
 #include <Rendering/CustomPipelineObject.h>
 #include <Rendering/VertexBuffer.h>
 #include <optional>
@@ -16,7 +15,6 @@ namespace Bennett
 	{
 		glm::mat4 View;
 		glm::mat4 Projection;
-		ChunkPosition TerrainChunkLocations[TERRAIN_CHUNK_COUNT];
 	};
 
 	struct BENNETT_ENGINE PushConstantBuffer

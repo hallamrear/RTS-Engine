@@ -2,8 +2,8 @@
 #include <Rendering/Renderer.h>
 #include <World/Entity.h>
 #include <World/World.h>
+#include <World/WorldChunk.h>
 #include <World/MoveableTestEntity.h>
-#include <WorldChunk.h>
 
 namespace Bennett
 {
@@ -29,7 +29,7 @@ namespace Bennett
 
     void World::AddEntityToSpatialGrid(const Entity& entity)
     {
-        glm::vec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
+        glm::ivec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
 
         auto itr = m_SpatialGrid.find(id);
 
@@ -83,7 +83,7 @@ namespace Bennett
 
     glm::ivec2 World::GetChunkIDOfPosition(const glm::vec3& position)
     {
-        return glm::ivec2(position.x / WorldChunkSize, position.z / WorldChunkSize);
+        return glm::ivec2(floorf(position.x / WorldChunkSize), floorf(position.z / WorldChunkSize));
     }
 
     World::World()
@@ -183,15 +183,18 @@ namespace Bennett
 
     void World::Update(const float& deltaTime)
     {
+        for (auto& chunk : m_SpatialGrid)
+        {
+            chunk.second->RemoveAllEntities();
+            chunk.second->Update(deltaTime);
+        }
+       
         for (auto& entity : m_Entities)
         {
+            AddEntityToSpatialGrid(*entity.second);
             entity.second->Update(deltaTime);
         }
 
-        for (auto& chunk : m_SpatialGrid)
-        {
-            chunk.second->Update(deltaTime);
-        }
     }
 
     void World::Render(const Renderer& renderer)

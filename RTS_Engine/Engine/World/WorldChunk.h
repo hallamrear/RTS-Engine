@@ -19,14 +19,16 @@ namespace Bennett
 		TerrainChunk* m_TerrainChunk;
 
 		std::vector<const Entity*> m_Entities;
-		WorldChunk();
+		WorldChunk(const glm::ivec2& id);
 
 	protected:
 		static WorldChunk* Create(const glm::ivec2& id);
+		void GenerateTerrainChunk();
 
 	public:
 		~WorldChunk();
 
+		void RemoveAllEntities();
 		void AddEntity(const Entity& entity);
 		void RemoveEntity(const Entity& entity);
 

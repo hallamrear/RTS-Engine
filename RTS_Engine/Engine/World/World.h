@@ -16,7 +16,7 @@ namespace Bennett
 
 		bool m_IsLoaded;
 		std::unordered_map<std::string, Entity*> m_Entities;
-		std::unordered_map<glm::vec2, WorldChunk*> m_SpatialGrid;
+		std::unordered_map<glm::ivec2, WorldChunk*> m_SpatialGrid;
 
 	protected:
 		void DeleteAllEntities();

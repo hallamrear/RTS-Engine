@@ -59,7 +59,6 @@ namespace Bennett
 			return result;
 		};
 
-
 		void Bind() override;
 	};
 }

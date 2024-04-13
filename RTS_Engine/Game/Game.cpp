@@ -17,7 +17,6 @@
 
 using namespace Bennett;
 
-
 Game::Game()
 {
     m_Window = nullptr;
@@ -76,29 +75,19 @@ bool Game::Initialise()
 
     inputMonitor = new InputMonitor(keys);
 
+    GetCameraController().SetCamera(Bennett::CAMERA_MODE::STANDARD_CAM);
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
+
     GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
-    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
-
-#define TEST_TERRAIN false
-#define TEST_OCTREE true
-
-#ifdef TEST_TERRAIN
-    if(TEST_TERRAIN)
-        InitTestTerrainScene();
-#endif
-
-#ifdef TEST_OCTREE
-    if (TEST_OCTREE)
-        InitTestOctreeScene();
-#endif
-
-#ifdef TEST_ENTITIES
-    if (TEST_ENTITIES)
-        InitTestEntitiesScene();
-#endif
+    ground = GetWorld().SpawnEntity("ChunkLoader");
+    //InitTestTerrainScene();
+    //InitTestOctreeScene();
+    //InitTestEntitiesScene();
 
   
     return true;
@@ -106,11 +95,23 @@ bool Game::Initialise()
 
 void Game::InitTestTerrainScene()
 {
-
+    AssetManager& am = ServiceLocator::GetAssetManager();
+    for (size_t i = 0; i < 180; i += 15)
+    {
+        glm::vec3 position = glm::vec3(i - (180 / 2), 10.0f, i - (180 / 2));
+        ground = GetWorld().SpawnEntity(std::to_string(i), glm::vec3(1.0f), position, glm::vec3(0.0f));
+        ground->SetModel(am.GetModel("1x1_Cube"));
+    }
 }
 
 void Game::InitTestEntitiesScene()
 {
+    AssetManager& am = ServiceLocator::GetAssetManager();
+    ground = GetWorld().SpawnEntity("Floor");
+    ground->SetModel(am.GetModel("1x1_Cube"));
+    ground->GetTransform().SetScale(glm::vec3(20.0f, 1.0f, 20.0f));
+    ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
+    ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 
 }
 
@@ -125,12 +126,6 @@ void Game::InitTestOctreeScene()
         ground->SetModel(am.GetModel("1x1_Cube"));
         ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
     }
-
-    ground = GetWorld().SpawnEntity("Floor");
-    ground->SetModel(am.GetModel("1x1_Cube"));
-    ground->GetTransform().SetScale(glm::vec3(20.0f, 1.0f, 20.0f));
-    ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
-    ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 }
 
 bool pressedLast = false;
@@ -178,6 +173,8 @@ void Game::RunGameLoop()
         static float s = 0.0f;
         s += dTime * rotSpeed;
         s = fmod(s, 360.0f);
+
+        GetWorld().GetEntity("ChunkLoader")->GetTransform().SetPosition(GetCameraController().GetCurrentCamera().GetPosition());
 
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f));
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f));

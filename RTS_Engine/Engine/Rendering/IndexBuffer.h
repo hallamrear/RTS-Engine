@@ -14,6 +14,8 @@ namespace Bennett
 		const size_t& Count() const;
 
 		static bool Create(IndexBuffer& buffer, const std::vector<VertexIndex>& indices);
+		static const VertexIndex GetPrimitiveEndIndex();
+
 		void Bind() override;
 	};
 }

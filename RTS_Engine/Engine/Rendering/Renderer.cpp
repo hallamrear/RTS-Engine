@@ -1931,7 +1931,7 @@ namespace Bennett
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		inputAssembly.topology = details.Topology;
-		inputAssembly.primitiveRestartEnable = VK_FALSE;
+		inputAssembly.primitiveRestartEnable = details.PrimitiveRestartEnabled;
 #pragma endregion
 
 #pragma region VERTEX INPUT ASSEMBLY

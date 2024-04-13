@@ -15,26 +15,7 @@ namespace Bennett
 
     }
 
-    void IndexBuffer::Bind()
-    {
-
-        switch (sizeof(VertexIndex))
-        {
-            case 2: //2 bytes USHORT
-                vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT16);
-                break;
-
-            case 4: //4 bytes UINT
-                vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
-                break;
-
-            default:
-                Log(LOG_CRITICAL, "Unsupported Vertex Index size.\n");
-                break;
-        }
-
-        //VK_INDEX_TYPE_UINT32
-    }
+    
 
     const size_t& IndexBuffer::Count() const
     {
@@ -66,6 +47,47 @@ namespace Bennett
         }
 
         return result;
+    }
+
+    const VertexIndex IndexBuffer::GetPrimitiveEndIndex()
+    {
+        switch (sizeof(VertexIndex))
+        {
+        case 2: //2 bytes USHORT
+            //0xFFFF when indexType is equal to VK_INDEX_TYPE_UINT16.
+            return 0xFFFF;
+            break;
+
+        case 4: //4 bytes UINT
+            //0xFFFFFFFF when the indexType parameter of vkCmdBindIndexBuffer2KHR or vkCmdBindIndexBuffer is equal to VK_INDEX_TYPE_UINT32.            
+            return 0xFFFFFFFF;
+            break;
+
+        default:
+            //0xFF when indexType is equal to VK_INDEX_TYPE_UINT8_KHR.
+            Log(LOG_CRITICAL, "Unsupported Vertex Index size.\n");
+            break;
+        }
+    }
+
+    void IndexBuffer::Bind()
+    {
+        switch (sizeof(VertexIndex))
+        {
+        case 2: //2 bytes USHORT
+            vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT16);
+            break;
+
+        case 4: //4 bytes UINT
+            vkCmdBindIndexBuffer(ServiceLocator::GetRenderer().GetCommandBuffer(), m_Buffer, 0, VK_INDEX_TYPE_UINT32);
+            break;
+
+        default:
+            Log(LOG_CRITICAL, "Unsupported Vertex Index size.\n");
+            break;
+        }
+
+        //VK_INDEX_TYPE_UINT32
     }
 
     //todo : IndexBuffer::Destroy;
