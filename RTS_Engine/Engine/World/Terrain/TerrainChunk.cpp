@@ -47,20 +47,22 @@ namespace Bennett
 		float noiseSizeScale = 2.0f;
 		float noiseDistanceScale = 1 / 16.0f;
 
+		glm::vec3 normal = glm::vec3(0.0f, 1.0f, 0.0f);
+
 		//Calculating Vertices
 		for (unsigned int z = 0; z < ChunkCellWidth; z++)
 		{
 			for (unsigned int x = 0; x <= ChunkCellWidth; x++)
 			{
 				vertices.push_back(Vertex(glm::vec3(
-						position.x + x * TriWidth,
-						position.y + (noiseSizeScale * pn.noise2D((m_Position.x + x * TriWidth) * noiseDistanceScale, (m_Position.z + z * TriWidth) * noiseDistanceScale)),
-						position.z + z * TriWidth)));
+					position.x + x * TriWidth,
+					position.y + (noiseSizeScale * pn.noise2D((m_Position.x + x * TriWidth) * noiseDistanceScale, (m_Position.z + z * TriWidth) * noiseDistanceScale)),
+					position.z + z * TriWidth), normal));
 
 				vertices.push_back(Vertex(glm::vec3(
 					position.x + x * TriWidth,
 					position.y + (noiseSizeScale * pn.noise2D((m_Position.x + x * TriWidth) * noiseDistanceScale, (m_Position.z + (z + 1) * TriWidth) * noiseDistanceScale)),
-					position.z + (z + 1) * TriWidth)));
+					position.z + (z + 1) * TriWidth), normal));
 			}
 		}
 
@@ -93,6 +95,8 @@ namespace Bennett
 		matrix = translate * scale;
 		renderer.PushConstants.ModelMatrix = matrix;
 		renderer.UpdatePushConstants();
+
+		renderer.PushDescriptorSet(m_Texture);
 
 		if (m_IndexBuffer.Exists())
 		{
