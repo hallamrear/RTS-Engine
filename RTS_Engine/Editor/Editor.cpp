@@ -3,7 +3,7 @@
 #include "pch.h"
 #include <Rendering/Window.h>
 #include <Rendering/Renderer.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <System/ServiceLocator.h>
 #include <System/Engine.h>
 #include <System/Logger.h>
@@ -83,11 +83,14 @@ bool Editor::CreateWindows()
     mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
     mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
     mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
+
 #ifdef _DEBUG
     mainWindowDetails.ShowState = WindowDetails::NORMAL;
 #else
     mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
 #endif
+
+    mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
 
     mainWindowDetails.ClassDetails.Icon = IDI_FACE;
     mainWindowDetails.ClassDetails.SmallIcon = IDI_FACE;
