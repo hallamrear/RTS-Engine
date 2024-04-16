@@ -9,19 +9,25 @@
 
 namespace Bennett
 {
-
 	TerrainChunk::TerrainChunk(const glm::vec3& position)
 	{
 		m_Position = position;
 		m_Texture = ServiceLocator::GetAssetManager().GetAsset<Texture>("red");
 
 		std::array<int, ChunkCellCount> data = { 0 };
-		CreateChunk(data);
+
+		for (size_t i = 0; i < ChunkCellCount; i++)
+		{
+			data[i] = rand() % 3;
+		}
+
+		SetChunkData(data);
+		CreateChunk();
 
 		CustomPipelineDetails details;
-		details.PrimitiveRestartEnabled = true;
-		details.Topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-		details.PolygonMode = VK_POLYGON_MODE_FILL;
+		details.PrimitiveRestartEnabled = VK_FALSE;
+		details.Topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+		details.PolygonMode = VK_POLYGON_MODE_LINE;
 
 		ServiceLocator::GetRenderer().CreateCustomPipeline(m_TerrainPipeline, details);
 	}
@@ -30,6 +36,43 @@ namespace Bennett
 	{
 		m_Position = glm::vec3(0.0f);
 		m_Texture = nullptr;
+	}
+
+	const glm::vec3& TerrainChunk::GetChunkCornerPosition() const
+	{
+		return m_Position;
+	}
+
+	const std::array<int, ChunkCellCount>& TerrainChunk::GetChunkData() const
+	{
+		return m_ChunkData;
+	}
+
+	void TerrainChunk::SetChunkData(const std::array<int, ChunkCellCount>& chunkCellData)
+	{
+		m_ChunkData = chunkCellData;
+	}
+
+	void TerrainChunk::CreateChunk()
+	{
+		if (m_ChunkData.size() > 0)
+		{
+			CreateChunk(m_ChunkData);
+		}
+		else
+		{
+			Log(LOG_MINIMAL, "Tried to create chunk without any data.\n");
+		}
+	}
+
+	float TerrainChunk::GetHeightAtPointInCell(const glm::ivec2& cellLocationInChunk) const
+	{
+		int HeightDataIndex = (ChunkCellWidth * cellLocationInChunk.y) + cellLocationInChunk.x;
+
+		if (HeightDataIndex > m_ChunkData.size())
+			return 0.0f;
+
+		return (m_ChunkData[HeightDataIndex] * ChunkCellHeightStep);
 	}
 
 	void TerrainChunk::CreateChunk(const std::array<int, ChunkCellCount>& chunkCellData)
@@ -49,24 +92,58 @@ namespace Bennett
 
 		glm::vec3 normal = glm::vec3(0.0f, 1.0f, 0.0f);
 
-		//Calculating Vertices
-		for (unsigned int z = 0; z < ChunkCellWidth; z++)
+		float height = 0.0f;
+		uint index = -1;
+
+		//Calculating Vertices and Indices
+
+		for (unsigned int i = 0; i < ChunkCellCount; i++)
 		{
-			for (unsigned int x = 0; x <= ChunkCellWidth; x++)
+			index = i;
+			uint x = i % ChunkCellWidth;
+			uint z = i / ChunkCellWidth;
+
+			if (chunkCellData[index] < 100)
 			{
+				height = chunkCellData[index] * ChunkCellHeightStep;
+
+				VertexIndex indexCount = (VertexIndex)vertices.size();
+
+				//Push Flat
 				vertices.push_back(Vertex(glm::vec3(
 					position.x + x * TriWidth,
-					position.y + (noiseSizeScale * pn.noise2D((m_Position.x + x * TriWidth) * noiseDistanceScale, (m_Position.z + z * TriWidth) * noiseDistanceScale)),
+					position.y + height,
 					position.z + z * TriWidth), normal));
 
 				vertices.push_back(Vertex(glm::vec3(
 					position.x + x * TriWidth,
-					position.y + (noiseSizeScale * pn.noise2D((m_Position.x + x * TriWidth) * noiseDistanceScale, (m_Position.z + (z + 1) * TriWidth) * noiseDistanceScale)),
+					position.y + height,
 					position.z + (z + 1) * TriWidth), normal));
+
+				vertices.push_back(Vertex(glm::vec3(
+					position.x + (x + 1) * TriWidth,
+					position.y + height,
+					position.z + (z + 1) * TriWidth), normal));
+
+				vertices.push_back(Vertex(glm::vec3(
+					position.x + (x + 1) * TriWidth,
+					position.y + height,
+					position.z + z * TriWidth), normal));
+
+				indices.push_back(indexCount + 0);
+				indices.push_back(indexCount + 1);
+				indices.push_back(indexCount + 2);
+				indices.push_back(indexCount + 0);
+				indices.push_back(indexCount + 2);
+				indices.push_back(indexCount + 3);
+			}
+			else
+			{
+				//Push Ramp
 			}
 		}
 
-		const int ExpectedIndexCountPerRow = (ChunkCellWidth * 2) + 2;
+		/*const int ExpectedIndexCountPerRow = (ChunkCellWidth * 2) + 2;
 
 		for (int r = 0; r < ChunkCellWidth; r++)
 		{
@@ -76,7 +153,7 @@ namespace Bennett
 			}
 
 			indices.push_back(RestartValue);
-		}
+		}*/
 
 		VertexBuffer::Create(m_VertexBuffer, vertices);
 		IndexBuffer::Create(m_IndexBuffer, indices);

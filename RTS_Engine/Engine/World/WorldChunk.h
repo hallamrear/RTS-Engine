@@ -2,7 +2,7 @@
 
 namespace Bennett
 {
-	constexpr int WorldChunkSize = 32;
+	constexpr int WorldChunkSize = 16;
 
 	class TerrainChunk;
 	class Renderer;
