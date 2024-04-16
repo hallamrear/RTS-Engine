@@ -9,7 +9,7 @@
 #include <Rendering/Vertex.h>
 #include <Rendering/Window.h>
 #include <System/InputMonitor.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <System/ServiceLocator.h>
 #include <World/Entity.h>
 #include <System/Transform.h>
