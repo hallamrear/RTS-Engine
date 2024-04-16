@@ -48,7 +48,7 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Manager\AssetManager.cpp">
+    <ClCompile Include="System\Assets\AssetManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BennettPCH.cpp">
@@ -72,13 +72,13 @@
     <ClCompile Include="System\InputMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Manager\LevelManager.cpp">
+    <ClCompile Include="System\Saves\LevelManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Defines\MarchingCubesTriangulationTable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Loader\ModelLoader.cpp">
+    <ClCompile Include="System\Assets\ModelLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera\ScriptedCamera.cpp">
@@ -90,7 +90,7 @@
     <ClCompile Include="Camera\StandardCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Loader\TextureLoader.cpp">
+    <ClCompile Include="System\Assets\TextureLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="External\tinyxml2.cpp">
@@ -263,19 +263,19 @@
     <ClInclude Include="External\tinyxml2.h">
       <Filter>Header Files\PCH and External Headers</Filter>
     </ClInclude>
-    <ClInclude Include="System\Manager\LevelManager.h">
+    <ClInclude Include="System\Saves\LevelManager.h">
       <Filter>Header Files\System\Manager</Filter>
     </ClInclude>
     <ClInclude Include="System\Manager\FileManagement.h">
       <Filter>Header Files\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="System\Manager\AssetManager.h">
+    <ClInclude Include="System\Assets\AssetManager.h">
       <Filter>Header Files\System\Manager</Filter>
     </ClInclude>
-    <ClInclude Include="System\Loader\ModelLoader.h">
+    <ClInclude Include="System\Assets\ModelLoader.h">
       <Filter>Header Files\System\Loader</Filter>
     </ClInclude>
-    <ClInclude Include="System\Loader\TextureLoader.h">
+    <ClInclude Include="System\Assets\TextureLoader.h">
       <Filter>Header Files\System\Loader</Filter>
     </ClInclude>
     <ClInclude Include="Collision\Collider\Collider.h">

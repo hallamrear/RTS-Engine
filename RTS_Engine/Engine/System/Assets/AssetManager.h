@@ -1,6 +1,6 @@
 #pragma once
-#include <System/Loader/ModelLoader.h>
-#include <System/Loader/TextureLoader.h>
+#include <System/Assets/ModelLoader.h>
+#include <System/Assets/TextureLoader.h>
 
 namespace Bennett
 {

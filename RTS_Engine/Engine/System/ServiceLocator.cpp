@@ -3,7 +3,7 @@
 #include <Rendering/Renderer.h>
 #include <Rendering/Window.h>
 #include <System/ServiceLocator.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 
 namespace Bennett
 {

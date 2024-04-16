@@ -1,6 +1,6 @@
 #include <BennettPCH.h>
-#include <System/Manager/LevelManager.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Saves/LevelManager.h>
+#include <System/Assets/AssetManager.h>
 #include <World/Entity.h>
 #include <World/World.h>
 #include <Rendering/Model.h>

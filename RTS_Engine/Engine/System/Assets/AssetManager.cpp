@@ -3,9 +3,9 @@
 #include <Rendering/Renderer.h>
 #include <Rendering/Texture.h>
 #include <Rendering/Model.h>
-#include <System/Loader/ModelLoader.h>
-#include <System/Loader/TextureLoader.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/ModelLoader.h>
+#include <System/Assets/TextureLoader.h>
+#include <System/Assets/AssetManager.h>
 #include <System/ServiceLocator.h>
 
 namespace Bennett

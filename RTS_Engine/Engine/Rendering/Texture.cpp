@@ -1,7 +1,7 @@
 #include <BennettPCH.h>
 #include <System/ServiceLocator.h>
 #include <Rendering/Texture.h>
-#include <System/Loader/TextureLoader.h>
+#include <System/Assets/TextureLoader.h>
 #include <Rendering/Renderer.h>
 #include <Rendering/Buffer.h>
 

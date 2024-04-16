@@ -1,9 +1,9 @@
 #include <BennettPCH.h>
 #include <System/Engine.h>
 #include <System/ServiceLocator.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <System/InputMonitor.h>
-#include <System/Manager/LevelManager.h>
+#include <System/Saves/LevelManager.h>
 #include <System/Manager/FileManagement.h>
 #include <Defines/PrimativeModelCreation.h>
 #include <Rendering/Model.h>

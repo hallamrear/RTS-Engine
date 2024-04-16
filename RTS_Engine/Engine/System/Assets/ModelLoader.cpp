@@ -1,7 +1,7 @@
 #include <BennettPCH.h>
 #include <istream>
 #include <System/ServiceLocator.h>
-#include <System/Loader/ModelLoader.h>
+#include <System/Assets/ModelLoader.h>
 #include <Rendering/Model.h>
 #include <System/Logger.h>
 

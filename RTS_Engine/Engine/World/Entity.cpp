@@ -5,7 +5,7 @@
 #include <Collision/Collider/AABBCollider.h>
 #include <Collision/Collider/OBBCollider.h>
 #include <System/InputMonitor.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <Defines/BennettInputDefines.h>
 #include <System/Logger.h>
 

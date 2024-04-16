@@ -1,5 +1,5 @@
 #include <BennettPCH.h>
-#include <System/Loader/TextureLoader.h>
+#include <System/Assets/TextureLoader.h>
 #include <Rendering/Texture.h>
 #include <Rendering/Renderer.h>
 #include <Rendering/Buffer.h>

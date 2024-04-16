@@ -1,7 +1,7 @@
 #include "BennettPCH.h"
 #include <Rendering/Renderer.h>
 #include <System/ServiceLocator.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <World/Terrain/TerrainChunk.h>
 #include <World/WorldChunk.h>
 #include <World/Entity.h>

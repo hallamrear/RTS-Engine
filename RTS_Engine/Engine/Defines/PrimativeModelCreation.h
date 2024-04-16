@@ -1,5 +1,5 @@
 #pragma once
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <System/ServiceLocator.h>
 #include <Rendering/Vertex.h>
 #include <corecrt_math_defines.h>

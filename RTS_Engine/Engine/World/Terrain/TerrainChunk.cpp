@@ -2,7 +2,7 @@
 #include "TerrainChunk.h"
 #include <Rendering/Renderer.h>
 #include <System/ServiceLocator.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <Rendering/Texture.h>
 #include <World/WorldChunk.h>
 #include <External/PerlinNoise.hpp>

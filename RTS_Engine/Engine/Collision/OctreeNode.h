@@ -2,7 +2,7 @@
 #include <cmath>
 #include <World/Entity.h>
 #include <System/ServiceLocator.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 #include <Collision/Collision.h>
 #include <Collision/Collider/AABBCollider.h>
 

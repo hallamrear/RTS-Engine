@@ -1,6 +1,6 @@
 #include <BennettPCH.h>
 #include <Collision/Collider/Collider.h>
-#include <System/Manager/AssetManager.h>
+#include <System/Assets/AssetManager.h>
 
 namespace Bennett
 {

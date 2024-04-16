@@ -124,7 +124,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Rendering\Window.cpp" />
     <ClCompile Include="Rendering\WindowDetails.cpp" />
     <ClCompile Include="Rendering\Shader.cpp" />
-    <ClCompile Include="System\Manager\AssetManager.cpp" />
+    <ClCompile Include="System\Assets\AssetManager.cpp" />
     <ClCompile Include="BennettPCH.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -140,9 +140,9 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="System\Manager\FileManagement.cpp" />
     <ClCompile Include="Camera\FreeCamera.cpp" />
     <ClCompile Include="System\InputMonitor.cpp" />
-    <ClCompile Include="System\Manager\LevelManager.cpp" />
+    <ClCompile Include="System\Saves\LevelManager.cpp" />
     <ClCompile Include="Defines\MarchingCubesTriangulationTable.cpp" />
-    <ClCompile Include="System\Loader\ModelLoader.cpp" />
+    <ClCompile Include="System\Assets\ModelLoader.cpp" />
     <ClCompile Include="World\MoveableTestEntity.cpp" />
     <ClCompile Include="Collision\Octree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
@@ -158,7 +158,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="System\ServiceLocator.cpp" />
     <ClCompile Include="Collision\Collider\SphereCollider.cpp" />
     <ClCompile Include="Camera\StandardCamera.cpp" />
-    <ClCompile Include="System\Loader\TextureLoader.cpp" />
+    <ClCompile Include="System\Assets\TextureLoader.cpp" />
     <ClCompile Include="External\tinyxml2.cpp" />
     <ClCompile Include="World\Terrain\TerrainChunk.cpp" />
     <ClCompile Include="World\World.cpp" />
@@ -189,7 +189,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="System\Manager\AssetManager.h">
+    <ClInclude Include="System\Assets\AssetManager.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
@@ -235,7 +235,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="System\Manager\LevelManager.h">
+    <ClInclude Include="System\Saves\LevelManager.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
@@ -248,7 +248,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="System\Loader\ModelLoader.h">
+    <ClInclude Include="System\Assets\ModelLoader.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
@@ -280,7 +280,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="System\Loader\TextureLoader.h">
+    <ClInclude Include="System\Assets\TextureLoader.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
