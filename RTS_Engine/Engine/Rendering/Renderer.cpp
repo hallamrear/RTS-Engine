@@ -764,6 +764,16 @@ namespace Bennett
 		framebuffer = VK_NULL_HANDLE;
 	}
 		
+	const CustomPipeline& Renderer::GetSolidGraphicsPipeline() const
+	{
+		return m_SolidPipeline;
+	}
+
+	const CustomPipeline& Renderer::GetWireframeGraphicsPipeline() const
+	{
+		return m_WireframePipeline;
+	}
+
 	bool Renderer::InitialiseGraphicsPipeline()
 	{
 		#pragma region SHADER SETUP

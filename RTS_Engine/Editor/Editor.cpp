@@ -61,15 +61,28 @@ bool Editor::Initialise()
         return FALSE;
     }
     
-    Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
-    Bennett::Entity* entity = GetWorld().SpawnEntity("Glitch");
-    entity->SetModel(am.GetModel("glitch.gltf"));
-    entity->SetTexture(am.GetTexture("glitch"));
+    AssetManager& am = ServiceLocator::GetAssetManager();
 
-    GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
-    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    std::vector<glm::ivec2> ids
+    {
+        glm::ivec2(-1, -1), glm::ivec2(+0, -1), glm::ivec2(+1, -1),
+        glm::ivec2(-1, +0), glm::ivec2(+0, +0), glm::ivec2(+1, +0),
+        glm::ivec2(-1, +1), glm::ivec2(+0, +1), glm::ivec2(+1, +1),
+    };
+
+    GetWorld().PreloadChunks(ids);
+    GetCameraController().SetCamera(Bennett::CAMERA_MODE::STANDARD_CAM);
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
+    GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
+    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
+    GetCameraController().GetCurrentCamera().SetMouseLookEnabled(false);
+
+    GetWorld().SpawnEntity("ChunkLoader");
+    GetWorld().SpawnTESTEntity("HeightTester", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3())->SetModel(am.GetModel("1x1_Cube"));
     return true;
 }
 
@@ -108,6 +121,9 @@ bool Editor::CreateWindows()
     m_RenderWindow = CreateRenderWindow(hInstance, m_MainWindow);
     if (!m_RenderWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
 
+    EnableMenuItem(GetSystemMenu(m_RenderWindow->GetWindowHandle(), FALSE), SC_CLOSE,
+        MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+
     m_PropertiesWindow = CreatePropertiesWindow(hInstance, m_MainWindow);
     if (!m_PropertiesWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
 
@@ -119,6 +135,8 @@ bool Editor::CreateWindows()
 
     TileWindows(m_MainWindow->GetWindowHandle(), MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
 
+    SetInFocus(true);
+
     return true;
 }
 
@@ -126,30 +144,36 @@ void Editor::RunGameLoop()
 {
     auto lTime = std::chrono::steady_clock::now();
     auto cTime = lTime;
+    std::chrono::duration<double> clockDelta = { };
     float dTime = 0.0f;
 
     MSG msg{};
     while (IsRunning())
     {
-        if (PeekMessage(&msg, m_MainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
+        while (PeekMessage(&msg, m_MainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-        else
+
+        cTime = std::chrono::steady_clock::now();
+        clockDelta = std::chrono::duration_cast<std::chrono::milliseconds>(cTime - lTime);
+        dTime = clockDelta.count();
+
+        if (dTime > TIMESTEP_CAP)
         {
-            cTime = std::chrono::steady_clock::now();
-            dTime = (cTime - lTime).count();
-
-            if (dTime > TIMESTEP_CAP)
-                dTime = TIMESTEP_CAP;
-
-            ProcessInput(dTime);
-            Update(dTime);
-            Render();
-
-            lTime = cTime;
+            Log(LOG_STATUS::LOG_MINIMAL, "Capped timestep to %f\n", TIMESTEP_CAP);
+            dTime = TIMESTEP_CAP;
         }
+
+        std::string dtStr = std::to_string(dTime);
+        m_MainWindow->SetTitle(dtStr.c_str());
+
+        ProcessInput(dTime);
+        Update(dTime);
+        Render();
+
+        lTime = cTime;
     }
 }
 
@@ -164,10 +188,16 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
     case WM_KEYUP:
     case WM_SYSKEYUP:
     {
-        bool state = Engine::GetInFocus();
+        bool state = false;
+
+        if (editor)
+        {
+            state = editor->GetInFocus();
+        }
+
         if (state)
         {
-            Engine::WindowsCallbackProcedure(hWnd, message, wParam, lParam);
+            return Engine::WindowsCallbackProcedure(hWnd, message, wParam, lParam);
         }
         else
         {
@@ -210,13 +240,13 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
             case ID_RENDERMODE_SOLID:
             {
-                ServiceLocator::GetRenderer().SetSolidGraphicsPipeline();
+                ServiceLocator::GetRenderer().SetCustomGraphicsPipelineNextFrame(ServiceLocator::GetRenderer().GetSolidGraphicsPipeline());
             }
                 break;
 
             case ID_RENDERMODE_WIREFRAME:
             {
-                ServiceLocator::GetRenderer().SetWireframeGraphicsPipeline();
+                ServiceLocator::GetRenderer().SetCustomGraphicsPipelineNextFrame(ServiceLocator::GetRenderer().GetWireframeGraphicsPipeline());
             }
                 break;
 

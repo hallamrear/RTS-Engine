@@ -55,7 +55,7 @@ namespace Bennett
 		if (m_InputMonitor->GetKeyState(BENNETT_KEY_SPACE))  { Translate(glm::vec3(m_UpVector     *   scaledMovementSpeed)); }
 		if (m_InputMonitor->GetKeyState(BENNETT_KEY_LSHIFT)) { Translate(glm::vec3(m_UpVector	  *  -scaledMovementSpeed)); }
 
-		if (m_InputMonitor->IsCursorLocked())
+		if (m_InputMonitor->IsCursorLocked() && IsMouseLookEnabled())
 		{
 			glm::vec2 mousePos = m_InputMonitor->GetMousePosition();
 			m_MouseDelta = mousePos - m_RenderWindow.GetCentre();

@@ -86,6 +86,7 @@ namespace Bennett
 			renderer.UpdatePushConstants();
 			m_Model->Render(renderer);
 
+			const CustomPipeline& existingPipeline = *renderer.GetCurrentGraphicsPipeline();
 			renderer.SetWireframeGraphicsPipeline();
 			matrix = glm::mat4(1.0f);
 			scale = glm::scale(matrix, glm::vec3(WorldChunkSize, 200.0f, WorldChunkSize));
@@ -94,7 +95,7 @@ namespace Bennett
 			renderer.PushConstants.ModelMatrix = matrix;
 			renderer.UpdatePushConstants();
 			m_Model->Render(renderer);
-			renderer.SetSolidGraphicsPipeline();
+			renderer.SetCustomGraphicsPipeline(existingPipeline);
 		}
 
 		if (m_TerrainChunk != nullptr)

@@ -176,6 +176,11 @@ namespace Bennett
 				break;
 
 			case WM_MOUSEMOVE:
+			case WM_MOUSEHOVER:
+			case WM_MOUSEWHEEL:
+			{
+				Engine::SetInFocus(true);
+			}
 			case WM_XBUTTONDOWN:
 			case WM_XBUTTONUP:
 			case WM_LBUTTONDOWN:
@@ -184,21 +189,22 @@ namespace Bennett
 			case WM_MBUTTONUP:
 			case WM_RBUTTONDOWN:
 			case WM_RBUTTONUP:
-			case WM_MOUSEHOVER:
-			case WM_MOUSEWHEEL:
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
 			case WM_KEYUP:
 			case WM_SYSKEYUP:
 			{
-				Engine::SetInFocus(true);
-				InputMonitor::Win32InputCallback(message, lParam, wParam);
+				if (Engine::GetInFocus())
+				{
+					InputMonitor::Win32InputCallback(message, lParam, wParam);
+				}
 			}
 				break;
 
 			case WM_CLOSE:
 			{
-				Engine::GetEngineInstance()->SetIsRunning(false);				
+				Engine::GetEngineInstance()->SetIsRunning(false);
+				Engine::SetInFocus(false);
 			}
 				break;
 
@@ -223,7 +229,8 @@ namespace Bennett
 			}
 				break;
 			}
-		return 0;
+
+		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 
 	Engine* Engine::GetEngineInstance()

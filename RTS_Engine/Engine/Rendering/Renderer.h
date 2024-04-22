@@ -266,6 +266,7 @@ namespace Bennett
 		bool m_PipelineNeedsChanging;
 		CustomPipeline m_SolidPipeline;
 		CustomPipeline m_WireframePipeline;
+
 		static const CustomPipeline* m_PendingPipeline;
 		static const CustomPipeline* m_CurrentPipeline;
 		bool InitialiseGraphicsPipeline();
@@ -416,6 +417,8 @@ namespace Bennett
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
 		void RebuildDefaultShaders() const;
+		const CustomPipeline& GetSolidGraphicsPipeline() const;
+		const CustomPipeline& GetWireframeGraphicsPipeline() const;
 
 		bool CreateCustomPipeline(CustomPipeline& pipeline, const CustomPipelineDetails& details);
 		void DestroyCustomPipeline(CustomPipeline& pipeline);

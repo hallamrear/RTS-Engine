@@ -32,6 +32,7 @@ namespace Bennett
 
 		void UpdateBasisVectors();
 		void ClampRotations();
+		bool m_MouseLookEnabled;
 
 	public:
 		virtual ~Camera() = 0;
@@ -40,6 +41,8 @@ namespace Bennett
 		virtual glm::mat4 GetProjectionMatrix();
 
 		float GetNearPlaneDistance() const;
+		const bool& IsMouseLookEnabled() const;
+		void SetMouseLookEnabled(const bool& state);
 		float GetFarPlaneDistance() const;
 		float GetAspectRatio() const;
 		float GetFOVAngleRadians() const;

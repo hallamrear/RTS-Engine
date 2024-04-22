@@ -9,6 +9,7 @@ namespace Bennett
 {
 	Camera::Camera() : m_Controller(CameraController::Get())
 	{
+		m_MouseLookEnabled = true;
 		m_ForwardVector = glm::vec3(0.0f, 0.0f, 1.0f);
 		m_RightVector   = glm::vec3(1.0f, 0.0f, 0.0f);
 		m_UpVector      = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -183,6 +184,18 @@ namespace Bennett
 	{
 		return m_NearPlaneDistance;
 	}
+
+
+	const bool& Camera::IsMouseLookEnabled() const
+	{
+		return m_MouseLookEnabled;
+	}
+
+	void Camera::SetMouseLookEnabled(const bool& state)
+	{
+		m_MouseLookEnabled = state;
+	}
+
 
 	void Camera::ClampRotations()
 	{
