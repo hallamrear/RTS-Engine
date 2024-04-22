@@ -53,7 +53,7 @@ namespace Bennett
 
 		if (nameItr == m_NameToIndexMap.end())
 		{
-			Log(LOG_MINIMAL, "Failed to find shader '%s' in shader index map. Returning nullptr.", name.c_str());
+			Log(LOG_MINIMAL, "Failed to find shader '%s' in shader index map. Returning nullptr.\n", name.c_str());
 			return VK_NULL_HANDLE;
 		}
 
@@ -62,7 +62,7 @@ namespace Bennett
 
 		if (shaderItr == m_IndexToShaderMap.end())
 		{
-			Log(LOG_MINIMAL, "Failed to find shader '%s' with index '%d' in shader index map. Returning nullptr.", name.c_str(), nameItr->second);
+			Log(LOG_MINIMAL, "Failed to find shader '%s' with index '%d' in shader index map. Returning nullptr.\n", name.c_str(), nameItr->second);
 			return VK_NULL_HANDLE;
 		}
 
@@ -73,7 +73,7 @@ namespace Bennett
 	{
 		if (location == "")
 		{
-			Log("No location provided for shader file.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "No location provided for shader file.\n");
 			return false;
 		}
 

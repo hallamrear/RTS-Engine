@@ -33,7 +33,7 @@ namespace Bennett
 		{
 		default:
 		case Bennett::ColliderType::Unknown:
-			Log("Collider trying to set a model of an unknown type.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Collider trying to set a model of an unknown type.\n");
 			break;
 		case Bennett::ColliderType::Sphere:
 			m_Model = AssetManager::GetModel("1x1_Sphere");

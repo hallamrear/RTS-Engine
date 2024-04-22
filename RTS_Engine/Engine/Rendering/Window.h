@@ -43,7 +43,7 @@ namespace Bennett
 			
 			if (!windowHandle)
 			{
-				Log(GetLastWin32Error(), LOG_SERIOUS);
+				Log(LOG_SERIOUS, GetLastWin32Error().c_str());
 				return FALSE;
 			}
 
@@ -74,7 +74,7 @@ namespace Bennett
 
 			if (!registeredClass)
 			{
-				Log(GetLastWin32Error(), LOG_SERIOUS);
+				Log(LOG_SERIOUS, GetLastWin32Error().c_str());
 				return 0;
 			}
 
@@ -110,7 +110,7 @@ namespace Bennett
 			BOOL result = DestroyWindow(window->m_WindowHandle);
 			if (result == 0)
 			{
-				Log(GetLastWin32Error(), LOG_SERIOUS);
+				Log(LOG_SERIOUS, GetLastWin32Error().c_str());
 			}
 
 			window->m_WaitingToClose = false;

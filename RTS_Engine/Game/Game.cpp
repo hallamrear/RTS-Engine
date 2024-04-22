@@ -54,13 +54,13 @@ bool Game::Initialise()
     // Perform application initialization:
     if (!m_Window)
     {
-        Log(GetLastWin32Error(), LOG_SERIOUS);
+        Log(LOG_SERIOUS, GetLastWin32Error().c_str());
         return FALSE;
     }
 
     if (!InitialiseEngineSystems(*m_Window))
     {
-        Log("Failed to initialise engine systems.", LOG_CRITICAL);
+        Log(LOG_CRITICAL, "Failed to initialise engine systems.\n");
         return FALSE;
     }
 

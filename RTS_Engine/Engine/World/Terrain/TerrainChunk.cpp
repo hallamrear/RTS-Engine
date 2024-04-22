@@ -36,6 +36,16 @@ namespace Bennett
 	{
 		m_Position = glm::vec3(0.0f);
 		m_Texture = nullptr;
+
+		if (m_IndexBuffer.Exists())
+		{
+			IndexBuffer::Destroy(m_IndexBuffer);
+		}
+
+		if (m_VertexBuffer.Exists())
+		{
+			VertexBuffer::Destroy(m_VertexBuffer);
+		}
 	}
 
 	const glm::vec3& TerrainChunk::GetChunkCornerPosition() const

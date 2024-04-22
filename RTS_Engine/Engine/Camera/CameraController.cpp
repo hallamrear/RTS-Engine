@@ -60,7 +60,7 @@ namespace Bennett
         if (m_CurrentMode == mode)
             return;
 
-        std::string str = "Changed to camera: ";
+        std::string str = "";
         switch (mode)
         {
         case Bennett::FREE_CAM: str += "Free Camera"; break;
@@ -71,7 +71,7 @@ namespace Bennett
             break;
         }
 
-        Log(str, LOG_SAFE);
+        Log(LOG_SAFE, "Changed to camera: %s \n", str.c_str());
         m_CurrentMode = mode;
     }
 

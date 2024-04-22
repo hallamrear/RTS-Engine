@@ -153,7 +153,6 @@ namespace Bennett
 
 		/// <summary>
 		/// Creates a VkImage
-		/// todo : finish
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
@@ -173,7 +172,6 @@ namespace Bennett
 
 		/// <summary>
 		/// Creates a VkImageView
-		/// todo : finish
 		/// </summary>
 		/// <param name="imageView"></param>
 		/// <param name="image"></param>

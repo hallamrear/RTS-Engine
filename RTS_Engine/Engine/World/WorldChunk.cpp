@@ -93,6 +93,7 @@ namespace Bennett
 			translate = glm::translate(matrix, chunkCentre);
 			matrix = translate * scale;
 			renderer.PushConstants.ModelMatrix = matrix;
+			renderer.PushDescriptorSet(&renderer.GetDebugTexture());
 			renderer.UpdatePushConstants();
 			m_Model->Render(renderer);
 			renderer.SetCustomGraphicsPipeline(existingPipeline);

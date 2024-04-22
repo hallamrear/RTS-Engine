@@ -30,7 +30,7 @@ namespace Bennett
 	{
 		if (m_Meshes.size() <= 0)
 		{
-			Log("Trying to draw a model with 0 meshes.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Trying to draw a model with 0 meshes.\n");
 			return;
 		}
 

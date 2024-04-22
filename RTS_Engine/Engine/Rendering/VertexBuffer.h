@@ -30,7 +30,7 @@ namespace Bennett
 				void* data = (void*)vertices.data();
 				result = Buffer::Create(buffer, bufferInfo, data);
 				data = nullptr;
-				buffer.m_Count = vertices.size();
+				buffer.m_Count = (int)vertices.size();
 			}
 
 			if (!result)
@@ -48,7 +48,7 @@ namespace Bennett
 			if (dataCount > 0)
 			{
 				result = Buffer::Create(buffer, bufferInfo, dataPtr);
-				buffer.m_Count = dataCount;
+				buffer.m_Count = (int)dataCount;
 			}
 
 			if (!result)

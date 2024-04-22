@@ -18,7 +18,7 @@ namespace Bennett
 	Engine::Engine()
 	{
 		srand((unsigned int)time(NULL));
-		Log("Engine created.", LOG_SAFE);
+		Log(LOG_SAFE, "Engine created.\n");
 		m_IsRunning = true;
 		m_InFocus = true;
 		m_EngineControls = nullptr;
@@ -28,7 +28,7 @@ namespace Bennett
 
 	Engine::~Engine()
 	{
-		Log("Destroying Engine", LOG_MINIMAL);
+		Log(LOG_MINIMAL, "Destroying Engine\n");
 		Destroy();
 	}
 	
@@ -39,9 +39,9 @@ namespace Bennett
 
 		if (ENABLE_LOG_DELTATIME_AND_FPS)
 		{
-			Log("DT: " + std::to_string(DeltaTime), LOG_SAFE);
+			Log(LOG_SAFE, "DT: %f\n", DeltaTime);
 			double fps = 1000.0f / DeltaTime;
-			Log("FPS: " + std::to_string(fps), LOG_SAFE);
+			Log(LOG_SAFE, "FPS: %f\n", fps);
 		}
 
 		m_CameraController->GetCurrentCamera().Update(DeltaTime);
@@ -92,7 +92,7 @@ namespace Bennett
 
 		CreateGenericModels();
 
-		Log("Initialised Engine successfully.", LOG_SAFE);
+		Log(LOG_SAFE, "Initialised Engine successfully.\n");
 		return true;
 	}
 
@@ -212,7 +212,6 @@ namespace Bennett
 			{
 				PAINTSTRUCT ps;
 				HDC hdc = BeginPaint(hWnd, &ps);
-				// TODO: Add any drawing code that uses hdc here...
 				EndPaint(hWnd, &ps);
 			}
 				break;

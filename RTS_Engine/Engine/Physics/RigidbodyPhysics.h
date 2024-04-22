@@ -38,6 +38,9 @@ namespace Bennett
 		const float& GetMass() const;
 		void SetMass(const float& mass);
 
+		const glm::vec3& GetMomentOfInertia() const;
+		void SetMomentOfInertia(const glm::vec3& moi);
+
 		void AddImpulseForce(const glm::vec3& force);
 
 		virtual void Update(const float& deltaTime);

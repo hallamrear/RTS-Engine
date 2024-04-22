@@ -107,7 +107,7 @@ namespace Bennett
 		}
 		else 
 		{
-			Log("Unsupported layout transition", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Unsupported layout transition.\n");
 		}
 
 		vkCmdPipelineBarrier(cmd,
@@ -156,7 +156,7 @@ namespace Bennett
 
 		if (!pixels)
 		{
-			Log("Failed to load texture image" + filepath, LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to load texture image %s\n", filepath);
 			return;
 		}
 
@@ -172,7 +172,7 @@ namespace Bennett
 		result = Buffer::Create(stagingBuffer, bufferInfo, pixels);
 		if (result == false)
 		{
-			Log("Failed to create staging properly.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create staging properly.\n");
 			return;
 		}
 
@@ -198,7 +198,7 @@ namespace Bennett
 		result = renderer.CreateImage(texture.m_Image, texture.m_ImageMemory, imageInfo);
 		if (result == false)
 		{
-			Log("Failed to create texture properly.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create texture properly.\n");
 			return;
 		}
 
@@ -222,7 +222,7 @@ namespace Bennett
 		result = renderer.CreateImageView(texture.m_ImageView, viewInfo);
 		if (result == false)
 		{
-			Log("Failed to create texture image view properly.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create texture image view properly.\n");
 			return;
 		}
 

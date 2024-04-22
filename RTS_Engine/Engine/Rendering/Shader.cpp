@@ -90,7 +90,7 @@ namespace Bennett
 
 		if (vkCreateShaderModule(ServiceLocator::GetRenderer().GetDevice(), &createInfo, nullptr, &m_VulkanModule) != VK_SUCCESS)
 		{
-			Log("Failed to create shader module.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create shader module.\n");
 			m_VulkanModule = VK_NULL_HANDLE;
 			return false;
 		}

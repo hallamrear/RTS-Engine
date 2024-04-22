@@ -17,7 +17,6 @@ namespace Bennett
 		m_AngularVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
 		m_AngularAcceleration = glm::vec3(0.0f, 0.0f, 0.0f);
 
-		//todo: Moment of inertia initialisation.
 		//This can remain as a default but should be alterable.
 		float w = 10.0f, h = 10.0f, d = 10.0f;
 		m_MomentOfInertia.x = (1.0f / 12.0f) * m_Mass * ((w * w) + (d * d));
@@ -62,6 +61,16 @@ namespace Bennett
 	{
 		m_Mass = mass;
 		m_InverseMass = 1.0f / mass;
+	}
+
+	const glm::vec3& Rigidbody::GetMomentOfInertia() const
+	{
+		return m_MomentOfInertia;
+	}
+
+	void Rigidbody::SetMomentOfInertia(const glm::vec3& moi)
+	{
+		m_MomentOfInertia = moi;
 	}
 
 	void Rigidbody::AddImpulseForce(const glm::vec3& force)

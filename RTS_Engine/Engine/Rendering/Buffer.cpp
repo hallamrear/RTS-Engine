@@ -16,7 +16,10 @@ namespace Bennett
 
 	Buffer::~Buffer()
 	{
-		//todo : destroy
+		if (m_Exists)
+		{
+			Destroy(*this);
+		}
 	}
 
 	VkBuffer& Buffer::Object()
@@ -48,7 +51,7 @@ namespace Bennett
 				return i;
 		}
 
-		Log("Failed to find a suitable memory type", LOG_CRITICAL);
+		Log(LOG_CRITICAL, "Failed to find a suitable memory type");
 		return 0;
 	}
 	
@@ -58,7 +61,7 @@ namespace Bennett
 
 		if (bufferSize <= 0)
 		{
-			Log("Invalid buffer data.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Invalid buffer data.");
 			return false;
 		}
 
@@ -66,7 +69,7 @@ namespace Bennett
 
 		if (vkCreateBuffer(renderer.GetDevice(), &createInfo, nullptr, &buffer.m_Buffer) != VK_SUCCESS)
 		{
-			Log("Failed to create buffer.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create buffer.");
 			return false;
 		}
 
@@ -80,7 +83,7 @@ namespace Bennett
 
 		if (vkAllocateMemory(renderer.GetDevice(), &allocInfo, nullptr, &buffer.m_BufferMemory) != VK_SUCCESS)
 		{
-			Log("Failed to allocate memory for buffer.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to allocate memory for buffer.");
 			return false;
 		}
 

@@ -34,7 +34,7 @@ namespace Bennett
 			}
 			else
 			{
-				Log("Unrecognised XBUTTON input detection.", LOG_MINIMAL);
+				Log(LOG_MINIMAL, "Unrecognised XBUTTON input detection.\n");
 			}
 		}
 			break;
@@ -52,7 +52,7 @@ namespace Bennett
 			}
 			else
 			{
-				Log("Unrecognised XBUTTON input detection.", LOG_MINIMAL);
+				Log(LOG_MINIMAL, "Unrecognised XBUTTON input detection.\n");
 			}
 		} 
 			break;
@@ -95,7 +95,7 @@ namespace Bennett
 
 		default:
 		{
-			Log("Message got to Win32InputCallback that is not meant to be there.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Message got to Win32InputCallback that is not meant to be there.\n");
 		}
 			break;
 		}
@@ -110,7 +110,7 @@ namespace Bennett
 			if (find != INPUT_STRINGS.end())
 			{
 				std::string str = find->second;
-				Log("Key Press: " + str + " - " + std::to_string(state), LOG_SAFE);
+				Log(LOG_SAFE, "Key Press: %s - %d\n", str, state);
 			}
 		}
 
@@ -124,7 +124,7 @@ namespace Bennett
 	{
 		if (ENABLE_LOG_MOUSEMOVEMENT)
 		{
-			Log("Mouse Pos: " + std::to_string(mousePosition.x) + ", " + std::to_string(mousePosition.y), LOG_SAFE);
+			Log(LOG_SAFE, "Mouse Pos: %f, %f\n", mousePosition.x, mousePosition.y);
 		}
 	}
 
@@ -183,7 +183,7 @@ namespace Bennett
 		glm::vec2 position = glm::vec2();
 		if (!m_IsAttached)
 		{
-			Log("Tried to get mouse position but InputMonitor has not been attached to a window. Returning 0,0.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Tried to get mouse position but InputMonitor has not been attached to a window. Returning 0,0.\n");
 		}
 		else
 		{
@@ -217,7 +217,7 @@ namespace Bennett
 			return itr->second;
 		}
 
-		Log("Tried to get the keystate of a key not being tracked.", LOG_SAFE);
+		Log(LOG_SAFE, "Tried to get the keystate of a key not being tracked.\n");
 
 		return false;
 	}

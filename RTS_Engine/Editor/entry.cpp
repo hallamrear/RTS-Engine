@@ -37,7 +37,7 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
         m_Editor->RunGameLoop();
     }
 
-    Log("Engine has finished running, it is now closing.", LOG_SAFE);
+    Log(LOG_SAFE, "Engine has finished running, it is now closing.\n");
     delete m_Editor;
     m_Editor = nullptr;
 

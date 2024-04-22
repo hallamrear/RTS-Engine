@@ -25,6 +25,4 @@ namespace Bennett
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(ServiceLocator::GetRenderer().GetCommandBuffer(), 0, 1, &m_Buffer, offsets);    
 	}
-
-	//todo : VertexBuffer::Destroy
 }

@@ -18,7 +18,7 @@ namespace Bennett
 	{
 		if (m_WindowHandle)
 		{
-			Log("Existing handle in window class. Destroying...", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Existing handle in window class. Destroying...");
 			return false;
 		}
 
@@ -30,20 +30,21 @@ namespace Bennett
 
 			if (!win32Class)
 			{
-				Log(GetLastWin32Error(), LOG_SERIOUS);
+				Log(LOG_SERIOUS, GetLastWin32Error().c_str());
 				return false;
 			}
 		}
 		else
 		{
-			Log("Window Win32 WndProc is NULL, skipping class registration.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Window Win32 WndProc is NULL, skipping class registration.");
 		}
 
 		m_WindowHandle = CreateWin32WindowHandle(instance, details);
 
 		if (!m_WindowHandle)
 		{
-			Log("Failed to create window." + GetLastWin32Error(), LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create window.");
+			Log(LOG_SERIOUS, GetLastWin32Error().c_str());
 			return false;
 		}
 
@@ -62,7 +63,7 @@ namespace Bennett
 		}
 		else
 		{
-			Log("Error setting window title - problem with window handle.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Error setting window title - problem with window handle.");
 		}
 	}
 
@@ -74,7 +75,7 @@ namespace Bennett
 		}
 		else
 		{
-			Log("Error setting window title - problem with window handle.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Error setting window title - problem with window handle.");
 		}
 	}
 
@@ -86,7 +87,7 @@ namespace Bennett
 		}
 		else
 		{
-			Log("Error setting window position - problem with window handle.", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Error setting window position - problem with window handle.");
 		}
 	}
 

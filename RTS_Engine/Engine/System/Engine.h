@@ -42,7 +42,7 @@ namespace Bennett
 
 			if (ENABLE_LOG_FOCUS)
 			{
-				Log("Focus: " + std::to_string(m_InFocus), LOG_SAFE);
+				Log(LOG_SAFE, "Focus: %d\n", m_InFocus);
 			}
 		};
 		inline static bool GetInFocus() { return m_InFocus; };

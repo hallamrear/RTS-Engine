@@ -47,6 +47,18 @@ namespace Bennett
 		m_CurrentPipeline = nullptr;
 		m_PendingPipeline = nullptr;
 		m_PipelineNeedsChanging = false;
+
+		m_DepthImageView = VkImageView{};
+		m_DescriptorPool = VkDescriptorPool{};
+		m_DescriptorSetLayout = VkDescriptorSetLayout{};
+		m_Device = VkDevice{};
+		m_GraphicsQueue = VkQueue{};
+		m_RenderPass = VkRenderPass{};
+		m_ScissorRect = VkRect2D{};
+		m_Surface = VkSurfaceKHR{};
+		m_SwapChainExtent = VkExtent2D{};
+		m_SwapChainFormat = VkFormat{};
+		m_TextureSampler = VkSampler{};
 	}
 
 	Renderer::~Renderer()
@@ -105,7 +117,7 @@ namespace Bennett
 		bool pipelineSuccessful = CreateCustomPipeline(m_DebugLinePipeline, lineRenderingPipelineDetails);
 		if (pipelineSuccessful != true)
 		{
-			Log("Failed to create debug line rendering graphics custom pipeline.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create debug line rendering graphics custom pipeline.\n");
 			return false;
 		}
 
@@ -139,7 +151,7 @@ namespace Bennett
 
 		if (vkAllocateCommandBuffers(m_Device, &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS)
 		{
-			Log("Failed to allocate command buffer.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to allocate command buffer.\n");
 			return false;
 		}
 
@@ -176,7 +188,7 @@ namespace Bennett
 
 		if (vkBeginCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame], &beginInfo) != VK_SUCCESS)
 		{
-			Log("Failed to begin recording command buffer.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to begin recording command buffer.\n");
 			return false;
 		}
 
@@ -302,7 +314,7 @@ namespace Bennett
 
 		if (vkCreateSampler(m_Device, &createInfo, nullptr, &m_TextureSampler) != VK_SUCCESS) 
 		{
-			Log("Failed to create texture sampler.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create texture sampler.\n");
 			return false;
 		}
 
@@ -365,7 +377,7 @@ namespace Bennett
 			m_DebugLineVertexBuffer.Bind();
 			PushConstants.ModelMatrix = glm::mat4(1.0f);
 			UpdatePushConstants();
-			PushDescriptorSet(nullptr);
+			PushDescriptorSet(m_DebugTexture);
 			UpdateUniformBuffers();
 			vkCmdDraw(GetCommandBuffer(), m_CurrentDebugLineCount * 2, 1, 0, 0);
 			SetCustomGraphicsPipeline(tempPipeline);
@@ -383,7 +395,7 @@ namespace Bennett
 
 		if (vkEndCommandBuffer(m_CommandBuffers[m_CurrentRenderFrame]) != VK_SUCCESS)
 		{
-			Log("Failed to record command buffer.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to record command buffer.\n");
 			return;
 		}
 
@@ -468,7 +480,7 @@ namespace Bennett
 		}
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) 
 		{
-			Log("failed to acquire swap chain image!", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to acquire swap chain image!\n");
 		}
 	}
 
@@ -535,7 +547,7 @@ namespace Bennett
 
 		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentRenderFrame]) != VK_SUCCESS)
 		{
-			Log("Failed to submit the graphics queue.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to submit the graphics queue.\n");
 		}
 	}
 
@@ -562,7 +574,7 @@ namespace Bennett
 		}
 		else if (result != VK_SUCCESS)
 		{
-			Log("failed to present swap chain image!", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to present swap chain image!\n");
 		}
 	}
 
@@ -584,7 +596,7 @@ namespace Bennett
 
 			if (vkCreateBuffer(m_Device, &bufferInfo, nullptr, &m_UniformBuffers[i]))
 			{
-				Log("Failed to create uniform buffer.", LOG_SERIOUS);
+				Log(LOG_SERIOUS, "Failed to create uniform buffer.\n");
 				return false;
 			}
 
@@ -598,7 +610,7 @@ namespace Bennett
 
 			if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &m_UniformBuffersMemory[i]) != VK_SUCCESS)
 			{
-				Log("Failed to allocate memory for uniform buffer.", LOG_SERIOUS);
+				Log(LOG_SERIOUS, "Failed to allocate memory for uniform buffer.\n");
 				return false;
 			}
 
@@ -649,7 +661,7 @@ namespace Bennett
 	{
 		if (m_CurrentDebugLineCount == MAX_DEBUG_LINE_COUNT)
 		{
-			Log("Trying to draw too many debug lines in one frame. Max is 100.\n", LOG_STATUS::LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Trying to draw too many debug lines in one frame. Max is 100.\n");
 			return;
 		}
 
@@ -724,7 +736,7 @@ namespace Bennett
 
 		if (vkCreateCommandPool(m_Device, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 		{
-			Log("Failed to create the command pool.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create the command pool.\n");
 			return false;
 		}
 
@@ -750,7 +762,7 @@ namespace Bennett
 
 			if (vkCreateFramebuffer(m_Device, &framebufferInfo, nullptr, &m_Framebuffers[i]) != VK_SUCCESS)
 			{
-				Log("Failed to create a framebuffer", LOG_CRITICAL);
+				Log(LOG_CRITICAL, "Failed to create a framebuffer\n");
 				return false;
 			}
 		}
@@ -787,14 +799,14 @@ namespace Bennett
 		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultVertex.spv", "DefaultVertex");
 		if (shaderLoadResult != true)
 		{
-			Log("Failed to load default vertex shader for graphics pipeline.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to load default vertex shader for graphics pipeline.\n");
 			return false;
 		}
 
 		shaderLoadResult = ShaderLoader::LoadShader(resourceLocation + "Required/DefaultFragment.spv", "DefaultFragment");
 		if (shaderLoadResult != true)
 		{
-			Log("Failed to load default fragment shader for graphics pipeline.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to load default fragment shader for graphics pipeline.\n");
 			return false;
 		}	
 
@@ -803,7 +815,7 @@ namespace Bennett
 		pipelineSuccessful = CreateCustomPipeline(m_SolidPipeline, pipelineDetails);
 		if (pipelineSuccessful != true)
 		{
-			Log("Failed to create solid graphics custom pipeline.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create solid graphics custom pipeline.\n");
 			return false;
 		}
 
@@ -812,7 +824,7 @@ namespace Bennett
 		pipelineSuccessful = CreateCustomPipeline(m_WireframePipeline, pipelineDetails);
 		if (pipelineSuccessful != true)
 		{
-			Log("Failed to create wireframe graphics custom pipeline.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create wireframe graphics custom pipeline.\n");
 			return false;
 		}
 
@@ -847,14 +859,14 @@ namespace Bennett
 
 		if (vkCreateDescriptorSetLayout(m_Device, &layoutInfo, nullptr, &m_DescriptorSetLayout) != VK_SUCCESS)
 		{
-			Log("Failed to create descriptor set layout!", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create descriptor set layout!\n");
 			return false;
 		}
 
 		vkCmdPushDescriptorSetKHR = (PFN_vkCmdPushDescriptorSetKHR)vkGetDeviceProcAddr(m_Device, "vkCmdPushDescriptorSetKHR");
 		if (!vkCmdPushDescriptorSetKHR)
 		{
-			Log("Could not get a valid function pointer for vkCmdPushDescriptorSetKHR", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Could not get a valid function pointer for vkCmdPushDescriptorSetKHR\n");
 			return false;
 		}
 
@@ -867,13 +879,13 @@ namespace Bennett
 
 		if (renderTexture == nullptr)
 		{
-			//Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Passed texture pointer is not loaded, using debug texture instead.\n", LOG_SERIOUS);
 			renderTexture = m_DebugTexture;
 		}
 
 		if (!renderTexture->Loaded())
 		{
-			//Log("Passed texture pointer is not loaded, using debug texture instead.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Passed texture pointer is not loaded, using debug texture instead.\n", LOG_SERIOUS);
 			renderTexture = m_DebugTexture;
 		}
 
@@ -904,7 +916,7 @@ namespace Bennett
 		descriptorWrites[1].pImageInfo = &imageInfo;
 
 		assert(m_CurrentPipeline != nullptr);
-		vkCmdPushDescriptorSetKHR(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Layout, 0, descriptorWrites.size(), descriptorWrites.data());
+		vkCmdPushDescriptorSetKHR(m_CommandBuffers[m_CurrentRenderFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->m_Layout, 0, (uint32_t)descriptorWrites.size(), descriptorWrites.data());
 	}
 
 	bool Renderer::CreateSyncObjects()
@@ -925,19 +937,19 @@ namespace Bennett
 		{
 			if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_ImageAvailableSemaphores[i]) != VK_SUCCESS)
 			{
-				Log("Failed to create image availability semaphore.", LOG_CRITICAL);
+				Log(LOG_CRITICAL, "Failed to create image availability semaphore.\n");
 				return false;
 			}
 
 			if (vkCreateSemaphore(m_Device, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphores[i]) != VK_SUCCESS)
 			{
-				Log("Failed to create render finished semaphore.", LOG_CRITICAL);
+				Log(LOG_CRITICAL, "Failed to create render finished semaphore.\n");
 				return false;
 			}
 
 			if (vkCreateFence(m_Device, &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS)
 			{
-				Log("Failed to create fence.", LOG_CRITICAL);
+				Log(LOG_CRITICAL, "Failed to create fence.\n");
 				return false;
 			}
 		}
@@ -1021,7 +1033,7 @@ namespace Bennett
 
 		if (vkCreateRenderPass(m_Device, &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS)
 		{
-			Log("Failed to create render pass.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create render pass.\n");
 			return false;
 		}
 
@@ -1050,7 +1062,7 @@ namespace Bennett
 	{
 		if (descriptorPool != VK_NULL_HANDLE)
 		{
-			vkFreeDescriptorSets(device, descriptorPool, descriptorSets.size(), descriptorSets.data());
+			vkFreeDescriptorSets(device, descriptorPool, (uint32_t)descriptorSets.size(), descriptorSets.data());
 		}
 	}
 
@@ -1160,8 +1172,9 @@ namespace Bennett
 		}
 
 		logMessage += pCallbackData->pMessage;
+		logMessage += "\n";
 
-		Log(logMessage, status);
+		Log(status, logMessage.c_str());
 
 		return VK_FALSE;
 	}
@@ -1203,7 +1216,7 @@ namespace Bennett
 		*/
 		if (m_EnableValidationLayers && !CheckValidationLayerSupport())
 		{
-			Log("Validation layers are enabled but failed to support them.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Validation layers are enabled but failed to support them.\n");
 			createInfo.enabledLayerCount = 0;
 		}
 		
@@ -1221,7 +1234,7 @@ namespace Bennett
 		VkResult result = vkCreateInstance(&createInfo, nullptr, &m_Instance);
 		if (result != VK_SUCCESS)
 		{
-			Log("Failed to create vulkan instance.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create vulkan instance.\n");
 			return false;
 		}
 		
@@ -1230,7 +1243,7 @@ namespace Bennett
 
 	void Renderer::DestroyVulkanInstance()
 	{
-		Log("Destroying vulkan instance", LOG_MINIMAL);
+		Log(LOG_MINIMAL, "Destroying vulkan instance\n");
 		vkDestroyInstance(m_Instance, nullptr);
 		m_Instance = VK_NULL_HANDLE;
 	}
@@ -1260,7 +1273,8 @@ namespace Bennett
 				{
 					std::string str = std::string("Found appropriate validation layer: ");
 					str += layerName;
-					Log(str, LOG_SAFE);
+					str += "\n";
+					Log(LOG_SAFE, str.c_str());
 					layerFound = true;
 					break;
 				}
@@ -1278,7 +1292,7 @@ namespace Bennett
 	{
 		if (vkCreateImage(m_Device, &createInfo, nullptr, &image) != VK_SUCCESS)
 		{
-			Log("Failed to create image", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create image\n");
 			return false;
 		}
 
@@ -1292,7 +1306,7 @@ namespace Bennett
 
 		if (vkAllocateMemory(m_Device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
 		{
-			Log("Failed to allocate image memory", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to allocate image memory\n");
 			return false;
 		}
 
@@ -1305,7 +1319,7 @@ namespace Bennett
 	{
 		if (vkCreateImageView(m_Device, &createInfo, nullptr, &imageView) != VK_SUCCESS)
 		{
-			Log("Failed to create image view", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create image view\n");
 			return false;
 		}
 
@@ -1464,7 +1478,7 @@ namespace Bennett
 
 		if (CreateDebugUtilsMessengerEXT(m_Instance, &createInfo, nullptr, &m_DebugMessenger) != VK_SUCCESS)
 		{
-			Log("Failed to create the debug messenger.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create the debug messenger.\n");
 		}
 	}
 
@@ -1484,7 +1498,7 @@ namespace Bennett
 
 		if (deviceCount == 0)
 		{
-			Log("Failed to find any physical devices.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to find any physical devices.\n");
 			return false;
 		}
 
@@ -1502,7 +1516,7 @@ namespace Bennett
 		
 		if (m_PhysicalDevice == VK_NULL_HANDLE)
 		{
-			Log("Failed to find any physical devices.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to find any physical devices.\n");
 			return false;
 		}
 
@@ -1510,7 +1524,8 @@ namespace Bennett
 		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &selectedDeviceProperties);
 		std::string str = "Selected device name: ";
 		str += selectedDeviceProperties.deviceName;
-		Log(str, LOG_SAFE);
+		str += "\n";
+		Log(LOG_SAFE, str.c_str());
 
 		return true;
 	}
@@ -1593,7 +1608,7 @@ namespace Bennett
 
 		if (isBindlessSupported == false)
 		{
-			Log("Bindless texturing not supported.", LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Bindless texturing not supported.\n");
 			return false;
 		}
 
@@ -1623,11 +1638,11 @@ namespace Bennett
 
 		if (vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device) != VK_SUCCESS)
 		{
-			Log("Failed to create logical device.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create logical device.\n");
 			return false;
 		}
 
-		Log("Created Vulkan logical device.", LOG_SAFE);
+		Log(LOG_SAFE, "Created Vulkan logical device.\n");
 		GetGraphicsQueue(indices);
 
 		return true;
@@ -1636,7 +1651,7 @@ namespace Bennett
 	void Renderer::GetGraphicsQueue(const QueueFamilyIndices& indices)
 	{
 		vkGetDeviceQueue(m_Device, indices.GraphicsFamily.value(), 0, &m_GraphicsQueue);
-		Log("Got graphics queue.", LOG_SAFE);
+		Log(LOG_SAFE, "Got graphics queue.\n");
 	}
 
 	bool Renderer::CreateWindowSurface(const HWND& hWnd, const HINSTANCE& hInstance)
@@ -1648,12 +1663,12 @@ namespace Bennett
 		
 		if (vkCreateWin32SurfaceKHR(m_Instance, &info, nullptr, &m_Surface) != VK_SUCCESS)
 		{
-			Log("Failed to create window surface", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create window surface\n");
 			return false;
 		}
 		else
 		{
-			Log("Created window surface successfully.", LOG_SAFE);
+			Log(LOG_SAFE, "Created window surface successfully.\n");
 			return true;
 		}
 	}
@@ -1699,13 +1714,13 @@ namespace Bennett
 			if (format.format == VK_FORMAT_B8G8R8A8_SRGB &&	
 				format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
 			{
-				Log("Found format using B8G8R8A8_SRGB AND COLOR_SPACE_SRGB.", LOG_SAFE);
+				Log(LOG_SAFE, "Found format using B8G8R8A8_SRGB AND COLOR_SPACE_SRGB.\n");
 				return format;
 			}
 
 		}
 
-		Log("Failed to find format using B8G8R8A8_SRGB AND COLOR_SPACE_SRGB, returning first available format.", LOG_MINIMAL);
+		Log(LOG_MINIMAL, "Failed to find format using B8G8R8A8_SRGB AND COLOR_SPACE_SRGB, returning first available format.\n");
 		return formats[0];
 	}
 
@@ -1846,11 +1861,11 @@ namespace Bennett
 
 		if (vkCreateSwapchainKHR(m_Device, &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS)
 		{
-			Log("Failed to create the swapchain.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create the swapchain.\n");
 			return false;
 		}
 
-		Log("Successfully created the swapchain.", LOG_SAFE);
+		Log(LOG_SAFE, "Successfully created the swapchain.\n");
 
 		//Store variables
 		m_SwapChainExtent = extent;
@@ -1868,7 +1883,7 @@ namespace Bennett
 	{
 		if (m_SwapChainImages.size() <= 0)
 		{
-			Log("Tried to create swap chain image views with no swap chain images.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Tried to create swap chain image views with no swap chain images.\n");
 			return false;
 		}
 
@@ -1898,7 +1913,7 @@ namespace Bennett
 
 			if (vkCreateImageView(m_Device, &createInfo, nullptr, &m_SwapChainImageViews[i]) != VK_SUCCESS)
 			{
-				Log("Failed to create an image view from swapchain image.", LOG_CRITICAL);
+				Log(LOG_CRITICAL, "Failed to create an image view from swapchain image.\n");
 			}
 		}
 
@@ -1911,14 +1926,14 @@ namespace Bennett
 		Shader* vertexShader = ShaderLoader::GetShaderByName(details.VertexShaderName);
 		if (vertexShader == nullptr)
 		{
-			Log("Failed to find vertex shader for custom pipeline.\n", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Failed to find vertex shader for custom pipeline.\n");
 			return false;
 		}
 
 		Shader* pixelShader = ShaderLoader::GetShaderByName(details.PixelShaderName);
 		if (pixelShader == nullptr)
 		{
-			Log("Failed to find pixel shader for custom pipeline.\n", LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Failed to find pixel shader for custom pipeline.\n");
 			return false;
 		}
 
@@ -2087,7 +2102,7 @@ namespace Bennett
 
 		if (vkCreatePipelineLayout(m_Device, &pipelineLayoutCreateInfo, nullptr, &pipeline.m_Layout) != VK_SUCCESS)
 		{
-			Log("Failed to create pipeline layout.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create pipeline layout.\n");
 			return false;
 		}
 
@@ -2112,7 +2127,7 @@ namespace Bennett
 
 		if (vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.m_Pipeline) != VK_SUCCESS)
 		{
-			Log("Failed to create a custom graphics pipeline object.", LOG_CRITICAL);
+			Log(LOG_CRITICAL, "Failed to create a custom graphics pipeline object.\n");
 			return false;
 		}
 
@@ -2136,7 +2151,7 @@ namespace Bennett
 
 	void Renderer::BindDescriptorSet() const
 	{
-		Log("Binding descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		Log("Binding descriptor sets is no longer used. You should be using PushDescriptorSets instead.\n", LOG_SERIOUS);
 		return;
 
 		assert(m_CurrentPipeline != nullptr);
@@ -2145,7 +2160,7 @@ namespace Bennett
 
 	bool Renderer::CreateDescriptorPool()
 	{
-		Log("Allocating descriptor pools is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		Log("Allocating descriptor pools is no longer used. You should be using PushDescriptorSets instead.\n", LOG_SERIOUS);
 		return false;
 
 		std::array<VkDescriptorPoolSize, DESCRIPTOR_COUNT> poolSize{};
@@ -2163,7 +2178,7 @@ namespace Bennett
 
 		if (vkCreateDescriptorPool(m_Device, &poolInfo, nullptr, &m_DescriptorPool) != VK_SUCCESS)
 		{
-			Log("Failed to create descriptor pool", LOG_SERIOUS);
+			Log("Failed to create descriptor pool\n", LOG_SERIOUS);
 			return false;
 		}
 
@@ -2172,7 +2187,7 @@ namespace Bennett
 
 	bool Renderer::AllocateDescriptorSets()
 	{
-		Log("Allocating descriptor sets is no longer used. You should be using PushDescriptorSets instead.", LOG_SERIOUS);
+		Log("Allocating descriptor sets is no longer used. You should be using PushDescriptorSets instead.\n", LOG_SERIOUS);
 		return false;
 
 		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
@@ -2188,7 +2203,7 @@ namespace Bennett
 
 		if (vkAllocateDescriptorSets(m_Device, &allocInfo, m_DescriptorSets.data()) != VK_SUCCESS)
 		{
-			Log("failed to create descriptor sets!", LOG_CRITICAL);
+			Log("failed to create descriptor sets!\n", LOG_CRITICAL);
 			return false;
 		}
 

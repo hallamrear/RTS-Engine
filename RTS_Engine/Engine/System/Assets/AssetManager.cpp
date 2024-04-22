@@ -52,14 +52,14 @@ namespace Bennett
 
         if (found != m_ModelMap.end())
         {
-            Log("Attempted to create a model from scratch using a name of a model already loaded. Returning existing model.", LOG_MINIMAL);
+            Log(LOG_MINIMAL, "Attempted to create a model from scratch using a name of a model already loaded. Returning existing model.");
             return found->second;
         }
 
         Model* model = ModelLoader::Create(vertices, indices);
         if (!model)
         {
-            Log("Failed to create model from scratch.", LOG_SERIOUS);
+            Log(LOG_SERIOUS, "Failed to create model from scratch.");
             return nullptr;
         }
 
@@ -82,7 +82,7 @@ namespace Bennett
         Model* model = ModelLoader::Load(filepath.c_str(), false);
         if (!model)
         {
-            Log("Failed to load model", LOG_SERIOUS);
+            Log(LOG_SERIOUS, "Failed to load model");
             return nullptr;
         }
 
@@ -105,7 +105,7 @@ namespace Bennett
         Texture* texture = TextureLoader::Load(filepath.c_str());
         if (!texture)
         {
-            Log("Failed to load ", LOG_SERIOUS);
+            Log(LOG_SERIOUS, "Failed to load texture %s", filepath.c_str());
             return nullptr;
         }
 

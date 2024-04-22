@@ -33,7 +33,7 @@ namespace Bennett
 
         if (!configOk)
         {
-            Log("Failed to read config.ini", LOG_CRITICAL);
+            Log(LOG_CRITICAL, "Failed to read config.ini\n");
             return false;
         }
 
@@ -45,7 +45,7 @@ namespace Bennett
             if (settings.has("ResourceSrcFolder"))
             {
                 m_ResourceFolderLocation = settings["ResourceSrcFolder"];
-                Log("Resource Folder set to \"" + m_ResourceFolderLocation + "\"", LOG_SAFE);
+                Log(LOG_SAFE, "Resource Folder set to \"%s\"\n", m_ResourceFolderLocation.c_str());
                 configOk = true;
             }
         }

@@ -37,7 +37,7 @@ namespace Bennett
 		inline static void IncreaseMaxDepth()
 		{
 			m_MaxDepth++;
-			Log("Max Depth: " + std::to_string(m_MaxDepth), LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Max Depth: %i\n", m_MaxDepth);
 		};
 
 		inline static void DecreaseMaxDepth()
@@ -47,7 +47,7 @@ namespace Bennett
 			else
 				m_MaxDepth--;
 
-			Log("Max Depth: " + std::to_string(m_MaxDepth), LOG_MINIMAL);
+			Log(LOG_MINIMAL, "Max Depth: %i\n", m_MaxDepth);
 		};
 
 		AABBCollider* m_Collider = nullptr;
@@ -258,7 +258,7 @@ namespace Bennett
 			}
 			str += std::to_string(m_DataObjects.size());
 			str += "\n";
-			Log(str, LOG_MINIMAL);
+			Log(LOG_MINIMAL, str.c_str());
 
 			if (m_HasSplit)
 			{

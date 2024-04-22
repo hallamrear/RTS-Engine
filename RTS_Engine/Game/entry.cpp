@@ -32,19 +32,19 @@ int APIENTRY WinMain(
 
     if (!game)
     {
-        Log("Failed to create engine.", LOG_CRITICAL);
+        Log(LOG_CRITICAL, "Failed to create engine.");
         return 0;
     }
 
     if (!game->Initialise())
     {
-        Log("Failed to create engine.", LOG_CRITICAL);
+        Log(LOG_CRITICAL, "Failed to create engine.");
         return 0;
     }
 
     game->RunGameLoop();
 
-    Log("Engine has finished running, it is now closing.", LOG_SAFE);
+    Log(LOG_SAFE, "Engine has finished running, it is now closing.");
     delete game;
     game = nullptr;
 

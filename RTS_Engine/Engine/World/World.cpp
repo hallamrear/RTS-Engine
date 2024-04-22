@@ -159,7 +159,7 @@ namespace Bennett
     {
         if (entity == nullptr)
         {
-            Log("World: Tried to delete an entity with an invalid pointer", LOG_MINIMAL);
+            Log(LOG_MINIMAL, "World: Tried to delete an entity with an invalid pointer\n");
             return;
         }
 
@@ -174,7 +174,7 @@ namespace Bennett
         }
         else
         {
-            Log("World: Tried to delete an entity that does not seem to exist in the map.", LOG_MINIMAL);
+            Log(LOG_MINIMAL, "World: Tried to delete an entity that does not seem to exist in the map.\n");
         }
     }
 
@@ -227,12 +227,12 @@ namespace Bennett
 
             if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
             {
-                Log("World: Created an entity called \"" + name + "\"", LOG_SAFE);
+                Log(LOG_SAFE, "World: Created an entity called \"%s\"\n", name.c_str());
             }
         }
         else
         {
-            Log("World: Tried to create an entity with a name that already exists.", LOG_MINIMAL);
+            Log(LOG_MINIMAL, "World: Tried to create an entity with a name that already exists.\n");
         }
 
         return entity;
@@ -252,12 +252,12 @@ namespace Bennett
 
             if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
             {
-                Log("World: Created an entity called \"" + name + "\"", LOG_SAFE);
+                Log(LOG_SAFE, "World: Created an entity called \"%s\"\n", name.c_str());
             }
         }
         else
         {
-            Log("World: Tried to create an entity with a name that already exists.", LOG_MINIMAL);
+            Log(LOG_MINIMAL, "World: Tried to create an entity with a name that already exists.\n");
         }
 
         return entity;

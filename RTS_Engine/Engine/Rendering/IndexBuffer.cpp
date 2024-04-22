@@ -13,9 +13,7 @@ namespace Bennett
     IndexBuffer::~IndexBuffer()
     {
 
-    }
-
-    
+    }    
 
     const size_t& IndexBuffer::Count() const
     {
@@ -38,7 +36,7 @@ namespace Bennett
             result = Buffer::Create(buffer, bufferInfo, data);
             data = nullptr;
 
-            buffer.m_Count = indices.size();
+            buffer.m_Count = (int)indices.size();
         }
 
         if (result == FALSE)
@@ -89,6 +87,4 @@ namespace Bennett
 
         //VK_INDEX_TYPE_UINT32
     }
-
-    //todo : IndexBuffer::Destroy;
 }

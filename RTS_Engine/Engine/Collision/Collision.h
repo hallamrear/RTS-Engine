@@ -65,7 +65,6 @@ namespace Bennett
 		};
 
 		/*
-
 		/// <summary>
 		/// Tests whether a point is inside a sphere.
 		/// </summary>

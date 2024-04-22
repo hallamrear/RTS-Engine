@@ -25,7 +25,7 @@ namespace Bennett
 
 		if ((vbCreated == false) || (ibCreated == false))
 		{
-			Log("Failed to create a vertex or index buffer.", LOG_STATUS::LOG_SERIOUS);
+			Log(LOG_SERIOUS, "Failed to create a vertex or index buffer.\n");
 			Destroy();
 			m_Exists = false;
 			return;

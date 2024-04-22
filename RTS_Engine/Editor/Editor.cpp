@@ -57,7 +57,7 @@ bool Editor::Initialise()
 
     if (!InitialiseEngineSystems(*m_RenderWindow))
     {
-        Log("Failed to initialise engine systems.", LOG_CRITICAL);
+        Log(LOG_CRITICAL, "Failed to initialise engine systems.");
         return FALSE;
     }
     
@@ -113,25 +113,26 @@ bool Editor::CreateWindows()
     // Perform application initialization:
     if (!m_MainWindow)
     {
-        Log(GetLastWin32Error(), LOG_SERIOUS); 
-        Log("Failed to create a window.", LOG_SERIOUS);
+        Log(LOG_SERIOUS, GetLastWin32Error().c_str()); 
+        Log(LOG_SERIOUS, "Failed to create a window.");
         return false;
     }
 
     m_RenderWindow = CreateRenderWindow(hInstance, m_MainWindow);
-    if (!m_RenderWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
+    if (!m_RenderWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str()); Log(LOG_SERIOUS, "Failed to create a window."); return false; }
 
+    //Disables the 'X' red close button for the render window as it stops the engine running lol.
     EnableMenuItem(GetSystemMenu(m_RenderWindow->GetWindowHandle(), FALSE), SC_CLOSE,
         MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
 
     m_PropertiesWindow = CreatePropertiesWindow(hInstance, m_MainWindow);
-    if (!m_PropertiesWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
+    if (!m_PropertiesWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str());  Log(LOG_SERIOUS, "Failed to create a window."); return false; }
 
     m_ToolWindow = CreateToolWindow(hInstance, m_MainWindow);
-    if (!m_ToolWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
+    if (!m_ToolWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str());  Log(LOG_SERIOUS, "Failed to create a window."); return false; }
 
     m_HierarchyWindow = CreateHierarchyWindow(hInstance, m_MainWindow);
-    if (!m_HierarchyWindow) { Log(GetLastWin32Error(), LOG_SERIOUS); Log("Failed to create a window.", LOG_SERIOUS); return false; }
+    if (!m_HierarchyWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str());  Log(LOG_SERIOUS, "Failed to create a window."); return false; }
 
     TileWindows(m_MainWindow->GetWindowHandle(), MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
 
@@ -201,7 +202,7 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
         }
         else
         {
-            Log("Non engine keyboard input", LOG_SAFE);
+            Log(LOG_SAFE, "Non engine keyboard input");
             //todo : potentially send the messages to the children rather than handle this way.
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
@@ -273,7 +274,6 @@ LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
             EndPaint(hWnd, &ps);
         }
         break;
