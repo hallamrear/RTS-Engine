@@ -13,6 +13,7 @@ namespace Bennett
 		bool m_WaitingToClose;
 
 		Window();
+		Window(HWND handle);
 		~Window();
 
 		bool Initialise(const WindowDetails& details);
@@ -86,6 +87,7 @@ namespace Bennett
 		void SetTitle(const char* title);
 		void SetSize(const glm::vec2& size);
 		void SetPosition(const glm::vec2& position);
+		const std::string GetTitle() const;
 		glm::vec2 GetSize() const;
 		glm::vec2 GetPosition() const;
 		const glm::vec2& GetCentre() const;
@@ -100,6 +102,18 @@ namespace Bennett
 			if (!window->Initialise(details))
 			{
 				Destroy(window);
+			}
+
+			return window;
+		};
+
+		inline static Window* CreateFromExistingHandle(const HWND& handle)
+		{
+			Bennett::Window* window = nullptr;
+
+			if (handle != NULL)
+			{
+				window = new Bennett::Window(handle);
 			}
 
 			return window;

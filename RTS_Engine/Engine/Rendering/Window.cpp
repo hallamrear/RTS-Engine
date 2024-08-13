@@ -9,6 +9,12 @@ namespace Bennett
 		m_WindowHandle = NULL;		
 	}
 
+	Window::Window(HWND handle)
+	{
+		m_WindowHandle = handle;
+		m_WaitingToClose = false;
+	}
+
 	Window::~Window()
 	{
 
@@ -89,6 +95,20 @@ namespace Bennett
 		{
 			Log(LOG_MINIMAL, "Error setting window position - problem with window handle.");
 		}
+	}
+
+	const std::string Window::GetTitle() const
+	{
+		std::string title = "";
+		if (m_WindowHandle)
+		{
+			GetWindowText(m_WindowHandle, &title[0], 255);
+		}
+		else
+		{
+			Log(LOG_MINIMAL, "Error getting window title - problem with window handle.");
+		}
+		return title;
 	}
 
 	glm::vec2 Window::GetSize() const

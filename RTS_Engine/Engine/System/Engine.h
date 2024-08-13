@@ -6,6 +6,13 @@
 
 namespace Bennett
 {
+	enum class ENGINE_STATE
+	{
+		RUNNING,
+		PAUSED,
+		STOPPED
+	};
+
 	class BENNETT_ENGINE Engine
 	{
 	private:
@@ -15,7 +22,7 @@ namespace Bennett
 		InputMonitor* m_EngineControls;
 
 	protected:
-		bool m_IsRunning;
+		ENGINE_STATE m_EngineState;
 		inline static bool m_InFocus;
 
 		Engine();
@@ -31,8 +38,9 @@ namespace Bennett
 		void Update(const float& DeltaTime);
 		void Render();
 
-		inline bool IsRunning() const { return m_IsRunning; };
-		inline void SetIsRunning(bool state) { m_IsRunning = state; };
+		inline const ENGINE_STATE& GetEngineState() const { return m_EngineState; };
+		inline void SetEngineState(const ENGINE_STATE& state) { m_EngineState = state; };
+
 		inline static void SetInFocus(bool state) 
 		{
 			if (m_InFocus == state)

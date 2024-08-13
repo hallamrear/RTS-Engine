@@ -92,6 +92,8 @@ bool Game::Initialise()
     //InitTestOctreeScene();
     //InitTestEntitiesScene();
   
+    SetEngineState(ENGINE_STATE::RUNNING);
+
     return true;
 }
 
@@ -145,8 +147,9 @@ void Game::RunGameLoop()
 
     CollisionDetails details;
 
+  
     MSG msg{};
-    while (IsRunning())
+    while (GetEngineState() == ENGINE_STATE::RUNNING)
     {
         while(PeekMessage(&msg, m_Window->GetWindowHandle(), 0, 0, PM_REMOVE))
         {

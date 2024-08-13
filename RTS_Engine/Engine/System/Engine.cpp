@@ -19,11 +19,11 @@ namespace Bennett
 	{
 		srand((unsigned int)time(NULL));
 		Log(LOG_SAFE, "Engine created.\n");
-		m_IsRunning = true;
 		m_InFocus = true;
 		m_EngineControls = nullptr;
 		m_Instance = this;
 		m_CameraController = nullptr;
+		m_EngineState = ENGINE_STATE::STOPPED;
 	}
 
 	Engine::~Engine()
@@ -45,7 +45,11 @@ namespace Bennett
 		}
 
 		m_CameraController->GetCurrentCamera().Update(DeltaTime);
-		m_World.Update(DeltaTime);
+
+		if (m_EngineState == ENGINE_STATE::RUNNING)
+		{
+			m_World.Update(DeltaTime);
+		}
 	}
 
 	void Engine::Render()
@@ -160,6 +164,11 @@ namespace Bennett
 
 	CameraController& Engine::GetCameraController()
 	{
+		if (m_CameraController == nullptr)
+		{
+			m_CameraController = &CameraController::Get();
+		}
+
 		return *m_CameraController;
 	}
 
@@ -203,7 +212,7 @@ namespace Bennett
 
 			case WM_CLOSE:
 			{
-				Engine::GetEngineInstance()->SetIsRunning(false);
+				Engine::GetEngineInstance()->SetEngineState(ENGINE_STATE::STOPPED);
 				Engine::SetInFocus(false);
 			}
 				break;

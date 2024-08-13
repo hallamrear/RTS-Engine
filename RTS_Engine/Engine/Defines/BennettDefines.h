@@ -1,7 +1,7 @@
 #pragma once
 
 //System Defines
-#define TIMESTEP_CAP 1.0f
+#define TIMESTEP_CAP 0.32f
 #define WINDOW_WIDTH 1280.0f
 #define WINDOW_HEIGHT 720.0f
 //When changing this value, be sure to change the hard-coded version in any shaders.
