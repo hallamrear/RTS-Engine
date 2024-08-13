@@ -15,31 +15,46 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Resource.h">
+    <ClInclude Include="Windows\Child_Windows\Main_Render\CRenderWindowFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Editor.h">
+    <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window\PropertiesWindow.h">
+    <ClInclude Include="Dialogs\CAboutDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window\ToolWindow.h">
+    <ClInclude Include="Windows\Child_Windows\Main_Render\CRenderWindowDoc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window\HierarchyWindow.h">
+    <ClInclude Include="Windows\Child_Windows\Main_Render\CRenderWindowFormView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window\RenderWindow.h">
+    <ClInclude Include="Windows\MainFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Child_Windows\Script_Editor\CScriptWindowEditView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Child_Windows\Script_Editor\CScriptWindowDocument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\Child_Windows\Script_Editor\CScriptWindowFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CRenderThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,22 +62,34 @@
     <ClCompile Include="Editor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Windows\Child_Windows\Main_Render\CRenderWindowFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window\PropertiesWindow.cpp">
+    <ClCompile Include="Dialogs\CAboutDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window\ToolWindow.cpp">
+    <ClCompile Include="Windows\Child_Windows\Main_Render\CRenderWindowDoc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window\HierarchyWindow.cpp">
+    <ClCompile Include="Windows\Child_Windows\Main_Render\CRenderWindowFormView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window\RenderWindow.cpp">
+    <ClCompile Include="Windows\MainFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="entry.cpp">
+    <ClCompile Include="Windows\Child_Windows\Script_Editor\CScriptWindowEditView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Child_Windows\Script_Editor\CScriptWindowDocument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\Child_Windows\Script_Editor\CScriptWindowFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CRenderThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,25 +99,35 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Editor.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Main.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Hammer.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="Pickaxe.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="config.ini">
+    <None Include="res\Editor.rc2">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\ribbon1.mfcribbon-ms">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="config.ini" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\EditorDoc.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Editor.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Hammer.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Main.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Pickaxe.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\pickaxe1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -1,306 +1,302 @@
-// Editor.cpp : Defines the entry point for the application.
+
+// Editor.cpp : Defines the class behaviors for the application.
+//
 
 #include "pch.h"
-#include <Rendering/Window.h>
-#include <Rendering/Renderer.h>
-#include <System/Assets/AssetManager.h>
-#include <System/ServiceLocator.h>
-#include <System/Engine.h>
-#include <System/Logger.h>
-#include <System/InputMonitor.h>
-#include <chrono>
+#include "resource.h"
+
+#include "framework.h"
+#include "afxwinappex.h"
+#include "afxdialogex.h"
 #include "Editor.h"
-#include <Window/PropertiesWindow.h>
-#include <Window/ToolWindow.h>
-#include <Window/HierarchyWindow.h>
-#include <Window/RenderWindow.h>
+#include "Windows/MainFrame.h"
 
-using namespace Bennett;
+#include "Dialogs/CAboutDlg.h"
 
-Editor::Editor()
-{
-    m_MainWindow = nullptr;
-    m_HierarchyWindow = nullptr;
-    m_ToolWindow = nullptr;
-    m_PropertiesWindow = nullptr;
-    m_RenderWindow = nullptr;
-}
+#include <Windows/Child_Windows/Main_Render/CRenderWindowFormView.h>
+#include <Windows/Child_Windows/Main_Render/CRenderWindowFrame.h>
+#include <Windows/Child_Windows/Main_Render/CRenderWindowDoc.h>
 
-Editor::~Editor()
-{
-    Window::Destroy(m_HierarchyWindow);
-    Window::Destroy(m_ToolWindow);
-    Window::Destroy(m_PropertiesWindow);
-    Window::Destroy(m_RenderWindow);
-    Window::Destroy(m_MainWindow);
-}
+#include <Windows/Child_Windows/Script_Editor/CScriptWindowDocument.h>
+#include <Windows/Child_Windows/Script_Editor/CScriptWindowEditView.h>
+#include <Windows/Child_Windows/Script_Editor/CScriptWindowFrame.h>
 
-bool Editor::Initialise()
-{
-    CreateWindows();
-
-    std::vector<int> keys =
-    {
-        BENNETT_KEY_F1,
-        BENNETT_KEY_F2,
-        BENNETT_KEY_F3,
-        BENNETT_KEY_F4,
-        BENNETT_KEY_F5,
-        BENNETT_KEY_F6,
-        BENNETT_KEY_F7,
-        BENNETT_KEY_F8,
-        BENNETT_KEY_F9,
-        BENNETT_KEY_F10,
-        BENNETT_KEY_F11,
-        BENNETT_KEY_F12
-    };
-
-    if (!InitialiseEngineSystems(*m_RenderWindow))
-    {
-        Log(LOG_CRITICAL, "Failed to initialise engine systems.");
-        return FALSE;
-    }
-    
-    AssetManager& am = ServiceLocator::GetAssetManager();
-
-    std::vector<glm::ivec2> ids
-    {
-        glm::ivec2(-1, -1), glm::ivec2(+0, -1), glm::ivec2(+1, -1),
-        glm::ivec2(-1, +0), glm::ivec2(+0, +0), glm::ivec2(+1, +0),
-        glm::ivec2(-1, +1), glm::ivec2(+0, +1), glm::ivec2(+1, +1),
-    };
-
-    GetWorld().PreloadChunks(ids);
-    GetCameraController().SetCamera(Bennett::CAMERA_MODE::STANDARD_CAM);
-    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
-    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
-
-    GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
-    GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
-    GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
-    GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
-    GetCameraController().GetCurrentCamera().SetMouseLookEnabled(false);
-
-    GetWorld().SpawnEntity("ChunkLoader");
-    GetWorld().SpawnTESTEntity("HeightTester", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3())->SetModel(am.GetModel("1x1_Cube"));
-    return true;
-}
-
-bool Editor::CreateWindows()
-{
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-
-    WindowDetails mainWindowDetails;
-    LoadString(hInstance, IDS_APP_TITLE, mainWindowDetails.Title, MAX_LOADSTRING);
-    LoadString(hInstance, IDC_EDITOR, mainWindowDetails.ClassDetails.ClassName, MAX_LOADSTRING);
-    mainWindowDetails.WindowStyles = WS_OVERLAPPEDWINDOW | WS_MAXIMIZE;
-    mainWindowDetails.ClassDetails.BackgroundColour = GetSysColorBrush(COLOR_APPWORKSPACE);
-    mainWindowDetails.ClassDetails.WndProcCallback = MainWindowWndProc;
+#include <Rendering/Window.h>
+#include <CRenderThread.h>
 
 #ifdef _DEBUG
-    mainWindowDetails.ShowState = WindowDetails::NORMAL;
-#else
-    mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
+#define new DEBUG_NEW
+#endif
+#include <Defines/BennettInputDefines.h>
+
+
+// CEditorApp
+
+BEGIN_MESSAGE_MAP(CEditorApp, CWinApp)
+	ON_COMMAND(ID_APP_ABOUT, &CEditorApp::OnAppAbout)
+	// Standard file based document commands
+	ON_COMMAND(ID_FILE_NEW, &CEditorApp::OnFileNew)
+	ON_COMMAND(ID_FILE_OPEN, &CWinApp::OnFileOpen)
+	// Standard print setup command
+	ON_COMMAND(ID_FILE_PRINT_SETUP, &CWinApp::OnFilePrintSetup)
+END_MESSAGE_MAP()
+
+
+// CEditorApp construction
+
+CEditorApp::CEditorApp() noexcept
+{
+
+
+	m_BennettWindowObject = nullptr;
+	m_RenderWindowDocTemplate = nullptr;
+	m_ScriptEditorDocTemplate = nullptr;
+
+	// support Restart Manager
+	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_ALL_ASPECTS;
+#ifdef _MANAGED
+	// If the application is built using Common Language Runtime support (/clr):
+	//     1) This additional setting is needed for Restart Manager support to work properly.
+	//     2) In your project, you must add a reference to System.Windows.Forms in order to build.
+	System::Windows::Forms::Application::SetUnhandledExceptionMode(System::Windows::Forms::UnhandledExceptionMode::ThrowException);
 #endif
 
-    mainWindowDetails.ShowState = WindowDetails::MAXIMIZED;
-
-    mainWindowDetails.ClassDetails.Icon = IDI_FACE;
-    mainWindowDetails.ClassDetails.SmallIcon = IDI_FACE;
-    mainWindowDetails.ClassDetails.MenuName = IDC_EDITOR;
-    m_MainWindow = Window::Create(mainWindowDetails);
-
-    // Perform application initialization:
-    if (!m_MainWindow)
-    {
-        Log(LOG_SERIOUS, GetLastWin32Error().c_str()); 
-        Log(LOG_SERIOUS, "Failed to create a window.");
-        return false;
-    }
-
-    m_RenderWindow = CreateRenderWindow(hInstance, m_MainWindow);
-    if (!m_RenderWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str()); Log(LOG_SERIOUS, "Failed to create a window."); return false; }
-
-    //Disables the 'X' red close button for the render window as it stops the engine running lol.
-    EnableMenuItem(GetSystemMenu(m_RenderWindow->GetWindowHandle(), FALSE), SC_CLOSE,
-        MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
-
-    m_PropertiesWindow = CreatePropertiesWindow(hInstance, m_MainWindow);
-    if (!m_PropertiesWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str());  Log(LOG_SERIOUS, "Failed to create a window."); return false; }
-
-    m_ToolWindow = CreateToolWindow(hInstance, m_MainWindow);
-    if (!m_ToolWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str());  Log(LOG_SERIOUS, "Failed to create a window."); return false; }
-
-    m_HierarchyWindow = CreateHierarchyWindow(hInstance, m_MainWindow);
-    if (!m_HierarchyWindow) { Log(LOG_SERIOUS, GetLastWin32Error().c_str());  Log(LOG_SERIOUS, "Failed to create a window."); return false; }
-
-    TileWindows(m_MainWindow->GetWindowHandle(), MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
-
-    SetInFocus(true);
-
-    return true;
+	// TODO: replace application ID string below with unique ID string; recommended
+	// format for string is CompanyName.ProductName.SubProduct.VersionInformation
+	SetAppID(_T("Editor.AppID.NoVersion"));
 }
 
-void Editor::RunGameLoop()
+// The one and only CEditorApp object
+
+CEditorApp theApp;
+CWinThread* gRenderThread;
+
+// CEditorApp initialization
+
+BOOL CEditorApp::InitInstance()
 {
-    auto lTime = std::chrono::steady_clock::now();
-    auto cTime = lTime;
-    std::chrono::duration<double> clockDelta = { };
-    float dTime = 0.0f;
 
-    MSG msg{};
-    while (IsRunning())
-    {
-        while (PeekMessage(&msg, m_MainWindow->GetWindowHandle(), 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+	// InitCommonControlsEx() is required on Windows XP if an application
+	// manifest specifies use of ComCtl32.dll version 6 or later to enable
+	// visual styles.  Otherwise, any window creation will fail.
+	INITCOMMONCONTROLSEX InitCtrls;
+	InitCtrls.dwSize = sizeof(InitCtrls);
+	// Set this to include all the common control classes you want to use
+	// in your application.
+	InitCtrls.dwICC = ICC_WIN95_CLASSES;
+	InitCommonControlsEx(&InitCtrls);
 
-        cTime = std::chrono::steady_clock::now();
-        clockDelta = std::chrono::duration_cast<std::chrono::milliseconds>(cTime - lTime);
-        dTime = clockDelta.count();
+	CWinApp::InitInstance();
 
-        if (dTime > TIMESTEP_CAP)
-        {
-            Log(LOG_STATUS::LOG_MINIMAL, "Capped timestep to %f\n", TIMESTEP_CAP);
-            dTime = TIMESTEP_CAP;
-        }
+	// Initialize OLE libraries
+	if (!AfxOleInit())
+	{
+		AfxMessageBox(IDP_OLE_INIT_FAILED);
+		return FALSE;
+	}
 
-        std::string dtStr = std::to_string(dTime);
-        m_MainWindow->SetTitle(dtStr.c_str());
+	AfxEnableControlContainer();
 
-        ProcessInput(dTime);
-        Update(dTime);
-        Render();
+	EnableTaskbarInteraction(FALSE);
 
-        lTime = cTime;
-    }
+	// AfxInitRichEdit2() is required to use RichEdit control
+	// AfxInitRichEdit2();
+
+	// Standard initialization
+	// If you are not using these features and wish to reduce the size
+	// of your final executable, you should remove from the following
+	// the specific initialization routines you do not need
+	// Change the registry key under which our settings are stored
+	// TODO: You should modify this string to be something appropriate
+	// such as the name of your company or organization
+	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+	LoadStdProfileSettings(4);  // Load standard INI file options (including MRU)
+
+	// Register the application's document templates.  Document templates
+	//  serve as the connection between documents, frame windows and views
+	m_RenderWindowDocTemplate = new CMultiDocTemplate(IDR_RenderWindow,
+		RUNTIME_CLASS(CRenderWindowDoc),
+		RUNTIME_CLASS(CRenderWindowFrame),
+		RUNTIME_CLASS(CRenderWindowView));
+	if (!m_RenderWindowDocTemplate)
+		return FALSE;
+	AddDocTemplate(m_RenderWindowDocTemplate);
+
+	m_ScriptEditorDocTemplate = new CMultiDocTemplate(IDR_ScriptEditor,
+		RUNTIME_CLASS(CScriptWindowDocument),
+		RUNTIME_CLASS(CScriptWindowFrame),
+		RUNTIME_CLASS(CScriptWindowEditView));
+	if (!m_ScriptEditorDocTemplate)
+		return FALSE;
+	AddDocTemplate(m_ScriptEditorDocTemplate);
+
+	// create main MDI Frame window
+	CMainFrame* pMainFrame = new CMainFrame;
+	if (!pMainFrame || !pMainFrame->LoadFrame(IDR_MainEditor))
+	{
+		delete pMainFrame;
+		return FALSE;
+	}
+	m_pMainWnd = pMainFrame;
+
+	// Parse command line for standard shell commands, DDE, file open
+	CCommandLineInfo cmdInfo;
+	ParseCommandLine(cmdInfo);
+
+	// Dispatch commands specified on the command line.  Will return FALSE if
+	// app was launched with /RegServer, /Register, /Unregserver or /Unregister.
+	if (!ProcessShellCommand(cmdInfo))
+		return FALSE;
+	// The main window has been initialized, so show and update it
+	pMainFrame->ShowWindow(m_nCmdShow);
+	pMainFrame->UpdateWindow();
+
+	//Open editor form windows.
+
+	if (m_ScriptEditorDocTemplate)
+	{
+		m_ScriptEditorDocTemplate->OpenDocumentFile(NULL);
+	}
+
+	if (m_RenderWindowDocTemplate)
+	{
+		m_RenderWindowDocTemplate->OpenDocumentFile(NULL);
+	}
+	
+
+	// this code is working
+	CMDIChildWnd* child = pMainFrame->MDIGetActive();
+	do
+	{
+		CString str;
+		child->GetWindowText(str);
+		if (str == "Game Render")
+		{
+			child->MDIActivate(); // or MDIActivate(child);
+			break;
+		}
+
+		child = (CMDIChildWnd*)child->GetWindow(GW_HWNDNEXT);
+	} while (child);
+
+
+
+
+
+
+	//Creating Engine bits.
+	if (m_BennettWindowObject)
+	{
+		Bennett::Window::Destroy(m_BennettWindowObject);
+		m_BennettWindowObject = nullptr;
+	}
+
+	assert(child);
+
+	if (child)
+	{
+		m_BennettWindowObject = Bennett::Window::CreateFromExistingHandle(child->GetSafeHwnd());
+	}
+
+	//Bennett Engine initialisation.
+	bool result = Initialise();
+
+	if (result == false)
+	{
+		Log(LOG_CRITICAL, "Failed to initialise engine systems.");
+		return FALSE;
+	}
+
+	gRenderThread = AfxBeginThread(RUNTIME_CLASS(CRenderThread), NULL, 0, CREATE_SUSPENDED);
+	gRenderThread->m_bAutoDelete = false;
+	gRenderThread->ResumeThread();
+
+	return TRUE;
 }
 
-LRESULT CALLBACK MainWindowWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+bool CEditorApp::Initialise()
 {
-    Bennett::Engine* editor = Engine::GetEngineInstance();
+	std::vector<int> keys =
+	{
+		BENNETT_KEY_F1,
+		BENNETT_KEY_F2,
+		BENNETT_KEY_F3,
+		BENNETT_KEY_F4,
+		BENNETT_KEY_F5,
+		BENNETT_KEY_F6,
+		BENNETT_KEY_F7,
+		BENNETT_KEY_F8,
+		BENNETT_KEY_F9,
+		BENNETT_KEY_F10,
+		BENNETT_KEY_F11,
+		BENNETT_KEY_F12
+	};
 
-    switch (message)
-    {
-    case WM_KEYDOWN:
-    case WM_SYSKEYDOWN:
-    case WM_KEYUP:
-    case WM_SYSKEYUP:
-    {
-        bool state = false;
+	if (!InitialiseEngineSystems(*m_BennettWindowObject))
+	{
+		Log(LOG_CRITICAL, "Failed to initialise engine systems.");
+		return FALSE;
+	}
 
-        if (editor)
-        {
-            state = editor->GetInFocus();
-        }
+	Bennett::AssetManager& am = Bennett::ServiceLocator::GetAssetManager();
+	
+	//std::vector<glm::ivec2> ids
+	//{
+	//	glm::ivec2(-1, -1), glm::ivec2(+0, -1), glm::ivec2(+1, -1),
+	//	glm::ivec2(-1, +0), glm::ivec2(+0, +0), glm::ivec2(+1, +0),
+	//	glm::ivec2(-1, +1), glm::ivec2(+0, +1), glm::ivec2(+1, +1),
+	//};
+	//
+	//GetWorld().PreloadChunks(ids);
+	//GetCameraController().SetCamera(Bennett::CAMERA_MODE::STANDARD_CAM);
+	//GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+	//GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
+	//
+	GetCameraController().SetCamera(Bennett::CAMERA_MODE::FREE_CAM);
+	GetCameraController().GetCurrentCamera().SetPosition(glm::vec3(0.0f, 10.0f, 0.0f));
+	GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
+	GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
+	GetCameraController().GetCurrentCamera().SetMouseLookEnabled(false);
+	
+	GetWorld().SpawnEntity("ChunkLoader");
+	GetWorld().SpawnTESTEntity("HeightTester", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3())->SetModel(am.GetModel("1x1_Cube"));
 
-        if (state)
-        {
-            return Engine::WindowsCallbackProcedure(hWnd, message, wParam, lParam);
-        }
-        else
-        {
-            Log(LOG_SAFE, "Non engine keyboard input");
-            //todo : potentially send the messages to the children rather than handle this way.
-            return DefWindowProc(hWnd, message, wParam, lParam);
-        }
-    }
-        break;
+	m_EngineState = Bennett::ENGINE_STATE::PAUSED;
 
-    case WM_COMMAND:
-        {
-            int wmId = LOWORD(wParam);
-            // Parse the menu selections:
-            switch (wmId)
-            {
-            case ID_FILE_NEW:
-            {
-                //TODO : Implement
-            }
-                break;
-
-            case ID_FILE_LOAD:
-            {
-                //TODO : Implement
-            }
-                break;
-
-            case ID_FILE_SAVE:
-            {
-                //TODO : Implement
-            }
-                break;
-
-            case ID_FILE_SAVEAS:
-            {
-                //TODO : Implement
-            }
-                break;
-
-            case ID_RENDERMODE_SOLID:
-            {
-                ServiceLocator::GetRenderer().SetCustomGraphicsPipelineNextFrame(ServiceLocator::GetRenderer().GetSolidGraphicsPipeline());
-            }
-                break;
-
-            case ID_RENDERMODE_WIREFRAME:
-            {
-                ServiceLocator::GetRenderer().SetCustomGraphicsPipelineNextFrame(ServiceLocator::GetRenderer().GetWireframeGraphicsPipeline());
-            }
-                break;
-
-            case IDM_EXIT:
-            {
-                DestroyWindow(hWnd);
-            }
-                break;
-
-            case IDM_ABOUT:
-                DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-
-            case ID_ARRANGEWINDOWS_4SQUARES:
-                TileWindows(hWnd, MDITILE_HORIZONTAL | MDITILE_VERTICAL, NULL, 0, NULL);
-                break;
-
-            default:
-                return DefWindowProc(hWnd, message, wParam, lParam);
-            }
-        }
-        break;
-    case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            EndPaint(hWnd, &ps);
-        }
-        break;
-    case WM_DESTROY:
-        PostQuitMessage(0);
-        break;
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-    return 0;
+	return TRUE;
 }
 
-INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+int CEditorApp::ExitInstance()
 {
-    UNREFERENCED_PARAMETER(lParam);
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
+	gRenderThread->SuspendThread();	
+	delete gRenderThread;
+	gRenderThread = nullptr;
 
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
+	//Destroying Engine bits.
+	if (m_BennettWindowObject)
+	{
+		Bennett::Window::Destroy(m_BennettWindowObject);
+		m_BennettWindowObject = nullptr;
+	}
+
+	//TODO: handle additional resources you may have added
+	AfxOleTerm(FALSE);
+
+	return CWinApp::ExitInstance();
+}
+
+
+// App command to run the dialog
+void CEditorApp::OnAppAbout()
+{
+	CAboutDlg aboutDlg;
+	aboutDlg.DoModal();
+}
+
+void CEditorApp::OnFileNew()
+{
+	if (m_ScriptEditorDocTemplate)
+	{
+		m_ScriptEditorDocTemplate->OpenDocumentFile(NULL);
+	}
 }
