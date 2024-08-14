@@ -16,10 +16,7 @@ namespace Bennett
 
 	Buffer::~Buffer()
 	{
-		if (m_Exists)
-		{
-			Destroy(*this);
-		}
+		assert(m_Exists == false);
 	}
 
 	VkBuffer& Buffer::Object()

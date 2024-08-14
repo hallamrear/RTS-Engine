@@ -34,6 +34,7 @@ namespace Bennett
 		const bool& IsCursorLocked() const;
 		void ToggleCursorLock();
 
+		glm::vec2 GetMousePositionNDC() const;
 		glm::vec2 GetMousePosition() const;
 		void SetMousePositionToCentre() const;
 		bool GetKeyState(int key);

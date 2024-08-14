@@ -4,15 +4,16 @@
 #include <System/InputMonitor.h>
 #include <System/ServiceLocator.h>
 #include <Rendering/Window.h>
+#include <Collision/Collider/Ray.h>
 
 namespace Bennett
 {
 	Camera::Camera() : m_Controller(CameraController::Get())
 	{
 		m_MouseLookEnabled = true;
-		m_ForwardVector = glm::vec3(0.0f, 0.0f, 1.0f);
-		m_RightVector   = glm::vec3(1.0f, 0.0f, 0.0f);
-		m_UpVector      = glm::vec3(0.0f, 1.0f, 0.0f);
+		m_ForwardVector = BENNETT_FORWARD_VECTOR;;
+		m_RightVector   = BENNETT_RIGHT_VECTOR;
+		m_UpVector      = BENNETT_UP_VECTOR;
 		m_NearPlaneDistance = 0.1f;
 		m_FarPlaneDistance = 10000.0f;
 		m_AspectRatio = (1280.0f / 720.0f);
@@ -83,6 +84,29 @@ namespace Bennett
 		{
 			Log(LOG_STATUS::LOG_SAFE, "Camera Rotation: %f, %f, %f\n", m_Rotation.x, m_Rotation.y, m_Rotation.z);
 		}
+	}
+
+	Ray Camera::Raycast(const glm::vec2& ndcClickCoords)
+	{
+		//Using mouse position in NDC coordinates.
+		//Want the ray to be pointing fowards (down the Z axis) and want to ensure its treated as a ray.
+		glm::vec4 projectionSpaceRay = glm::vec4(ndcClickCoords.x, ndcClickCoords.y, -1.0f, 1.0f);
+
+		//Reverse from projection space back into view space by using the inverse projection.
+		//Only need to unproject the X and Y so we redefine the ray looking forwards and set W to 0.0 to treat as a point.
+		glm::vec4 viewSpaceRay = glm::inverse(GetProjectionMatrix()) * projectionSpaceRay;
+		viewSpaceRay.z = -1.0f;
+		viewSpaceRay.w = 0.0f;
+
+		glm::vec4 worldSpaceRay = glm::vec4((glm::inverse(GetViewMatrix()) * viewSpaceRay));
+		glm::vec3 direction = glm::normalize(glm::vec3(worldSpaceRay));
+	
+		return Ray(GetPosition(), direction);
+	}
+
+	Ray Camera::Raycast()
+	{
+		return Raycast(glm::vec2(0.0));
 	}
 
 	const glm::vec3& Camera::GetRotation() const

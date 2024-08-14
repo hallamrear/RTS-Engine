@@ -64,6 +64,32 @@ namespace Bennett
 			return GJK::CheckCollision(colliderA, colliderB, manifold);
 		};
 
+		
+		
+		/// <summary>
+		/// Calculates whether a ray intersects a plane, and if so, returns the time along the ray when it does.
+		/// Assumes that all directions are already normalised.
+		/// </summary>
+		/// <param name="planeOrigin">The centre of the plane.</param>
+		/// <param name="planeNormal">The upward face normal of the plane.</param>
+		/// <param name="ray">The ray to test for intersection.</param>
+		/// <param name="timeOfIntersection">The distance along the ray in which it crosses the plane.</param>
+		/// <returns>Whether the ray has intersected the plane.</returns>
+		inline static bool RayPlaneIntersection(const glm::vec3& planeOrigin, const glm::vec3& planeNormal, const Ray& ray, float& timeOfIntersection)
+		{
+			timeOfIntersection = 0.0f;
+
+			float dot = glm::dot(planeNormal, ray.GetDirection());
+			if (abs(dot) > 0.0001f)
+			{
+				glm::vec3 lineToPlane = planeOrigin - ray.GetStart();
+				timeOfIntersection = glm::dot(lineToPlane, planeNormal) / dot;
+				return (timeOfIntersection >= 0);
+			}
+
+			return false;
+		};
+
 		/*
 		/// <summary>
 		/// Tests whether a point is inside a sphere.

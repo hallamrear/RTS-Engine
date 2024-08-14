@@ -7,6 +7,7 @@ namespace Bennett
 {
 	class CameraController;
 	class InputMonitor;
+	class Ray;
 
 	class BENNETT_ENGINE Camera
 	{
@@ -67,5 +68,18 @@ namespace Bennett
 		virtual void Update(const float& deltaTime) = 0;
 		void Translate(const glm::vec3& offset);
 		void Rotate(const glm::vec3& offset);
+
+		/// <summary>
+		/// Raycasts outward from the camera returning a ray in worldspace.
+		/// </summary>
+		/// <param name="ndcClickCoords">The position of the raycast in Normalised Device Coordinates.</param>
+		/// <returns>Worldspace Ray from the camera's position point.</returns>
+		Ray Raycast(const glm::vec2& ndcClickCoords);
+		
+		/// <summary>
+		/// Raycasts outward from the camera returning a ray in worldspace. This is the same as Raycast(NDC) when clicking the centre of the viewport.
+		/// </summary>
+		/// <returns>Worldspace Ray from the camera's position point in the camera's forward direction.</returns>
+		Ray Raycast();
 	};
 }

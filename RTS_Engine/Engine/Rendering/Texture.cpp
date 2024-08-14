@@ -237,6 +237,11 @@ namespace Bennett
 		vkDestroyImage(renderer.GetDevice(), texture.m_Image, nullptr);
 		vkFreeMemory(renderer.GetDevice(), texture.m_ImageMemory, nullptr);
 		vkDestroyImageView(renderer.GetDevice(), texture.m_ImageView, nullptr);
+		texture.m_Image = VK_NULL_HANDLE;
+		texture.m_ImageMemory = VK_NULL_HANDLE;
+		texture.m_ImageView = VK_NULL_HANDLE;
+		texture.m_Width = 0;
+		texture.m_Height = 0;
 		texture.m_IsLoaded = false;
 	}
 }

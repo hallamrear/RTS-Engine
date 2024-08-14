@@ -178,6 +178,26 @@ namespace Bennett
 		}
 	}
 
+	glm::vec2 InputMonitor::GetMousePositionNDC() const
+	{
+		glm::vec2 position = glm::vec2();
+		if (!m_IsAttached)
+		{
+			Log(LOG_MINIMAL, "Tried to get mouse position but InputMonitor has not been attached to a window. Returning 0,0.\n");
+		}
+		else
+		{
+			position = GetMousePosition();
+			glm::vec2 size = m_AttachedWindow->GetSize();
+			float ndc_x = position.x / size.x * 2 - 1;
+			float ndc_y = position.y / size.y * 2 - 1;
+			position = glm::vec2(ndc_x, ndc_y);
+		}
+
+		return position;
+	}
+
+
 	glm::vec2 InputMonitor::GetMousePosition() const
 	{
 		glm::vec2 position = glm::vec2();
