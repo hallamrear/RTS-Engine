@@ -27,6 +27,13 @@ namespace Bennett
 	private:
 		friend class Texture;
 
+		//Objects for debug circle data.
+		CustomPipeline m_DebugCirclePipeline;
+		VertexBuffer m_DebugCircleVertexBuffer;
+		static std::vector<Vertex> m_DebugCircleList;
+		static int m_CurrentDebugCircleCount;
+
+		//Objects for debug line data.
 		CustomPipeline m_DebugLinePipeline;
 		VertexBuffer m_DebugLineVertexBuffer;
 		static std::vector<Vertex> m_DebugLineList;
@@ -370,6 +377,7 @@ namespace Bennett
 		void CleanupFence(VkDevice& device, VkFence& fence);
 
 		void DrawAllPendingLines();
+		void DrawAllPendingCircles();
 
 	public:
 		static UniformBufferObject UniformMatrixBuffer;
@@ -407,6 +415,7 @@ namespace Bennett
 		void SetWireframeGraphicsPipeline() const;
 		void WaitForRendererIdle();
 
+		void DrawDebugCircle(const glm::vec3& origin, const float& radius = 0.5f, const glm::vec3& normal = BENNETT_UP_VECTOR);
 		void DrawDebugLine(const glm::vec3& start, const glm::vec3& end) const;
 		void DrawDebugLine(const glm::vec3& start, const glm::vec3& dir, const float& length) const;
 		const Texture& GetDebugTexture() const;

@@ -268,6 +268,44 @@ namespace Bennett
 
 #pragma endregion
         
+#pragma region 2D Unit Circle
+
+        float radius = 0.5f;
+        int segmentCount = 16;
+        float angle = 360.0f / segmentCount;
+
+        int triangleCount = segmentCount - 2;
+
+        Vertex vertex;
+        //Vertices
+        for (int i = 0; i < segmentCount; i++)
+        {
+            float currentAngle = angle * i;
+            float x = radius * sin(glm::radians(currentAngle));
+            float y = 0.0f;
+            float z = radius * cos(glm::radians(currentAngle));
+
+            vertex.Position = glm::vec3(x, y, z);
+            vertex.Normal = glm::vec3(0.0f, 1.0f, 0.0f);
+            vertex.UV = glm::vec2(0.0f, 0.0f);
+            vertex.Colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+            vertices.push_back(vertex);
+        }
+
+        //Indices
+        for (int i = 0; i < triangleCount; i++)
+        {
+            indices.push_back(0);
+            indices.push_back(i + 1);
+            indices.push_back(i + 2);
+        }
+        
+        am.CreateModel("2D_Unit_Circle", vertices, indices);
+        vertices.clear();
+        indices.clear();
+
+
+#pragma endregion
 
         /*
         float radius = 0.5f;

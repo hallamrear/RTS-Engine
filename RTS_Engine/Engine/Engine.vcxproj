@@ -132,7 +132,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="Camera\CameraController.cpp" />
     <ClCompile Include="Collision\Collider\Collider.cpp" />
-    <ClCompile Include="Collision\Collision.cpp" />
+    <ClCompile Include="Collision\CollisionDetection.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="System\Engine.cpp" />
     <ClCompile Include="World\WorldChunk.cpp" />
@@ -211,7 +211,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="Collision\Collider\Collider.h" />
-    <ClInclude Include="Collision\Collision.h" />
+    <ClInclude Include="Collision\CollisionDetection.h" />
     <ClInclude Include="System\Engine.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>

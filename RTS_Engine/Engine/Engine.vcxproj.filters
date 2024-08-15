@@ -111,7 +111,7 @@
     <ClCompile Include="Collision\OctreeNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Collision.cpp">
+    <ClCompile Include="Collision\CollisionDetection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Collision\Collider\Collider.cpp">
@@ -188,7 +188,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Collision\Collision.h">
+    <ClInclude Include="Collision\CollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="Collision\Octree.h">

@@ -1,5 +1,5 @@
 #include <BennettPCH.h>
-#include <Collision/Collision.h>
+#include <Collision/CollisionDetection.h>
 #include <Defines/HelperFunctions.h>
 
 using namespace Bennett::Helper;

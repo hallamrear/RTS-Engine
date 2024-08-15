@@ -20,6 +20,9 @@ namespace Bennett
 	const CustomPipeline* Renderer::m_CurrentPipeline = nullptr;
 	const CustomPipeline* Renderer::m_PendingPipeline = nullptr;
 
+	std::vector<Vertex> Renderer::m_DebugCircleList = std::vector<Vertex>();
+	int Renderer::m_CurrentDebugCircleCount = 0;
+
 	std::vector<Vertex> Renderer::m_DebugLineList = std::vector<Vertex>();
 	int Renderer::m_CurrentDebugLineCount = 0;
 
@@ -109,6 +112,7 @@ namespace Bennett
 		}
 		Texture::Create(*m_DebugTexture, ServiceLocator::GetResourceFolderLocation() + "Required/debug.png");
 
+		//Debug Line objects
 		CustomPipelineDetails lineRenderingPipelineDetails{};
 		lineRenderingPipelineDetails.Cullmode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
 		lineRenderingPipelineDetails.PolygonMode = VkPolygonMode::VK_POLYGON_MODE_LINE;
@@ -120,6 +124,7 @@ namespace Bennett
 			Log(LOG_SERIOUS, "Failed to create debug line rendering graphics custom pipeline.\n");
 			return false;
 		}
+
 
 		m_DebugLineList = std::vector<Vertex>();
 		m_DebugLineList.resize(MAX_DEBUG_LINE_COUNT * 2);
@@ -135,6 +140,42 @@ namespace Bennett
 		{
 			return false;
 		}
+
+
+		//Debug circle objects
+
+		CustomPipelineDetails circleRenderingPipelineDetails{};
+		circleRenderingPipelineDetails.Cullmode = VkCullModeFlagBits::VK_CULL_MODE_NONE;
+		circleRenderingPipelineDetails.PolygonMode = VkPolygonMode::VK_POLYGON_MODE_LINE;
+		circleRenderingPipelineDetails.Topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
+
+		pipelineSuccessful = CreateCustomPipeline(m_DebugCirclePipeline, circleRenderingPipelineDetails);
+		if (pipelineSuccessful != true)
+		{
+			Log(LOG_SERIOUS, "Failed to create debug circle rendering graphics custom pipeline.\n");
+			return false;
+		}
+
+		m_DebugCircleList = std::vector<Vertex>();
+		m_DebugCircleList.resize(MAX_DEBUG_CIRCLE_COUNT * DEBUG_CIRCLE_POINT_COUNT);
+		m_CurrentDebugCircleCount = 0;
+
+		VkBufferCreateInfo circleBufferInfo{};
+		circleBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+		circleBufferInfo.size = sizeof(Vertex) * MAX_DEBUG_CIRCLE_COUNT * DEBUG_CIRCLE_POINT_COUNT;
+		circleBufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+		circleBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		if (VertexBuffer::Create(m_DebugCircleVertexBuffer, circleBufferInfo, (void*)m_DebugCircleList.data(), m_DebugCircleList.size()) == false)
+		{
+			return false;
+		}
+
+
+
+
+
+
 
 		return true;
 	}
@@ -387,9 +428,41 @@ namespace Bennett
 		}
 	}
 
+	void Renderer::DrawAllPendingCircles()
+	{
+		if (m_CurrentDebugCircleCount > 0)
+		{
+			VkCommandBuffer debugCircleCommandBuffer = BeginSingleTimeCommands();
+			//Update line list vertex buffer with pending lines.
+			vkCmdUpdateBuffer(
+				debugCircleCommandBuffer,
+				m_DebugCircleVertexBuffer.Object(),
+				0,
+				(sizeof(Vertex) * m_CurrentDebugCircleCount * DEBUG_CIRCLE_POINT_COUNT),
+				m_DebugCircleList.data());
+
+			EndSingleTimeCommands(debugCircleCommandBuffer);
+
+			//Draw all.
+			const CustomPipeline& tempPipeline = *m_CurrentPipeline;
+			SetCustomGraphicsPipeline(m_DebugCirclePipeline);
+			m_DebugCircleVertexBuffer.Bind();
+			PushConstants.ModelMatrix = glm::mat4(1.0f);
+			UpdatePushConstants();
+			PushDescriptorSet(m_DebugTexture);
+			UpdateUniformBuffers();
+			vkCmdDraw(GetCommandBuffer(), m_CurrentDebugCircleCount * DEBUG_CIRCLE_POINT_COUNT, 1, 0, 0);
+			SetCustomGraphicsPipeline(tempPipeline);
+
+			//Reset the memory index.
+			m_CurrentDebugCircleCount = 0;
+		}
+	}
+
 	void Renderer::EndFrame()
 	{
 		DrawAllPendingLines();
+		DrawAllPendingCircles();
 
 		EndRenderPass();
 
@@ -655,6 +728,33 @@ namespace Bennett
 	{
 		vkDestroyFence(device, fence, nullptr);
 		fence = VK_NULL_HANDLE;
+	}
+
+	void Renderer::DrawDebugCircle(const glm::vec3& origin, const float& radius, const glm::vec3& normal)
+	{
+		if (m_CurrentDebugCircleCount == MAX_DEBUG_CIRCLE_COUNT)
+		{
+			Log(LOG_MINIMAL, "Trying to draw too many debug circles in one frame. Max is 100.\n");
+			return;
+		}
+
+		float angle = 360.0f / DEBUG_CIRCLE_POINT_COUNT;
+		for (int i = 0; i < DEBUG_CIRCLE_POINT_COUNT; i++)
+		{
+			float currentAngle = angle * i;
+			glm::vec3 position = glm::vec3(radius * cos(glm::radians(currentAngle)), 0.0f, radius * sin(glm::radians(currentAngle)));
+
+			if (normal != BENNETT_UP_VECTOR)
+			{
+				//circlePoints[i] = glm::mat4(1.0f) * glm::rotate() * glm::vec4(circlePoints[i], 1.0f);
+			}
+
+			m_DebugCircleList[(m_CurrentDebugCircleCount * DEBUG_CIRCLE_POINT_COUNT) + i] = origin + position;
+		}
+
+		DrawDebugLine(origin, normal, 10.0f);
+
+		m_CurrentDebugCircleCount++;
 	}
 
 	void Renderer::DrawDebugLine(const glm::vec3& start, const glm::vec3& end) const

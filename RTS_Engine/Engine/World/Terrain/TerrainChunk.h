@@ -10,7 +10,7 @@ namespace Bennett
 
 	constexpr int ChunkCellWidth = 16;
 	constexpr int ChunkCellCount = (ChunkCellWidth * ChunkCellWidth);
-	constexpr float ChunkCellHeightStep = 2.0f;
+	constexpr float ChunkCellHeightStep = 0.0f;
 
 	class BENNETT_ENGINE TerrainChunk
 	{

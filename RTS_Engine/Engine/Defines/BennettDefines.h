@@ -23,6 +23,8 @@
 
 //Renderer Defines
 #define MAX_DEBUG_LINE_COUNT 100
+#define MAX_DEBUG_CIRCLE_COUNT 100
+#define DEBUG_CIRCLE_POINT_COUNT 12
 
 //Custom Defines
 #define BENNETT_ENGINE __declspec(dllexport)

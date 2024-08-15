@@ -5,7 +5,7 @@
 #include <Collision/Collider/AABBCollider.h>
 #include <Collision/Collider/Ray.h>
 #include <Collision/Collider/SphereCollider.h>
-#include <Collision/Collision.h>
+#include <Collision/CollisionDetection.h>
 #include <Rendering/Vertex.h>
 #include <Rendering/Window.h>
 #include <System/InputMonitor.h>
@@ -85,10 +85,10 @@ bool Game::Initialise()
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
     //ground = GetWorld().SpawnEntity("ChunkLoader");
-    ground = GetWorld().SpawnTESTEntity("HeightTester", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3());
+    ground = GetWorld().SpawnEntity("HeightTester", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3());
     ground->SetModel(am.GetModel("1x1_Cube"));
 
-    InitTestTerrainScene();
+    //InitTestTerrainScene();
     //InitTestOctreeScene();
     InitTestEntitiesScene();
   
@@ -116,15 +116,19 @@ Entity* car = nullptr;
 void Game::InitTestEntitiesScene()
 {
     AssetManager& am = ServiceLocator::GetAssetManager();
-    ground = GetWorld().SpawnEntity("Floor");
-    ground->SetModel(am.GetModel("1x1_Cube"));
-    ground->GetTransform().SetScale(glm::vec3(20.0f, 1.0f, 20.0f));
-    ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
-    ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+    //ground = GetWorld().SpawnEntity("Floor");
+    //ground->SetModel(am.GetModel("1x1_Cube"));
+    //ground->GetTransform().SetScale(glm::vec3(20.0f, 1.0f, 20.0f));
+    //ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
+    //ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 
-    car = GetWorld().SpawnTESTEntity("Car", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f));
-    car->SetModel(am.GetModel("Car3.gltf"));
-    car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+    //car = GetWorld().SpawnTESTEntity("Car", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f));
+    //car->SetModel(am.GetModel("Car3.gltf"));
+    //car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+
+    car = GetWorld().SpawnTESTEntity("Car", glm::vec3(5.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f));
+    //car->SetModel(am.GetModel("2D_Unit_Circle"));
+    //car->SetTexture(am.GetTexture("red"));
 }
 
 void Game::InitTestOctreeScene()
@@ -188,9 +192,9 @@ void Game::RunGameLoop()
 
         //GetWorld().GetEntity("ChunkLoader")->GetTransform().SetPosition(GetCameraController().GetCurrentCamera().GetPosition());
 
-        glm::vec3 pos = GetWorld().GetEntity("HeightTester")->GetTransform().GetPosition();
-        pos.y = GetWorld().GetTerrainHeight(pos);
-        GetWorld().GetEntity("HeightTester")->GetTransform().SetPosition(pos);
+        //glm::vec3 pos = GetWorld().GetEntity("HeightTester")->GetTransform().GetPosition();
+        //pos.y = GetWorld().GetTerrainHeight(pos);
+        //GetWorld().GetEntity("HeightTester")->GetTransform().SetPosition(pos);
 
         if (inputMonitor->GetKeyState(BENNETT_MOUSE_LEFT))
         {
@@ -218,7 +222,7 @@ void Game::RunGameLoop()
         {
             pressedLast = false;
         }
-                              
+                         
         //if (ground->GetCollider() != nullptr && car->GetCollider() != nullptr)
         //{
         //    details.Depth = 0.0f;

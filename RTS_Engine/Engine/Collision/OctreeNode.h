@@ -3,7 +3,7 @@
 #include <World/Entity.h>
 #include <System/ServiceLocator.h>
 #include <System/Assets/AssetManager.h>
-#include <Collision/Collision.h>
+#include <Collision/CollisionDetection.h>
 #include <Collision/Collider/AABBCollider.h>
 
 #define OCTREE_CHILD_NODE_COUNT 8
