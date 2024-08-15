@@ -2,10 +2,10 @@
 #include "Game.h"
 #include <chrono>
 #include <array>
-#include <Collision/Collider/AABBCollider.h>
-#include <Collision/Collider/Ray.h>
-#include <Collision/Collider/SphereCollider.h>
-#include <Collision/CollisionDetection.h>
+#include <Physics/Collision/Collider/AABBCollider.h>
+#include <Physics/Collision/Collider/Ray.h>
+#include <Physics/Collision/Collider/SphereCollider.h>
+#include <Physics/Collision/CollisionDetection.h>
 #include <Rendering/Vertex.h>
 #include <Rendering/Window.h>
 #include <System/InputMonitor.h>
@@ -14,6 +14,7 @@
 #include <World/Entity/Entity.h>
 #include <System/Transform.h>
 #include <World/Entity/MoveableTestEntity.h>
+#include <World/WorldChunk.h>
 
 using namespace Bennett;
 
@@ -122,9 +123,9 @@ void Game::InitTestEntitiesScene()
     //ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
     //ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 
-    //car = GetWorld().SpawnTESTEntity("Car", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f));
-    //car->SetModel(am.GetModel("Car3.gltf"));
-    //car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+    car = GetWorld().SpawnTESTEntity("Car", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f));
+    car->SetModel(am.GetModel("Car3.gltf"));
+    car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 
     car = GetWorld().SpawnTESTEntity("Car", glm::vec3(5.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f));
     //car->SetModel(am.GetModel("2D_Unit_Circle"));
@@ -210,6 +211,20 @@ void Game::RunGameLoop()
                 {
                     end = start + (ray.GetDirection() * t);
                     lines.push_back(std::make_pair(start, end));
+
+                    WorldChunk* chunk = GetWorld().GetWorldChunk(end);
+
+                    if (chunk)
+                    {
+                        std::vector<const Entity*>& entities = chunk->GetAllEntities();
+
+                        if (entities.size() > 0)
+                        {
+                            GetWorld().GetEntity(entities[0]->GetName())->GetTransform().SetPosition(end);
+                        }
+
+                    }
+
 
                     glm::vec3 pos = end;
                     pos.y = GetWorld().GetTerrainHeight(end);

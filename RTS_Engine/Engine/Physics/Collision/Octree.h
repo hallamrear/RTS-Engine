@@ -1,5 +1,5 @@
 #pragma once
-#include <Collision/OctreeNode.h>
+#include <Physics/Collision/OctreeNode.h>
 
 namespace Bennett
 {

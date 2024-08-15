@@ -1,8 +1,8 @@
 #pragma once
-#include <Collision/CollisionStructures.h>
-#include <Collision/Collider/AABBCollider.h>
-#include <Collision/Collider/SphereCollider.h>
-#include <Collision/Collider/Ray.h>
+#include <Physics/Collision/CollisionStructures.h>
+#include <Physics/Collision/Collider/AABBCollider.h>
+#include <Physics/Collision/Collider/SphereCollider.h>
+#include <Physics/Collision/Collider/Ray.h>
 #include <glm/fwd.hpp>
 #include <System/Logger.h>
 

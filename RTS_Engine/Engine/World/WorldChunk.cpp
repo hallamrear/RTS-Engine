@@ -40,6 +40,11 @@ namespace Bennett
 		}
 	}
 
+	std::vector<const Entity*>& WorldChunk::GetAllEntities()
+	{
+		return m_Entities;
+	}
+
 	void WorldChunk::RemoveAllEntities()
 	{
 		m_Entities.clear();

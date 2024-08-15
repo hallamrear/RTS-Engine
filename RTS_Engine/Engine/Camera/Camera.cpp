@@ -4,7 +4,7 @@
 #include <System/InputMonitor.h>
 #include <System/ServiceLocator.h>
 #include <Rendering/Window.h>
-#include <Collision/Collider/Ray.h>
+#include <Physics/Collision/Collider/Ray.h>
 
 namespace Bennett
 {

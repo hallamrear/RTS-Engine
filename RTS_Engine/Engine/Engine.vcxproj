@@ -106,9 +106,9 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Collision\Collider\AABBCollider.cpp" />
-    <ClCompile Include="Collision\Collider\OBBCollider.cpp" />
-    <ClCompile Include="Collision\CollisionStructures.cpp" />
+    <ClCompile Include="Physics\Collision\Collider\AABBCollider.cpp" />
+    <ClCompile Include="Physics\Collision\Collider\OBBCollider.cpp" />
+    <ClCompile Include="Physics\Collision\CollisionStructures.cpp" />
     <ClCompile Include="Physics\RigidbodyPhysics.cpp" />
     <ClCompile Include="System\Transform.cpp" />
     <ClCompile Include="Rendering\CustomPipelineObject.cpp" />
@@ -131,8 +131,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     </ClCompile>
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="Camera\CameraController.cpp" />
-    <ClCompile Include="Collision\Collider\Collider.cpp" />
-    <ClCompile Include="Collision\CollisionDetection.cpp" />
+    <ClCompile Include="Physics\Collision\Collider\Collider.cpp" />
+    <ClCompile Include="Physics\Collision\CollisionDetection.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="System\Engine.cpp" />
     <ClCompile Include="World\WorldChunk.cpp" />
@@ -144,19 +144,19 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="Defines\MarchingCubesTriangulationTable.cpp" />
     <ClCompile Include="System\Assets\ModelLoader.cpp" />
     <ClCompile Include="World\Entity\MoveableTestEntity.cpp" />
-    <ClCompile Include="Collision\Octree.cpp">
+    <ClCompile Include="Physics\Collision\Octree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Collision\OctreeNode.cpp">
+    <ClCompile Include="Physics\Collision\OctreeNode.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Defines\PrimativeModelCreation.cpp" />
-    <ClCompile Include="Collision\Collider\Ray.cpp" />
+    <ClCompile Include="Physics\Collision\Collider\Ray.cpp" />
     <ClCompile Include="Camera\ScriptedCamera.cpp" />
     <ClCompile Include="System\ServiceLocator.cpp" />
-    <ClCompile Include="Collision\Collider\SphereCollider.cpp" />
+    <ClCompile Include="Physics\Collision\Collider\SphereCollider.cpp" />
     <ClCompile Include="Camera\StandardCamera.cpp" />
     <ClCompile Include="System\Assets\TextureLoader.cpp" />
     <ClCompile Include="External\tinyxml2.cpp" />
@@ -164,12 +164,12 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Collision\Collider\AABBCollider.h" />
-    <ClInclude Include="Collision\CollisionStructures.h" />
+    <ClInclude Include="Physics\Collision\Collider\AABBCollider.h" />
+    <ClInclude Include="Physics\Collision\CollisionStructures.h" />
     <ClInclude Include="Defines\HelperFunctions.h" />
     <ClInclude Include="External\PerlinNoise.hpp" />
     <ClInclude Include="External\tiny_gltf.h" />
-    <ClInclude Include="Collision\Collider\OBBCollider.h" />
+    <ClInclude Include="Physics\Collision\Collider\OBBCollider.h" />
     <ClInclude Include="Physics\RigidbodyPhysics.h" />
     <ClInclude Include="System\Transform.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />
@@ -210,8 +210,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="Collision\Collider\Collider.h" />
-    <ClInclude Include="Collision\CollisionDetection.h" />
+    <ClInclude Include="Physics\Collision\Collider\Collider.h" />
+    <ClInclude Include="Physics\Collision\CollisionDetection.h" />
     <ClInclude Include="System\Engine.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
@@ -253,16 +253,16 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
     <ClInclude Include="World\Entity\MoveableTestEntity.h" />
-    <ClInclude Include="Collision\Octree.h">
+    <ClInclude Include="Physics\Collision\Octree.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
-    <ClInclude Include="Collision\OctreeNode.h">
+    <ClInclude Include="Physics\Collision\OctreeNode.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="Defines\PrimativeModelCreation.h" />
-    <ClInclude Include="Collision\Collider\Ray.h" />
+    <ClInclude Include="Physics\Collision\Collider\Ray.h" />
     <ClInclude Include="External\resource.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
@@ -275,7 +275,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="Collision\Collider\SphereCollider.h" />
+    <ClInclude Include="Physics\Collision\Collider\SphereCollider.h" />
     <ClInclude Include="Camera\StandardCamera.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>

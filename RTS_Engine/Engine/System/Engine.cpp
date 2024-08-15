@@ -8,7 +8,7 @@
 #include <Defines/PrimativeModelCreation.h>
 #include <Rendering/Model.h>
 #include <World/World.h>
-#include <Collision/Octree.h>
+#include <Physics/Collision/Octree.h>
 #include <Defines/DebugDefines.h>
 
 namespace Bennett

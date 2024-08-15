@@ -1,5 +1,5 @@
 #pragma once
-#include <Collision/Collider/Collider.h>
+#include <Physics/Collision/Collider/Collider.h>
 
 namespace Bennett
 {

@@ -28,6 +28,7 @@ namespace Bennett
 	public:
 		~WorldChunk();
 
+		std::vector<const Entity*>& GetAllEntities();
 		void RemoveAllEntities();
 		void AddEntity(const Entity& entity);
 		void RemoveEntity(const Entity& entity);

@@ -1,7 +1,7 @@
 #include <BennettPCH.h>
 #include <World/Entity/MoveableTestEntity.h>
 #include <System/InputMonitor.h>
-#include <Collision/Collider/Collider.h>
+#include <Physics/Collision/Collider/Collider.h>
 #include <Rendering/Renderer.h>
 
 namespace Bennett

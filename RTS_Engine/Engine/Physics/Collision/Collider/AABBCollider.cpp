@@ -1,7 +1,7 @@
 #include <BennettPCH.h>
 #include <Rendering/Renderer.h>
 #include <glm/gtx/quaternion.hpp>
-#include <Collision/Collider/AABBCollider.h>
+#include <Physics/Collision/Collider/AABBCollider.h>
 #include <Rendering/Model.h>
 
 namespace Bennett

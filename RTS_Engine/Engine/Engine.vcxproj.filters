@@ -105,28 +105,28 @@
     <ClCompile Include="Defines\PrimativeModelCreation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Octree.cpp">
+    <ClCompile Include="Physics\Collision\Octree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\OctreeNode.cpp">
+    <ClCompile Include="Physics\Collision\OctreeNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\CollisionDetection.cpp">
+    <ClCompile Include="Physics\Collision\CollisionDetection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Collider\Collider.cpp">
+    <ClCompile Include="Physics\Collision\Collider\Collider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Collider\Ray.cpp">
+    <ClCompile Include="Physics\Collision\Collider\Ray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Collider\SphereCollider.cpp">
+    <ClCompile Include="Physics\Collision\Collider\SphereCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="World\Entity\MoveableTestEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Collider\AABBCollider.cpp">
+    <ClCompile Include="Physics\Collision\Collider\AABBCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Buffer.cpp">
@@ -171,13 +171,13 @@
     <ClCompile Include="System\Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Collider\OBBCollider.cpp">
+    <ClCompile Include="Physics\Collision\Collider\OBBCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\RigidbodyPhysics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\CollisionStructures.cpp">
+    <ClCompile Include="Physics\Collision\CollisionStructures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="World\WorldChunk.cpp">
@@ -188,13 +188,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Collision\CollisionDetection.h">
+    <ClInclude Include="Physics\Collision\CollisionDetection.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\Octree.h">
+    <ClInclude Include="Physics\Collision\Octree.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\OctreeNode.h">
+    <ClInclude Include="Physics\Collision\OctreeNode.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
     <ClInclude Include="Camera\Camera.h">
@@ -278,19 +278,19 @@
     <ClInclude Include="System\Assets\TextureLoader.h">
       <Filter>Header Files\System\Loader</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\Collider\Collider.h">
+    <ClInclude Include="Physics\Collision\Collider\Collider.h">
       <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\Collider\SphereCollider.h">
+    <ClInclude Include="Physics\Collision\Collider\SphereCollider.h">
       <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
     <ClInclude Include="World\Entity\MoveableTestEntity.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\Collider\AABBCollider.h">
+    <ClInclude Include="Physics\Collision\Collider\AABBCollider.h">
       <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\Collider\Ray.h">
+    <ClInclude Include="Physics\Collision\Collider\Ray.h">
       <Filter>Header Files\Collision\Colliders</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Buffer.h">
@@ -341,7 +341,7 @@
     <ClInclude Include="System\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\Collider\OBBCollider.h">
+    <ClInclude Include="Physics\Collision\Collider\OBBCollider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Defines\HelperFunctions.h">
@@ -350,7 +350,7 @@
     <ClInclude Include="Physics\RigidbodyPhysics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Collision\CollisionStructures.h">
+    <ClInclude Include="Physics\Collision\CollisionStructures.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="World\WorldChunk.h">

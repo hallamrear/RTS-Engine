@@ -102,6 +102,11 @@ namespace Bennett
         return glm::ivec2(floorf(position.x / WorldChunkSize), floorf(position.z / WorldChunkSize));
     }
 
+    WorldChunk* World::GetWorldChunk(const glm::vec3& position) const
+    {
+        return GetWorldChunk(GetChunkIDOfPosition(position));
+    }
+
     WorldChunk* World::GetWorldChunk(const glm::ivec2& id) const
     {
         auto itr = m_SpatialGrid.find(id);

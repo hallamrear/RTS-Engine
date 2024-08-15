@@ -1,5 +1,5 @@
 #include <BennettPCH.h>
-#include <Collision/Collider/SphereCollider.h>
+#include <Physics/Collision/Collider/SphereCollider.h>
 #include <Rendering/Model.h>
 
 namespace Bennett

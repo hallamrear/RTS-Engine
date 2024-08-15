@@ -1,6 +1,6 @@
 #pragma once
 #include <unordered_map>
-#include <Collision/Octree.h>
+#include <Physics/Collision/Octree.h>
 
 namespace Bennett
 {
@@ -30,6 +30,7 @@ namespace Bennett
 		World();
 		~World();
 
+		WorldChunk* GetWorldChunk(const glm::vec3& position) const;
 		WorldChunk* GetWorldChunk(const glm::ivec2& id) const;
 		Entity* SpawnEntity(const std::string& name);
 		Entity* SpawnEntity(const std::string& name, glm::vec3 scale, glm::vec3 position, glm::vec3 rotation);

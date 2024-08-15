@@ -1,9 +1,9 @@
 #include <BennettPCH.h>
 #include <World/Entity/Entity.h>
-#include <Collision/Collider/Collider.h>
-#include <Collision/Collider/SphereCollider.h>
-#include <Collision/Collider/AABBCollider.h>
-#include <Collision/Collider/OBBCollider.h>
+#include <Physics/Collision/Collider/Collider.h>
+#include <Physics/Collision/Collider/SphereCollider.h>
+#include <Physics/Collision/Collider/AABBCollider.h>
+#include <Physics/Collision/Collider/OBBCollider.h>
 #include <System/InputMonitor.h>
 #include <System/Assets/AssetManager.h>
 #include <Defines/BennettInputDefines.h>
@@ -21,6 +21,7 @@ namespace Bennett
 		m_Collider = nullptr;
 		m_InputMonitor = nullptr;
 		m_Model = nullptr;
+		m_Texture = nullptr;
 		m_ID = m_EntityIDCounter;
 		m_EntityIDCounter++;
 	}
@@ -31,6 +32,8 @@ namespace Bennett
 		m_Transform = transform;
 		m_Collider = nullptr;
 		m_InputMonitor = nullptr;
+		m_Model = nullptr;
+		m_Texture = nullptr;
 		m_ID = m_EntityIDCounter;
 		m_EntityIDCounter++;
 	}

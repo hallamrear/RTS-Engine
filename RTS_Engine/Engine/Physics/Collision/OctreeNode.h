@@ -3,8 +3,8 @@
 #include <World/Entity/Entity.h>
 #include <System/ServiceLocator.h>
 #include <System/Assets/AssetManager.h>
-#include <Collision/CollisionDetection.h>
-#include <Collision/Collider/AABBCollider.h>
+#include <Physics/Collision/CollisionDetection.h>
+#include <Physics/Collision/Collider/AABBCollider.h>
 
 #define OCTREE_CHILD_NODE_COUNT 8
 #define OCTREE_NODE_MAX_ENTITY_COUNT 8
