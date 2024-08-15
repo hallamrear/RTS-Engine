@@ -4,7 +4,7 @@
 #include <System/Assets/AssetManager.h>
 #include <World/Terrain/TerrainChunk.h>
 #include <World/WorldChunk.h>
-#include <World/Entity.h>
+#include <World/Entity/Entity.h>
 
 namespace Bennett
 {

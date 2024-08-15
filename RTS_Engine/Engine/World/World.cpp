@@ -1,10 +1,10 @@
 #include <BennettPCH.h>
 #include <Rendering/Renderer.h>
-#include <World/Entity.h>
+#include <World/Entity/Entity.h>
 #include <World/World.h>
 #include <World/WorldChunk.h>
 #include <World/Terrain/TerrainChunk.h>
-#include <World/MoveableTestEntity.h>
+#include <World/Entity/MoveableTestEntity.h>
 
 namespace Bennett
 {

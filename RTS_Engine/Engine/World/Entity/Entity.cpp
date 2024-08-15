@@ -1,5 +1,5 @@
 #include <BennettPCH.h>
-#include <World/Entity.h>
+#include <World/Entity/Entity.h>
 #include <Collision/Collider/Collider.h>
 #include <Collision/Collider/SphereCollider.h>
 #include <Collision/Collider/AABBCollider.h>

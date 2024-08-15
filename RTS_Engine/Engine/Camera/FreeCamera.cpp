@@ -33,17 +33,17 @@ namespace Bennett
 		if (!m_InputMonitor)
 			return;
 
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_HOME)) { m_MovementSpeed++; Log(LOG_SAFE, "Camera movement speed: %f", m_MovementSpeed); };
-		if (m_InputMonitor->GetKeyState(BENNETT_KEY_END)) { m_MovementSpeed--; Log(LOG_SAFE, "Camera movement speed: %f",  m_MovementSpeed); };
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_HOME)) { m_MovementSpeed++; Log(LOG_SAFE, "Camera movement speed: %f\n", m_MovementSpeed); };
+		if (m_InputMonitor->GetKeyState(BENNETT_KEY_END)) { m_MovementSpeed--; Log(LOG_SAFE, "Camera movement speed: %f\n",  m_MovementSpeed); };
 
 		if (m_InputMonitor->GetKeyState(BENNETT_KEY_PRIOR))
 		{ 
-			m_RotationSpeed++; Log(LOG_SAFE, "Camera rotation speed: %f", m_RotationSpeed);
+			m_RotationSpeed++; Log(LOG_SAFE, "Camera rotation speed: %f\n", m_RotationSpeed);
 		};
 
 		if (m_InputMonitor->GetKeyState(BENNETT_KEY_NEXT))
 		{ 
-			m_RotationSpeed--; Log(LOG_SAFE, "Camera rotation speed: %f", m_RotationSpeed);
+			m_RotationSpeed--; Log(LOG_SAFE, "Camera rotation speed: %f\n", m_RotationSpeed);
 		};
 
 		float scaledMovementSpeed = m_MovementSpeed * deltaTime;
@@ -84,7 +84,7 @@ namespace Bennett
 				
 				if (ENABLE_LOG_MOUSE_LOCK_MESSAGE)
 				{
-					Log(LOG_SAFE, "Mouse unlocked.");
+					Log(LOG_SAFE, "Mouse unlocked.\n");
 				}
 			}
 			else
@@ -94,7 +94,7 @@ namespace Bennett
 
 				if (ENABLE_LOG_MOUSE_LOCK_MESSAGE)
 				{
-					Log(LOG_SAFE, "Mouse locked to screen centre.");
+					Log(LOG_SAFE, "Mouse locked to screen centre.\n");
 				}
 			}
 		};

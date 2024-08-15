@@ -11,9 +11,9 @@
 #include <System/InputMonitor.h>
 #include <System/Assets/AssetManager.h>
 #include <System/ServiceLocator.h>
-#include <World/Entity.h>
+#include <World/Entity/Entity.h>
 #include <System/Transform.h>
-#include <World/MoveableTestEntity.h>
+#include <World/Entity/MoveableTestEntity.h>
 
 using namespace Bennett;
 

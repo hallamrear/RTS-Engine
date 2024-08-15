@@ -136,14 +136,14 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="System\Engine.cpp" />
     <ClCompile Include="World\WorldChunk.cpp" />
-    <ClCompile Include="World\Entity.cpp" />
+    <ClCompile Include="World\Entity\Entity.cpp" />
     <ClCompile Include="System\Manager\FileManagement.cpp" />
     <ClCompile Include="Camera\FreeCamera.cpp" />
     <ClCompile Include="System\InputMonitor.cpp" />
     <ClCompile Include="System\Saves\LevelManager.cpp" />
     <ClCompile Include="Defines\MarchingCubesTriangulationTable.cpp" />
     <ClCompile Include="System\Assets\ModelLoader.cpp" />
-    <ClCompile Include="World\MoveableTestEntity.cpp" />
+    <ClCompile Include="World\Entity\MoveableTestEntity.cpp" />
     <ClCompile Include="Collision\Octree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -218,7 +218,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     </ClInclude>
     <ClInclude Include="World\Terrain\TerrainChunk.h" />
     <ClInclude Include="World\WorldChunk.h" />
-    <ClInclude Include="World\Entity.h">
+    <ClInclude Include="World\Entity\Entity.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
@@ -252,7 +252,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="World\MoveableTestEntity.h" />
+    <ClInclude Include="World\Entity\MoveableTestEntity.h" />
     <ClInclude Include="Collision\Octree.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

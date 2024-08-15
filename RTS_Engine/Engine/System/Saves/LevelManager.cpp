@@ -1,7 +1,7 @@
 #include <BennettPCH.h>
 #include <System/Saves/LevelManager.h>
 #include <System/Assets/AssetManager.h>
-#include <World/Entity.h>
+#include <World/Entity/Entity.h>
 #include <World/World.h>
 #include <Rendering/Model.h>
 #include <External/tinyxml2.h>

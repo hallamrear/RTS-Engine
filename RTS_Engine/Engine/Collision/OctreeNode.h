@@ -1,6 +1,6 @@
 #pragma once
 #include <cmath>
-#include <World/Entity.h>
+#include <World/Entity/Entity.h>
 #include <System/ServiceLocator.h>
 #include <System/Assets/AssetManager.h>
 #include <Collision/CollisionDetection.h>
