@@ -27,8 +27,11 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
-#include <Defines/BennettInputDefines.h>
 
+#include <Defines/BennettInputDefines.h>
+#include <System/Transform.h>
+#include <World/Actor/BActor.h>
+#include <Rendering/Model.h>
 
 // CEditorApp
 
@@ -46,8 +49,6 @@ END_MESSAGE_MAP()
 
 CEditorApp::CEditorApp() noexcept
 {
-
-
 	m_BennettWindowObject = nullptr;
 	m_RenderWindowDocTemplate = nullptr;
 	m_ScriptEditorDocTemplate = nullptr;
@@ -258,8 +259,8 @@ bool CEditorApp::Initialise()
 	GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 	GetCameraController().GetCurrentCamera().SetMouseLookEnabled(false);
 	
-	GetWorld().SpawnEntity("ChunkLoader");
-	GetWorld().SpawnTESTEntity("HeightTester", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3())->SetModel(am.GetModel("1x1_Cube"));
+	GetWorld().SpawnActor("ChunkLoader", Bennett::Transform());
+	GetWorld().SpawnActor("HeightTester", Bennett::Transform())->SetModel(am.GetModel("1x1_Cube"));
 
 	m_EngineState = Bennett::ENGINE_STATE::PAUSED;
 

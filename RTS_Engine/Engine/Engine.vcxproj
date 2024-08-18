@@ -106,10 +106,13 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="World\Actor\UnitActors\TestUnit.cpp" />
+    <ClCompile Include="World\Actor\BActor.cpp" />
     <ClCompile Include="Physics\Collision\Collider\AABBCollider.cpp" />
     <ClCompile Include="Physics\Collision\Collider\OBBCollider.cpp" />
     <ClCompile Include="Physics\Collision\CollisionStructures.cpp" />
     <ClCompile Include="Physics\RigidbodyPhysics.cpp" />
+    <ClCompile Include="World\Prop\BProp.cpp" />
     <ClCompile Include="System\Transform.cpp" />
     <ClCompile Include="Rendering\CustomPipelineObject.cpp" />
     <ClCompile Include="Rendering\Buffer.cpp" />
@@ -136,14 +139,13 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="System\Engine.cpp" />
     <ClCompile Include="World\WorldChunk.cpp" />
-    <ClCompile Include="World\Entity\Entity.cpp" />
+    <ClCompile Include="World\Entity\BEntity.cpp" />
     <ClCompile Include="System\Manager\FileManagement.cpp" />
     <ClCompile Include="Camera\FreeCamera.cpp" />
     <ClCompile Include="System\InputMonitor.cpp" />
     <ClCompile Include="System\Saves\LevelManager.cpp" />
     <ClCompile Include="Defines\MarchingCubesTriangulationTable.cpp" />
     <ClCompile Include="System\Assets\ModelLoader.cpp" />
-    <ClCompile Include="World\Entity\MoveableTestEntity.cpp" />
     <ClCompile Include="Physics\Collision\Octree.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
@@ -164,6 +166,8 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="World\Actor\UnitActors\TestUnit.h" />
+    <ClInclude Include="World\Actor\BActor.h" />
     <ClInclude Include="Physics\Collision\Collider\AABBCollider.h" />
     <ClInclude Include="Physics\Collision\CollisionStructures.h" />
     <ClInclude Include="Defines\HelperFunctions.h" />
@@ -171,6 +175,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClInclude Include="External\tiny_gltf.h" />
     <ClInclude Include="Physics\Collision\Collider\OBBCollider.h" />
     <ClInclude Include="Physics\RigidbodyPhysics.h" />
+    <ClInclude Include="World\Prop\BProp.h" />
     <ClInclude Include="System\Transform.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />
     <ClInclude Include="Rendering\Buffer.h" />
@@ -218,7 +223,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     </ClInclude>
     <ClInclude Include="World\Terrain\TerrainChunk.h" />
     <ClInclude Include="World\WorldChunk.h" />
-    <ClInclude Include="World\Entity\Entity.h">
+    <ClInclude Include="World\Entity\BEntity.h">
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
@@ -252,7 +257,6 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
     </ClInclude>
-    <ClInclude Include="World\Entity\MoveableTestEntity.h" />
     <ClInclude Include="Physics\Collision\Octree.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>

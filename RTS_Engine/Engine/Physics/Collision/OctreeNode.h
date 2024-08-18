@@ -1,6 +1,6 @@
 #pragma once
 #include <cmath>
-#include <World/Entity/Entity.h>
+#include <World/Entity/BEntity.h>
 #include <System/ServiceLocator.h>
 #include <System/Assets/AssetManager.h>
 #include <Physics/Collision/CollisionDetection.h>
@@ -24,7 +24,7 @@ namespace Bennett
 	protected:
 		int m_Depth = -1;
 		bool m_HasSplit = false;
-		Entity* m_NodeEntity = nullptr;
+		BEntity* m_NodeEntity = nullptr;
 		std::vector<T> m_DataObjects;
 		unsigned int m_Size = INT_MAX;
 		Transform m_Centre = Transform();
@@ -100,7 +100,7 @@ namespace Bennett
 			}
 
 			std::string name = "N_" + std::to_string(depth) + "_" + std::to_string(quadrant);
-			m_NodeEntity = new Entity(name.c_str());
+			m_NodeEntity = new BEntity(name.c_str());
 			m_NodeEntity->GetTransform().SetPosition(m_Centre.GetPosition());
 			m_NodeEntity->GetTransform().SetScale(glm::vec3((float)m_Size));
 		}
@@ -167,7 +167,7 @@ namespace Bennett
 		{
 			if (m_HasSplit)
 			{
-				const Entity* entity = dynamic_cast<const Entity*>(data);
+				const BEntity* entity = dynamic_cast<const BEntity*>(data);
 
 				if (!entity)
 					return;

@@ -1,10 +1,10 @@
 #include <BennettPCH.h>
 #include <Rendering/Renderer.h>
-#include <World/Entity/Entity.h>
+#include <World/Entity/BEntity.h>
+#include <World/Actor/UnitActors/TestUnit.h>
 #include <World/World.h>
 #include <World/WorldChunk.h>
 #include <World/Terrain/TerrainChunk.h>
-#include <World/Entity/MoveableTestEntity.h>
 
 namespace Bennett
 {
@@ -12,7 +12,7 @@ namespace Bennett
     {
         for (auto itr = m_Entities.begin(); itr != m_Entities.end(); /*it++*/)
         {
-            Entity* entity = itr->second;
+            BEntity* entity = itr->second;
             if (entity == nullptr)
             {
                 ++itr;
@@ -28,7 +28,7 @@ namespace Bennett
         m_Entities.clear();
     }
 
-    void World::AddEntityToSpatialGrid(const Entity& entity)
+    void World::AddEntityToSpatialGrid(const BEntity& entity)
     {
         glm::ivec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
 
@@ -73,7 +73,7 @@ namespace Bennett
         return itr->second;
     }
 
-    void World::RemoveEntityFromSpatialGrid(const Entity& entity)
+    void World::RemoveEntityFromSpatialGrid(const BEntity& entity)
     {
         glm::vec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
 
@@ -133,7 +133,7 @@ namespace Bennett
 
     World::World()
     {
-        m_Entities = std::unordered_map<std::string, Entity*>();
+        m_Entities = std::unordered_map<std::string, BEntity*>();
         m_IsLoaded = false;
     }
 
@@ -141,7 +141,7 @@ namespace Bennett
     {
         for (auto itr = m_Entities.begin(); itr != m_Entities.end(); /*it++*/)
         {
-            Entity* entity = itr->second;
+            BEntity* entity = itr->second;
             if (entity == nullptr)
             {
                 ++itr;
@@ -155,12 +155,7 @@ namespace Bennett
         }
     }
 
-    Entity* World::SpawnEntity(const std::string& name)
-    {
-        return SpawnEntity(name, glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f));
-    }
-
-    void World::DestroyEntity(Entity* entity)
+    void World::DestroyEntity(BEntity* entity)
     {
         if (entity == nullptr)
         {
@@ -218,14 +213,14 @@ namespace Bennett
         return m_IsLoaded;
     }
 
-    Entity* World::SpawnEntity(const std::string& name, glm::vec3 scale, glm::vec3 position, glm::vec3 rotation)
+    BActor* World::SpawnActor(const std::string& name, const Transform& transform)
     {
-        Entity* entity = nullptr;
+        BActor* entity = nullptr;
         auto itr = m_Entities.find(name);
 
         if (itr == m_Entities.end())
         {
-            entity = new Entity(name, scale, position, rotation);
+            entity = new TestUnit(name, transform);
             m_Entities.insert(std::make_pair(name, entity));
 
             AddEntityToSpatialGrid(*entity);
@@ -243,39 +238,18 @@ namespace Bennett
         return entity;
     }
 
-    Entity* World::SpawnTESTEntity(const std::string& name, glm::vec3 scale, glm::vec3 position, glm::vec3 rotation)
+    BActor* World::GetEntity(const std::string& name)
     {
-        Entity* entity = nullptr;
-        auto itr = m_Entities.find(name);
-
-        if (itr == m_Entities.end())
-        {
-            entity = new MoveableTestEntity(name, scale, position, rotation);
-            m_Entities.insert(std::make_pair(name, entity));
-
-            AddEntityToSpatialGrid(*entity);
-
-            if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
-            {
-                Log(LOG_SAFE, "World: Created an entity called \"%s\"\n", name.c_str());
-            }
-        }
-        else
-        {
-            Log(LOG_MINIMAL, "World: Tried to create an entity with a name that already exists.\n");
-        }
-
-        return entity;
-    }
-
-    Entity* World::GetEntity(const std::string& name)
-    {
-        Entity* entity = nullptr;
+        BActor* entity = nullptr;
         auto itr = m_Entities.find(name);
 
         if (itr != m_Entities.end())
         {
-            return itr->second;
+            BActor* actor = dynamic_cast<BActor*>(itr->second);
+            if (actor)
+            {
+                return actor;
+            }
         }
 
         return entity;
@@ -294,7 +268,6 @@ namespace Bennett
             AddEntityToSpatialGrid(*entity.second);
             entity.second->Update(deltaTime);
         }
-
     }
 
     void World::Render(const Renderer& renderer)

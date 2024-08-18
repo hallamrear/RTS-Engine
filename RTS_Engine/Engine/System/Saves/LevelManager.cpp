@@ -1,7 +1,7 @@
 #include <BennettPCH.h>
 #include <System/Saves/LevelManager.h>
 #include <System/Assets/AssetManager.h>
-#include <World/Entity/Entity.h>
+#include <World/Entity/BEntity.h>
 #include <World/World.h>
 #include <Rendering/Model.h>
 #include <External/tinyxml2.h>
@@ -31,7 +31,7 @@ namespace Bennett
         terrainName = document.FirstChildElement("Level")->FirstChildElement("TerrainName")->GetText();
         if (terrainName != "")
         {
-            Entity* floor = world.SpawnEntity("tank");
+            BEntity* floor = world.SpawnActor("tank");
             floor->SetModel(AssetManager::GetModel("tank"));
             if(floor->HasModel())
                 floor->SetTexture(AssetManager::GetTexture("tank"));

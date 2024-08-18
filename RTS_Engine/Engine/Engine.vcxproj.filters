@@ -63,7 +63,7 @@
     <ClCompile Include="System\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="World\Entity\Entity.cpp">
+    <ClCompile Include="World\Entity\BEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Camera\FreeCamera.cpp">
@@ -121,9 +121,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\Collision\Collider\SphereCollider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="World\Entity\MoveableTestEntity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\Collision\Collider\AABBCollider.cpp">
@@ -184,6 +181,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="World\Terrain\TerrainChunk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Prop\BProp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Actor\BActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Actor\UnitActors\TestUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -251,7 +257,7 @@
     <ClInclude Include="World\World.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
-    <ClInclude Include="World\Entity\Entity.h">
+    <ClInclude Include="World\Entity\BEntity.h">
       <Filter>Header Files\World</Filter>
     </ClInclude>
     <ClInclude Include="System\ApplicationEvents.h">
@@ -283,9 +289,6 @@
     </ClInclude>
     <ClInclude Include="Physics\Collision\Collider\SphereCollider.h">
       <Filter>Header Files\Collision\Colliders</Filter>
-    </ClInclude>
-    <ClInclude Include="World\Entity\MoveableTestEntity.h">
-      <Filter>Header Files\World</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Collision\Collider\AABBCollider.h">
       <Filter>Header Files\Collision\Colliders</Filter>
@@ -357,6 +360,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="World\Terrain\TerrainChunk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Prop\BProp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Actor\BActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Actor\UnitActors\TestUnit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

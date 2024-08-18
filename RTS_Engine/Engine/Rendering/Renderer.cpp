@@ -99,12 +99,12 @@ namespace Bennett
 		INIT_CHECK(CreateUniformBuffers())
 		INIT_CHECK(CreateCommandBuffer())
 		INIT_CHECK(CreateSyncObjects())
-		INIT_CHECK(CreateRenderingDebugAssets())
+		INIT_CHECK(CreateDebugAssets())
 
 		return true;
 	}
 
-	bool Renderer::CreateRenderingDebugAssets()
+	bool Renderer::CreateDebugAssets()
 	{
 		if (m_DebugTexture->Loaded())
 		{
@@ -170,10 +170,6 @@ namespace Bennett
 		{
 			return false;
 		}
-
-
-
-
 
 
 
@@ -443,7 +439,6 @@ namespace Bennett
 
 			EndSingleTimeCommands(debugCircleCommandBuffer);
 
-			//Draw all.
 			const CustomPipeline& tempPipeline = *m_CurrentPipeline;
 			SetCustomGraphicsPipeline(m_DebugCirclePipeline);
 			m_DebugCircleVertexBuffer.Bind();
@@ -451,7 +446,12 @@ namespace Bennett
 			UpdatePushConstants();
 			PushDescriptorSet(m_DebugTexture);
 			UpdateUniformBuffers();
-			vkCmdDraw(GetCommandBuffer(), m_CurrentDebugCircleCount * DEBUG_CIRCLE_POINT_COUNT, 1, 0, 0);
+
+			for (size_t i = 0; i < m_CurrentDebugCircleCount; i++)
+			{
+				vkCmdDraw(GetCommandBuffer(), DEBUG_CIRCLE_POINT_COUNT, 1, i * DEBUG_CIRCLE_POINT_COUNT, 0);
+			}
+
 			SetCustomGraphicsPipeline(tempPipeline);
 
 			//Reset the memory index.
@@ -730,7 +730,7 @@ namespace Bennett
 		fence = VK_NULL_HANDLE;
 	}
 
-	void Renderer::DrawDebugCircle(const glm::vec3& origin, const float& radius, const glm::vec3& normal)
+	void Renderer::DrawDebugCircle(const glm::vec3& origin, const float& radius, const glm::vec3& normal) const
 	{
 		if (m_CurrentDebugCircleCount == MAX_DEBUG_CIRCLE_COUNT)
 		{
@@ -738,21 +738,22 @@ namespace Bennett
 			return;
 		}
 
-		float angle = 360.0f / DEBUG_CIRCLE_POINT_COUNT;
+		float angle = 360.0f / (DEBUG_CIRCLE_POINT_COUNT);
+		float currentAngle = 0.0f;
+		glm::vec3 position = glm::vec3(0.0f);
+
 		for (int i = 0; i < DEBUG_CIRCLE_POINT_COUNT; i++)
 		{
-			float currentAngle = angle * i;
-			glm::vec3 position = glm::vec3(radius * cos(glm::radians(currentAngle)), 0.0f, radius * sin(glm::radians(currentAngle)));
+			currentAngle = angle * i;
+			position = glm::vec3(radius * cos(glm::radians(currentAngle)), 0.0f, radius * sin(glm::radians(currentAngle)));
+			m_DebugCircleList[(m_CurrentDebugCircleCount * DEBUG_CIRCLE_POINT_COUNT) + (i)] = origin + position;
 
 			if (normal != BENNETT_UP_VECTOR)
 			{
+				//todo : finish calculating rotation points.
 				//circlePoints[i] = glm::mat4(1.0f) * glm::rotate() * glm::vec4(circlePoints[i], 1.0f);
 			}
-
-			m_DebugCircleList[(m_CurrentDebugCircleCount * DEBUG_CIRCLE_POINT_COUNT) + i] = origin + position;
 		}
-
-		DrawDebugLine(origin, normal, 10.0f);
 
 		m_CurrentDebugCircleCount++;
 	}

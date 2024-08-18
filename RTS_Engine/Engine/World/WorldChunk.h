@@ -2,11 +2,11 @@
 
 namespace Bennett
 {
-	constexpr int WorldChunkSize = 16;
+	constexpr int WorldChunkSize = 32;
 
 	class TerrainChunk;
 	class Renderer;
-	class Entity;
+	class BEntity;
 
 	class BENNETT_ENGINE WorldChunk
 	{
@@ -18,7 +18,7 @@ namespace Bennett
 		glm::ivec2 m_ID;
 		TerrainChunk* m_TerrainChunk;
 
-		std::vector<const Entity*> m_Entities;
+		std::vector<const BEntity*> m_Entities;
 		WorldChunk(const glm::ivec2& id);
 
 	protected:
@@ -28,10 +28,10 @@ namespace Bennett
 	public:
 		~WorldChunk();
 
-		std::vector<const Entity*>& GetAllEntities();
+		std::vector<const BEntity*>& GetAllEntities();
 		void RemoveAllEntities();
-		void AddEntity(const Entity& entity);
-		void RemoveEntity(const Entity& entity);
+		void AddEntity(const BEntity& entity);
+		void RemoveEntity(const BEntity& entity);
 
 		void Update(const float& deltaTime);
 		void Render(const Renderer& renderer) const;

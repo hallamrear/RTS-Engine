@@ -139,7 +139,7 @@ namespace Bennett
 		bool m_IsInitialised;
 
 		bool InitialiseCoreVulkanSystem(const Window& window, HINSTANCE hInstance);
-		bool CreateRenderingDebugAssets();
+		bool CreateDebugAssets();
 
 		VkViewport m_Viewport;
 		VkRect2D m_ScissorRect;
@@ -415,7 +415,7 @@ namespace Bennett
 		void SetWireframeGraphicsPipeline() const;
 		void WaitForRendererIdle();
 
-		void DrawDebugCircle(const glm::vec3& origin, const float& radius = 0.5f, const glm::vec3& normal = BENNETT_UP_VECTOR);
+		void DrawDebugCircle(const glm::vec3& origin, const float& radius = 0.5f, const glm::vec3& normal = BENNETT_UP_VECTOR) const;
 		void DrawDebugLine(const glm::vec3& start, const glm::vec3& end) const;
 		void DrawDebugLine(const glm::vec3& start, const glm::vec3& dir, const float& length) const;
 		const Texture& GetDebugTexture() const;

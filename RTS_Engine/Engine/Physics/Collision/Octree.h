@@ -3,7 +3,7 @@
 
 namespace Bennett
 {
-	class Entity;
+	class BEntity;
 
 	template<class T>
 	class BENNETT_ENGINE Octree

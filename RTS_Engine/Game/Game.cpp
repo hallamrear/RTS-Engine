@@ -11,10 +11,11 @@
 #include <System/InputMonitor.h>
 #include <System/Assets/AssetManager.h>
 #include <System/ServiceLocator.h>
-#include <World/Entity/Entity.h>
 #include <System/Transform.h>
-#include <World/Entity/MoveableTestEntity.h>
 #include <World/WorldChunk.h>
+#include <World/Entity/BEntity.h>
+#include <World/Actor/BActor.h>
+#include <Defines/HelperFunctions.h>
 
 using namespace Bennett;
 
@@ -31,7 +32,8 @@ Game::~Game()
     }
 }
 
-Entity* ground = nullptr;
+BActor* car = nullptr;
+BActor* ground = nullptr;
 InputMonitor* inputMonitor = nullptr;
 
 std::vector<std::pair<glm::vec3, glm::vec3>> lines;
@@ -72,6 +74,8 @@ bool Game::Initialise()
     std::vector<int> keys =
     {
         BENNETT_MOUSE_LEFT, //Draw cam Line
+        BENNETT_MOUSE_RIGHT,
+        BENNETT_KEY_P
     };
 
     inputMonitor = new InputMonitor(keys);
@@ -85,64 +89,62 @@ bool Game::Initialise()
     GetCameraController().GetCurrentCamera().SetRotation(glm::vec3(0.0f, 0.0f, 0.0f));
     GetCameraController().GetCurrentCamera().SetMovementSpeed(10.0f);
 
-    //ground = GetWorld().SpawnEntity("ChunkLoader");
-    ground = GetWorld().SpawnEntity("HeightTester", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3());
-    ground->SetModel(am.GetModel("1x1_Cube"));
+    //ground = GetWorld().SpawnActor("ChunkLoader");
+    //ground = GetWorld().SpawnActor("HeightTester", Transform());
+    //ground->SetModel(am.GetModel("1x1_Cube"));
 
-    //InitTestTerrainScene();
-    //InitTestOctreeScene();
-    InitTestEntitiesScene();
+    glm::vec3 pos;
+    
+    for (size_t i = 0; i < 10; i++)
+    {
+        std::string name = std::to_string(i);
+        pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
+        GetWorld().SpawnActor(name, Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
+        GetWorld().GetEntity(name)->SetModel(am.GetModel("1x1_Cube"));
+        GetWorld().GetEntity(name)->SetTexture(am.GetTexture("green"));
+    }
+
+    pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
+    GetWorld().SpawnActor("TestUnit", Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
+    GetWorld().GetEntity("TestUnit")->SetModel(am.GetModel("Car3.gltf"));
+    GetWorld().GetEntity("TestUnit")->SetTexture(am.GetTexture("Car3"));
   
-    SetEngineState(ENGINE_STATE::RUNNING);
-
-    return true;
-}
-
-void Game::InitTestTerrainScene()
-{
-    AssetManager& am = ServiceLocator::GetAssetManager();
-
     std::vector<glm::ivec2> ids
     {
         glm::ivec2(-1, -1), glm::ivec2(+0, -1), glm::ivec2(+1, -1),
         glm::ivec2(-1, +0), glm::ivec2(+0, +0), glm::ivec2(+1, +0),
         glm::ivec2(-1, +1), glm::ivec2(+0, +1), glm::ivec2(+1, +1),
     };
-    
+
     GetWorld().PreloadChunks(ids);
-}
 
-Entity* car = nullptr;
-
-void Game::InitTestEntitiesScene()
-{
-    AssetManager& am = ServiceLocator::GetAssetManager();
-    //ground = GetWorld().SpawnEntity("Floor");
+    //ground = GetWorld().SpawnActor("Floor");
     //ground->SetModel(am.GetModel("1x1_Cube"));
     //ground->GetTransform().SetScale(glm::vec3(20.0f, 1.0f, 20.0f));
     //ground->GetTransform().Translate(glm::vec3(0.0f, -5.0f, 0.0f));
     //ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
 
-    car = GetWorld().SpawnTESTEntity("Car", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f));
-    car->SetModel(am.GetModel("Car3.gltf"));
-    car->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+    //car = GetWorld().SpawnActor("Car", Transform());
+    //car->SetModel(am.GetModel("Car3.gltf"));
+    //car->GenerateColliderFromModel(Bennett::ColliderType::OBB);
 
-    car = GetWorld().SpawnTESTEntity("Car", glm::vec3(5.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f));
+    //car = GetWorld().SpawnActor("Car", Transform(glm::vec3(5.0f), glm::vec3(0.0f, 5.0f, 0.0f), glm::vec3(0.0f)));
     //car->SetModel(am.GetModel("2D_Unit_Circle"));
     //car->SetTexture(am.GetTexture("red"));
-}
 
-void Game::InitTestOctreeScene()
-{
-    AssetManager& am = ServiceLocator::GetAssetManager();
-
+    /*
     for (size_t i = 0; i < 100; i++)
     {
         glm::vec3 position = glm::vec3(rand() % 100 - 50, rand() % 100 - 50, rand() % 100 - 50);
-        ground = GetWorld().SpawnEntity(std::to_string(i), glm::vec3(1.0f), position, glm::vec3(0.0f));
+        ground = GetWorld().SpawnActor(std::to_string(i), Transform(glm::vec3(1.0f), position, glm::vec3(0.0f)));
         ground->SetModel(am.GetModel("1x1_Cube"));
-        ground->GenerateBroadPhaseColliderFromModel(Bennett::ColliderType::OBB);
+        ground->GenerateColliderFromModel(Bennett::ColliderType::OBB);
     }
+    */
+
+    SetEngineState(ENGINE_STATE::RUNNING);
+
+    return true;
 }
 
 bool pressedLast = false;
@@ -161,7 +163,7 @@ void Game::RunGameLoop()
     MSG msg{};
     while (GetEngineState() == ENGINE_STATE::RUNNING)
     {
-        while(PeekMessage(&msg, m_Window->GetWindowHandle(), 0, 0, PM_REMOVE))
+        while (PeekMessage(&msg, m_Window->GetWindowHandle(), 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -185,7 +187,7 @@ void Game::RunGameLoop()
         Render();
 
         float rotSpeed = 10.0f;
-        float r = 10.0f;    
+        float r = 10.0f;
         float t = glm::radians<float>(90.0f);
         static float s = 0.0f;
         s += dTime * rotSpeed;
@@ -197,38 +199,36 @@ void Game::RunGameLoop()
         //pos.y = GetWorld().GetTerrainHeight(pos);
         //GetWorld().GetEntity("HeightTester")->GetTransform().SetPosition(pos);
 
+        Ray ndcRay = GetCameraController().GetCurrentCamera().Raycast(inputMonitor->GetMousePositionNDC());
+
         if (inputMonitor->GetKeyState(BENNETT_MOUSE_LEFT))
         {
             if (pressedLast == false)
             {
-                glm::vec3 start = GetCameraController().GetCurrentCamera().GetPosition();
-                glm::vec3 end = start + (GetCameraController().GetCurrentCamera().GetForwardVector() * 10.0f);
-
-                Ray ray = GetCameraController().GetCurrentCamera().Raycast(inputMonitor->GetMousePositionNDC());
-
-                float t = 0.0f;
-                if (Collision::RayPlaneIntersection(glm::vec3(0.0f), glm::normalize(BENNETT_UP_VECTOR), ray, t))
+                if (inputMonitor->GetKeyState(BENNETT_MOUSE_LEFT))
                 {
-                    end = start + (ray.GetDirection() * t);
-                    lines.push_back(std::make_pair(start, end));
-
-                    WorldChunk* chunk = GetWorld().GetWorldChunk(end);
-
-                    if (chunk)
+                    Transform transform;
+                    float t = 0.0f;
+                    if (Collision::RayPlaneIntersection(glm::vec3(0.0f), glm::normalize(BENNETT_UP_VECTOR), ndcRay, t))
                     {
-                        std::vector<const Entity*>& entities = chunk->GetAllEntities();
+                        glm::vec3 position = GetCameraController().GetCurrentCamera().GetPosition() + (ndcRay.GetDirection() * t);
 
-                        if (entities.size() > 0)
+                        auto entities = GetWorld().GetWorldChunk(position)->GetAllEntities();
+
+                        for (auto itr : entities)
                         {
-                            GetWorld().GetEntity(entities[0]->GetName())->GetTransform().SetPosition(end);
+                            BActor* actor = dynamic_cast<BActor*>(GetWorld().GetEntity(itr->GetName()));
+
+                            if (actor)
+                            {
+                                if (Helper::Distance(position, actor->GetTransform().GetPosition()) < 5.0f)
+                                {
+                                    actor->SetIsSelected(true);
+                                }
+                            }
                         }
 
                     }
-
-
-                    glm::vec3 pos = end;
-                    pos.y = GetWorld().GetTerrainHeight(end);
-                    GetWorld().GetEntity("HeightTester")->GetTransform().SetPosition(pos);
                 }
             }
             pressedLast = true;
@@ -237,7 +237,23 @@ void Game::RunGameLoop()
         {
             pressedLast = false;
         }
-                         
+
+        if (inputMonitor->GetKeyState(BENNETT_MOUSE_RIGHT))
+        {
+            float t = 0.0f;
+            if (Collision::RayPlaneIntersection(glm::vec3(0.0f), glm::normalize(BENNETT_UP_VECTOR), ndcRay, t))
+            {
+                glm::vec3 position = GetCameraController().GetCurrentCamera().GetPosition() + (ndcRay.GetDirection() * t);
+                GetWorld().GetEntity("TestUnit")->SetTargetPosition(position);
+            }
+        }
+
+        if (Collision::RayPlaneIntersection(glm::vec3(0.0f), glm::normalize(BENNETT_UP_VECTOR), ndcRay, t))
+        {
+            glm::vec3 position = GetCameraController().GetCurrentCamera().GetPosition() + (ndcRay.GetDirection() * t);
+            ServiceLocator::GetRenderer().DrawDebugCircle(position, 1.0f);
+        }
+ 
         //if (ground->GetCollider() != nullptr && car->GetCollider() != nullptr)
         //{
         //    details.Depth = 0.0f;

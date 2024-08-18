@@ -1,7 +1,7 @@
 #pragma once
 #include <Camera/CameraController.h>
 #include <Rendering/Window.h>
-#include <World/Entity/Entity.h>
+#include <World/Entity/BEntity.h>
 #include <World/World.h>
 
 namespace Bennett

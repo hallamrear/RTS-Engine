@@ -4,7 +4,8 @@
 #include <System/Assets/AssetManager.h>
 #include <World/Terrain/TerrainChunk.h>
 #include <World/WorldChunk.h>
-#include <World/Entity/Entity.h>
+#include <Rendering/Model.h>
+#include <World/Entity/BEntity.h>
 
 namespace Bennett
 {
@@ -22,7 +23,7 @@ namespace Bennett
 
 	WorldChunk::WorldChunk(const glm::ivec2& id)
 	{
-		m_Entities = std::vector<const Entity*>();
+		m_Entities = std::vector<const BEntity*>();
 		m_ID = id;
 		m_TerrainChunk = nullptr;
 		m_Model = ServiceLocator::GetAssetManager().GetAsset<Model>("1x1_Cube");
@@ -40,7 +41,7 @@ namespace Bennett
 		}
 	}
 
-	std::vector<const Entity*>& WorldChunk::GetAllEntities()
+	std::vector<const BEntity*>& WorldChunk::GetAllEntities()
 	{
 		return m_Entities;
 	}
@@ -50,12 +51,12 @@ namespace Bennett
 		m_Entities.clear();
 	}
 
-	void WorldChunk::AddEntity(const Entity& entity)
+	void WorldChunk::AddEntity(const BEntity& entity)
 	{
 		m_Entities.push_back(&entity);
 	}
 
-	void WorldChunk::RemoveEntity(const Entity& entity)
+	void WorldChunk::RemoveEntity(const BEntity& entity)
 	{
 		auto itr = std::find(m_Entities.begin(), m_Entities.end(), &entity);
 

@@ -4,6 +4,28 @@ namespace Bennett
 {
 	namespace Helper
 	{
+		inline static glm::vec3 MoveTowards(const glm::vec3& current, const glm::vec3& target, const float& maxStep)
+		{
+			glm::vec3 toTarget = target - current;
+		
+			float sqdist = toTarget.x * toTarget.x + toTarget.y * toTarget.y + toTarget.z * toTarget.z;
+
+			if (sqdist == 0 || (maxStep >= 0 && sqdist <= maxStep * maxStep))
+				return target;
+
+			float dist = sqrt(sqdist);
+
+			return glm::vec3(
+				current.x + toTarget.x / dist * maxStep,
+				current.y + toTarget.y / dist * maxStep,
+				current.z + toTarget.z / dist * maxStep);
+		}
+
+		inline static float Distance(const glm::vec3& vecA, const glm::vec3& vecB)
+		{
+			return glm::vec3(vecA - vecB).length();
+		}
+
 		inline static glm::vec3 GetNormalOfTriangle(const glm::vec3& A, const glm::vec3& B, const glm::vec3& C)
 		{
 			glm::vec3 normal = glm::vec3(0.0f);

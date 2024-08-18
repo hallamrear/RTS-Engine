@@ -12,9 +12,5 @@ public:
 	~Game();
 	bool Initialise();
 
-	void InitTestTerrainScene();
-	void InitTestEntitiesScene();
-	void InitTestOctreeScene();
-
 	void RunGameLoop();
 };
