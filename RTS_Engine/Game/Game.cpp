@@ -75,7 +75,7 @@ bool Game::Initialise()
     {
         BENNETT_MOUSE_LEFT, //Draw cam Line
         BENNETT_MOUSE_RIGHT,
-        BENNETT_KEY_P
+        BENNETT_KEY_C
     };
 
     inputMonitor = new InputMonitor(keys);
@@ -95,19 +95,21 @@ bool Game::Initialise()
 
     glm::vec3 pos;
     
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i <= 1; i++)
     {
         std::string name = std::to_string(i);
         pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
         GetWorld().SpawnActor(name, Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
         GetWorld().GetEntity(name)->SetModel(am.GetModel("1x1_Cube"));
         GetWorld().GetEntity(name)->SetTexture(am.GetTexture("green"));
+        GetWorld().GetEntity(name)->AddCollider(ColliderType::Sphere, glm::vec3(5.0f, 5.0f, 5.0f));
     }
 
     pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
     GetWorld().SpawnActor("TestUnit", Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
     GetWorld().GetEntity("TestUnit")->SetModel(am.GetModel("Car3.gltf"));
     GetWorld().GetEntity("TestUnit")->SetTexture(am.GetTexture("Car3"));
+    GetWorld().GetEntity("TestUnit")->AddCollider(ColliderType::Sphere, glm::vec3(5.0f, 5.0f, 5.0f));
   
     std::vector<glm::ivec2> ids
     {
@@ -193,12 +195,6 @@ void Game::RunGameLoop()
         s += dTime * rotSpeed;
         s = fmod(s, 360.0f);
 
-        //GetWorld().GetEntity("ChunkLoader")->GetTransform().SetPosition(GetCameraController().GetCurrentCamera().GetPosition());
-
-        //glm::vec3 pos = GetWorld().GetEntity("HeightTester")->GetTransform().GetPosition();
-        //pos.y = GetWorld().GetTerrainHeight(pos);
-        //GetWorld().GetEntity("HeightTester")->GetTransform().SetPosition(pos);
-
         Ray ndcRay = GetCameraController().GetCurrentCamera().Raycast(inputMonitor->GetMousePositionNDC());
 
         if (inputMonitor->GetKeyState(BENNETT_MOUSE_LEFT))
@@ -213,21 +209,23 @@ void Game::RunGameLoop()
                     {
                         glm::vec3 position = GetCameraController().GetCurrentCamera().GetPosition() + (ndcRay.GetDirection() * t);
 
-                        auto entities = GetWorld().GetWorldChunk(position)->GetAllEntities();
+                        std::vector<BEntity*>& entities = GetWorld().GetWorldChunk(position)->GetAllEntities();
 
-                        for (auto itr : entities)
+                        if (entities.size() > 0)
                         {
-                            BActor* actor = dynamic_cast<BActor*>(GetWorld().GetEntity(itr->GetName()));
-
-                            if (actor)
+                            for (auto itr : entities)
                             {
-                                if (Helper::Distance(position, actor->GetTransform().GetPosition()) < 5.0f)
+                                BActor* actor = dynamic_cast<BActor*>(GetWorld().GetEntity(itr->GetName()));
+
+                                if (actor)
                                 {
-                                    actor->SetIsSelected(true);
+                                    if (Helper::Distance(position, actor->GetTransform().GetPosition()) < 5.0f)
+                                    {
+                                        actor->SetIsSelected(true);
+                                    }
                                 }
                             }
                         }
-
                     }
                 }
             }

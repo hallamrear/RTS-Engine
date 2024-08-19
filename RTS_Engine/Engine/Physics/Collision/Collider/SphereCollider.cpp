@@ -30,7 +30,7 @@ namespace Bennett
 		const glm::mat4 parent = GetTransform().GetModelMatrix();
 		const glm::mat4 identity = glm::mat4(1.0f);
 		const glm::mat4 translate = glm::translate(identity, GetOffset());
-		const glm::mat4 scale = glm::scale(identity, glm::vec3(m_Radius));
+		const glm::mat4 scale = glm::scale(identity, glm::vec3(m_Radius * 2));
 		const glm::mat4 model = translate * scale;
 
 		renderer.PushConstants.ModelMatrix = parent * model;

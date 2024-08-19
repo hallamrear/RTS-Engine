@@ -192,6 +192,9 @@
     <ClCompile Include="World\Actor\UnitActors\TestUnit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\Collision\CollisionResolution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Physics\Collision\CollisionDetection.h">
@@ -369,6 +372,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="World\Actor\UnitActors\TestUnit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Collision\CollisionResolution.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

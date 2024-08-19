@@ -90,6 +90,39 @@ namespace Bennett
 			return false;
 		};
 
+		/// <summary>
+		/// Checks for an intersection between 2 sphere colliders.
+		/// </summary>
+		/// <param name="colliderA">One of the colliders involved in the check.</param>
+		/// <param name="colliderB">The other collider involved in the check.</param>
+		/// <returns></returns>
+		inline static bool SphereSphere(const SphereCollider& colliderA, const SphereCollider& colliderB, CollisionDetails* manifold = nullptr)
+		{
+			const glm::vec3 positionDiff = colliderA.GetTransform().GetPosition() - colliderB.GetTransform().GetPosition();
+
+			const float distanceSquared =
+				((positionDiff.x) * (positionDiff.x) +
+					(positionDiff.y) * (positionDiff.y) +
+					(positionDiff.z) * (positionDiff.z));
+
+			const float radiusSum = colliderA.GetRadius() + colliderB.GetRadius();
+			const float radiusSquared = radiusSum * radiusSum;
+
+			bool hasCollided = distanceSquared <= radiusSquared;
+
+			if (hasCollided && manifold != nullptr)
+			{
+				glm::vec3 normal = positionDiff;
+				if (normal == glm::vec3(0.0f))
+					normal = BENNETT_FORWARD_VECTOR;
+
+				manifold->Normal = glm::normalize(normal);
+				manifold->Depth = sqrt(radiusSquared - distanceSquared);
+			}
+
+			return hasCollided;
+		};
+
 		/*
 		/// <summary>
 		/// Tests whether a point is inside a sphere.
@@ -195,28 +228,6 @@ namespace Bennett
 			//TODO : Implement
 			throw;
 			return false;
-		};
-
-		/// <summary>
-		/// Checks for an intersection between 2 sphere colliders.
-		/// </summary>
-		/// <param name="colliderA">One of the colliders involved in the check.</param>
-		/// <param name="colliderB">The other collider involved in the check.</param>
-		/// <returns></returns>
-		template<>
-		inline static bool CheckCollision<SphereCollider, SphereCollider>(const SphereCollider& colliderA, const SphereCollider& colliderB)
-		{
-			const glm::vec3 positionDiff = colliderA.GetTransform().GetPosition() - colliderB.GetTransform().GetPosition();
-
-			const float distanceSquared = 
-			   ((positionDiff.x) * (positionDiff.x) +
-				(positionDiff.y) * (positionDiff.y) +
-				(positionDiff.z) * (positionDiff.z));
-
-			const float radiusSum = colliderA.GetRadius() + colliderB.GetRadius();
-			const float radiusSquared = radiusSum * radiusSum;
-
-			return distanceSquared <= radiusSquared; 
 		};
 
 		/// <summary>

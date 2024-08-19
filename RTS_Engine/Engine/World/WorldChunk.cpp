@@ -5,7 +5,10 @@
 #include <World/Terrain/TerrainChunk.h>
 #include <World/WorldChunk.h>
 #include <Rendering/Model.h>
-#include <World/Entity/BEntity.h>
+#include <World/Prop/BProp.h>
+
+#include <Physics/Collision/CollisionDetection.h>
+#include <Physics/Collision/CollisionResolution.h>
 
 namespace Bennett
 {
@@ -23,7 +26,7 @@ namespace Bennett
 
 	WorldChunk::WorldChunk(const glm::ivec2& id)
 	{
-		m_Entities = std::vector<const BEntity*>();
+		m_Entities = std::vector<BEntity*>();
 		m_ID = id;
 		m_TerrainChunk = nullptr;
 		m_Model = ServiceLocator::GetAssetManager().GetAsset<Model>("1x1_Cube");
@@ -41,7 +44,7 @@ namespace Bennett
 		}
 	}
 
-	std::vector<const BEntity*>& WorldChunk::GetAllEntities()
+	std::vector<BEntity*>& WorldChunk::GetAllEntities()
 	{
 		return m_Entities;
 	}
@@ -51,12 +54,12 @@ namespace Bennett
 		m_Entities.clear();
 	}
 
-	void WorldChunk::AddEntity(const BEntity& entity)
+	void WorldChunk::AddEntity(BEntity& entity)
 	{
 		m_Entities.push_back(&entity);
 	}
 
-	void WorldChunk::RemoveEntity(const BEntity& entity)
+	void WorldChunk::RemoveEntity(BEntity& entity)
 	{
 		auto itr = std::find(m_Entities.begin(), m_Entities.end(), &entity);
 
@@ -73,7 +76,7 @@ namespace Bennett
 
 	void WorldChunk::Update(const float& deltaTime)
 	{
-
+		
 	}
 
 	void WorldChunk::Render(const Renderer& renderer) const

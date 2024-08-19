@@ -21,9 +21,9 @@ namespace Bennett
 
 	protected:
 		void DeleteAllEntities();
-		void AddEntityToSpatialGrid(const BEntity& entity);
+		void AddEntityToSpatialGrid(BEntity& entity);
 		WorldChunk* CreateChunk(const glm::ivec2& id);
-		void RemoveEntityFromSpatialGrid(const BEntity& entity);
+		void RemoveEntityFromSpatialGrid(BEntity& entity);
 
 		glm::ivec2 GetChunkIDOfPosition(const glm::vec3& position) const;
 

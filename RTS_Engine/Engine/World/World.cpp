@@ -28,7 +28,7 @@ namespace Bennett
         m_Entities.clear();
     }
 
-    void World::AddEntityToSpatialGrid(const BEntity& entity)
+    void World::AddEntityToSpatialGrid(BEntity& entity)
     {
         glm::ivec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
 
@@ -73,7 +73,7 @@ namespace Bennett
         return itr->second;
     }
 
-    void World::RemoveEntityFromSpatialGrid(const BEntity& entity)
+    void World::RemoveEntityFromSpatialGrid(BEntity& entity)
     {
         glm::vec2 id = GetChunkIDOfPosition(entity.GetTransform().GetPosition());
 
@@ -257,17 +257,89 @@ namespace Bennett
 
     void World::Update(const float& deltaTime)
     {
+        Collider* colliderI = nullptr;
+        Collider* colliderJ = nullptr;
+
+        for (auto i = m_Entities.begin(); i != m_Entities.end(); i++)
+        {
+            for (auto j = i; j != m_Entities.end(); j++)
+            {
+                if (i->second == j->second)
+                    continue;
+
+                if (dynamic_cast<BProp*>(i->second))
+                {
+                    colliderI = dynamic_cast<BProp*>(i->second)->GetCollider();
+                }
+
+                if (dynamic_cast<BProp*>(j->second))
+                {
+                    colliderJ = dynamic_cast<BProp*>(j->second)->GetCollider();
+                }
+
+                if ((colliderI == nullptr) || (colliderJ == nullptr))
+                    continue;
+
+                CollisionDetails manifold;
+
+                auto scI = (SphereCollider*)colliderI;
+                auto scJ = (SphereCollider*)colliderJ;
+
+                if (Collision::SphereSphere(*scI, *scJ, &manifold))
+                {
+                    Transform& transformA = i->second->GetTransform();
+                    Transform& transformB = j->second->GetTransform();
+
+                    transformA.Translate(manifold.Normal * (manifold.Depth * +0.5f));
+                    ServiceLocator::GetRenderer().DrawDebugLine(transformA.GetPosition(), transformA.GetPosition() + (manifold.Normal * (manifold.Depth * +0.5f)));
+
+                    transformB.Translate(manifold.Normal * (manifold.Depth * -0.5f));
+                    ServiceLocator::GetRenderer().DrawDebugLine(transformB.GetPosition(), transformB.GetPosition() + (manifold.Normal * (manifold.Depth * -0.5f)));
+
+                    /*
+                    if (glitch->GetRigidbody()->IsStatic() == true && car->GetRigidbody()->IsStatic() == true)
+                       continue;
+
+                    if (glitch->GetRigidbody()->IsStatic() == false && car->GetRigidbody()->IsStatic() == true)
+                    {
+                        transformA.Translate(details.Normal * (-details.Depth * 0.5f));
+                        car->GetRigidbody()->AddImpulseForce(details.Normal * (-details.Depth * 0.5f));
+                    }
+                    else if (glitch->GetRigidbody()->IsStatic() == true && glitch->GetRigidbody()->IsStatic() == false)
+                    {
+                        transformB.Translate(details.Normal * (details.Depth * 0.5f));
+                        car->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * 0.5f));
+                    }
+                    else
+                    {
+                        transformA.Translate(details.Normal* (details.Depth * -0.5f * 0.5f));
+                        transformB.Translate(details.Normal* (details.Depth * +0.5f * 0.5f));
+                        glitch->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * -0.5f * 0.5f));
+                        car->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * +0.5f * 0.5f));
+                    }
+                    */
+                }
+            }
+        }
+
+
+
+
         for (auto& chunk : m_SpatialGrid)
         {
             chunk.second->RemoveAllEntities();
-            chunk.second->Update(deltaTime);
         }
-       
+
         for (auto& entity : m_Entities)
         {
             AddEntityToSpatialGrid(*entity.second);
             entity.second->Update(deltaTime);
         }
+
+        for (auto& chunk : m_SpatialGrid)
+        {
+            chunk.second->Update(deltaTime);
+        }       
     }
 
     void World::Render(const Renderer& renderer)

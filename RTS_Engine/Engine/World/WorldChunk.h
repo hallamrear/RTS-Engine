@@ -18,7 +18,7 @@ namespace Bennett
 		glm::ivec2 m_ID;
 		TerrainChunk* m_TerrainChunk;
 
-		std::vector<const BEntity*> m_Entities;
+		std::vector<BEntity*> m_Entities;
 		WorldChunk(const glm::ivec2& id);
 
 	protected:
@@ -28,10 +28,10 @@ namespace Bennett
 	public:
 		~WorldChunk();
 
-		std::vector<const BEntity*>& GetAllEntities();
+		std::vector<BEntity*>& GetAllEntities();
 		void RemoveAllEntities();
-		void AddEntity(const BEntity& entity);
-		void RemoveEntity(const BEntity& entity);
+		void AddEntity(BEntity& entity);
+		void RemoveEntity(BEntity& entity);
 
 		void Update(const float& deltaTime);
 		void Render(const Renderer& renderer) const;
