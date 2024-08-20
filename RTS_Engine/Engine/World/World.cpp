@@ -2,6 +2,7 @@
 #include <Rendering/Renderer.h>
 #include <World/Entity/BEntity.h>
 #include <World/Actor/UnitActors/TestUnit.h>
+#include <World/Prop/Objects/StaticProp.h>
 #include <World/World.h>
 #include <World/WorldChunk.h>
 #include <World/Terrain/TerrainChunk.h>
@@ -222,34 +223,70 @@ namespace Bennett
         {
             entity = new TestUnit(name, transform);
             m_Entities.insert(std::make_pair(name, entity));
+            m_Actors.insert(std::make_pair(name, entity));
 
             AddEntityToSpatialGrid(*entity);
 
             if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
             {
-                Log(LOG_SAFE, "World: Created an entity called \"%s\"\n", name.c_str());
+                Log(LOG_SAFE, "World: Created an actor called \"%s\"\n", name.c_str());
             }
         }
         else
         {
-            Log(LOG_MINIMAL, "World: Tried to create an entity with a name that already exists.\n");
+            Log(LOG_MINIMAL, "World: Tried to create an actor with a name that already exists.\n");
         }
 
         return entity;
     }
 
-    BActor* World::GetEntity(const std::string& name)
+    BActor* World::GetActor(const std::string& name)
     {
         BActor* entity = nullptr;
+        auto itr = m_Actors.find(name);
+
+        if (itr != m_Actors.end())
+        {
+            return itr->second;
+        }
+
+        return entity;
+    }
+
+    BProp* World::SpawnProp(const std::string& name, const Transform& transform)
+    {
+        BProp* entity = nullptr;
         auto itr = m_Entities.find(name);
 
-        if (itr != m_Entities.end())
+        if (itr == m_Entities.end())
         {
-            BActor* actor = dynamic_cast<BActor*>(itr->second);
-            if (actor)
+            entity = new StaticProp(name, transform);
+            m_Entities.insert(std::make_pair(name, entity));
+            m_Props.insert(std::make_pair(name, entity));
+
+            AddEntityToSpatialGrid(*entity);
+
+            if (ENABLE_LOG_SPAWN_ENTITY_NOTICE)
             {
-                return actor;
+                Log(LOG_SAFE, "World: Created a prop called \"%s\"\n", name.c_str());
             }
+        }
+        else
+        {
+            Log(LOG_MINIMAL, "World: Tried to create a prop with a name that already exists.\n");
+        }
+
+        return entity;
+    }
+
+    BProp* World::GetProp(const std::string& name)
+    {
+        BProp* entity = nullptr;
+        auto itr = m_Props.find(name);
+
+        if (itr != m_Props.end())
+        {
+            return itr->second;
         }
 
         return entity;
@@ -269,15 +306,18 @@ namespace Bennett
 
                 if (dynamic_cast<BProp*>(i->second))
                 {
-                    colliderI = dynamic_cast<BProp*>(i->second)->GetCollider();
+                    colliderI = dynamic_cast<BProp*>(i->second)->GetPhysicsCollider();
                 }
 
                 if (dynamic_cast<BProp*>(j->second))
                 {
-                    colliderJ = dynamic_cast<BProp*>(j->second)->GetCollider();
+                    colliderJ = dynamic_cast<BProp*>(j->second)->GetPhysicsCollider();
                 }
 
                 if ((colliderI == nullptr) || (colliderJ == nullptr))
+                    continue;
+
+                if ((colliderI->GetType() != ColliderType::Sphere) || (colliderJ->GetType() != ColliderType::Sphere))
                     continue;
 
                 CollisionDetails manifold;
@@ -321,9 +361,6 @@ namespace Bennett
                 }
             }
         }
-
-
-
 
         for (auto& chunk : m_SpatialGrid)
         {

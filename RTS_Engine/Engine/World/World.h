@@ -5,10 +5,11 @@
 namespace Bennett
 {
 	class Renderer;
-	class BEntity;
 	class Terrain;
 	class WorldChunk;
+	class BEntity;
 	class BActor;
+	class BProp;
 
 	class BENNETT_ENGINE World
 	{
@@ -16,7 +17,9 @@ namespace Bennett
 		friend class LevelManager;
 
 		bool m_IsLoaded;
-		std::unordered_map<std::string, BEntity*> m_Entities;
+		std::unordered_map<std::string, BEntity*>	m_Entities;
+		std::unordered_map<std::string, BActor*>	m_Actors;
+		std::unordered_map<std::string, BProp*>		m_Props;
 		std::unordered_map<glm::ivec2, WorldChunk*> m_SpatialGrid;
 
 	protected:
@@ -34,7 +37,9 @@ namespace Bennett
 		WorldChunk* GetWorldChunk(const glm::vec3& position) const;
 		WorldChunk* GetWorldChunk(const glm::ivec2& id) const;
 		BActor* SpawnActor(const std::string& name, const Transform& transform);
-		BActor* GetEntity(const std::string& name);
+		BActor* GetActor(const std::string& name);
+		BProp* SpawnProp(const std::string& name, const Transform& transform);
+		BProp* GetProp(const std::string& name);
 		void DestroyEntity(BEntity* entity);
 
 		void PreloadChunks(const std::vector<glm::ivec2>& chunkIds);

@@ -171,7 +171,7 @@
     <ClCompile Include="Physics\Collision\Collider\OBBCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\RigidbodyPhysics.cpp">
+    <ClCompile Include="Physics\Rigidbody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\Collision\CollisionStructures.cpp">
@@ -193,6 +193,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\Collision\CollisionResolution.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Prop\Objects\StaticProp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -353,7 +356,7 @@
     <ClInclude Include="Defines\HelperFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\RigidbodyPhysics.h">
+    <ClInclude Include="Physics\Rigidbody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Collision\CollisionStructures.h">
@@ -375,6 +378,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Collision\CollisionResolution.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Prop\Objects\StaticProp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

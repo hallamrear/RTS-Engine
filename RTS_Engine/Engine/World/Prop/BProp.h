@@ -1,5 +1,6 @@
 #pragma once
 #include <World/Entity/BEntity.h>
+#include <Physics/RigidbodyPhysics.h>
 
 namespace Bennett
 {
@@ -13,7 +14,8 @@ namespace Bennett
 	private:
 		Model* m_Model;
 		const Texture* m_Texture;
-		Collider* m_Collider;
+		Collider* m_PhysicsCollider;
+		Rigidbody m_Rigidbody;
 
 	protected:
 		BProp(const std::string& name, const Transform& transform);
@@ -29,11 +31,11 @@ namespace Bennett
 		void SetTexture(Texture* texture);
 		bool HasTexture() const;
 
-		Collider* GetCollider() const;
-		bool HasCollider() const;
-		void DestroyCollider();
+		Collider* GetPhysicsCollider() const;
+		bool HasPhysicsCollider() const;
+		void DestroyPhysicsCollider();
 
-		void GenerateColliderFromModel(const ColliderType& type);
+		void GeneratePhysicsColliderFromModel(const ColliderType& type);
 		void AddCollider(const ColliderType& type, const glm::vec3& size, const glm::vec3& offset = glm::vec3(0.0f));
 
 		virtual void Update(const float& deltaTime) override;

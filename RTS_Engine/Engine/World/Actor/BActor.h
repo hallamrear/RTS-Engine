@@ -1,5 +1,6 @@
 #pragma once
 #include <World/Prop/BProp.h>
+#include <Physics/Collision/Collider/SphereCollider.h>
 
 namespace Bennett
 {
@@ -12,9 +13,9 @@ namespace Bennett
         bool m_IsSelected;
         bool m_CanBeSelected;
         glm::vec3 m_TargetPosition;
+        SphereCollider m_SelectionCollider;
 
     protected:
-
         class InputMonitor* m_InputMonitor;
         BActor(const std::string& name, const Transform& transform);
 
@@ -28,6 +29,8 @@ namespace Bennett
         const bool CanBeSelected() const;
         void SetIsSelected(const bool state);
         const bool IsSelected() const;
+
+        SphereCollider& GetSelectionCollider();
 
         virtual void Update(const float& deltaTime);
         virtual void Render(const Renderer& renderer);

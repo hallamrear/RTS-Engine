@@ -6,6 +6,7 @@ class Game : public Bennett::Engine
 {
 private:
 	Bennett::Window* m_Window;
+	std::vector<class Bennett::BActor*> m_SelectedEntities;
 
 public:
 	Game();

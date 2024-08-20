@@ -7,7 +7,6 @@
 #include <Physics/Collision/Collider/SphereCollider.h>
 #include <Rendering/Model.h>
 #include <Rendering/Renderer.h>
-#include <System/Assets/AssetManager.h>
 #include <System/InputMonitor.h>
 #include <System/Logger.h>
 
@@ -15,14 +14,14 @@ namespace Bennett
 {
 	BProp::BProp(const std::string& name, const Transform& transform) : BEntity(name, transform)
 	{
-		m_Collider = nullptr;
+		m_PhysicsCollider = nullptr;
 		m_Model = nullptr;
 		m_Texture = nullptr;
 	}
 
 	BProp::~BProp()
 	{
-		DestroyCollider();
+		DestroyPhysicsCollider();
 
 		//Model and Texture destruction is done by the AssetManager
 		m_Model = nullptr;
@@ -61,28 +60,28 @@ namespace Bennett
 		return m_Texture != nullptr;
 	}
 
-	Collider* BProp::GetCollider() const
+	Collider* BProp::GetPhysicsCollider() const
 	{
-		if (m_Collider)
-			return m_Collider;
+		if (m_PhysicsCollider)
+			return m_PhysicsCollider;
 		
 		return nullptr;
 	}
 
-	bool BProp::HasCollider() const
+	bool BProp::HasPhysicsCollider() const
 	{
-		return m_Collider != nullptr;
+		return m_PhysicsCollider != nullptr;
 	}
 
-	void BProp::DestroyCollider()
+	void BProp::DestroyPhysicsCollider()
 	{
-		if (m_Collider)
+		if (m_PhysicsCollider)
 		{
-			delete m_Collider;
-			m_Collider = nullptr;
+			delete m_PhysicsCollider;
+			m_PhysicsCollider = nullptr;
 		}
 	}
-	void BProp::GenerateColliderFromModel(const ColliderType& type)
+	void BProp::GeneratePhysicsColliderFromModel(const ColliderType& type)
 	{
 		if (m_Model == nullptr)
 		{
@@ -100,7 +99,7 @@ namespace Bennett
 
 	void BProp::AddCollider(const ColliderType& type, const glm::vec3& size, const glm::vec3& offset)
 	{
-		DestroyCollider();
+		DestroyPhysicsCollider();
 
 		switch (type)
 		{
@@ -108,19 +107,19 @@ namespace Bennett
 		{
 			float r = std::fmaxf(size.x, size.y);
 			r = std::fmaxf(r, size.z);
-			m_Collider = new SphereCollider(GetTransform(), r, offset);
+			m_PhysicsCollider = new SphereCollider(GetTransform(), r, offset);
 		}
 		break;
 
 		case Bennett::ColliderType::OBB:
 		{
-			m_Collider = new OBBCollider(GetTransform(), size, offset);
+			m_PhysicsCollider = new OBBCollider(GetTransform(), size, offset);
 		}
 		break;
 
 		case Bennett::ColliderType::AABB:
 		{
-			m_Collider = new AABBCollider(GetTransform(), size, offset);
+			m_PhysicsCollider = new AABBCollider(GetTransform(), size, offset);
 		}
 		break;
 
@@ -135,9 +134,9 @@ namespace Bennett
 	{
 		BEntity::Update(deltaTime);
 
-		if (m_Collider)
+		if (m_PhysicsCollider)
 		{
-			m_Collider->Update(deltaTime);
+			m_PhysicsCollider->Update(deltaTime);
 		}
 	}
 
@@ -161,9 +160,9 @@ namespace Bennett
 			m_Model->Render(renderer);
 		}
 
-		if (m_Collider)
+		if (m_PhysicsCollider)
 		{
-			m_Collider->Render(renderer);
+			m_PhysicsCollider->Render(renderer);
 		}
 	}
 }

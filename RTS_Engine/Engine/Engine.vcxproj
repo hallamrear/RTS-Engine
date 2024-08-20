@@ -107,12 +107,13 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Physics\Collision\CollisionResolution.cpp" />
+    <ClCompile Include="World\Prop\Objects\StaticProp.cpp" />
     <ClCompile Include="World\Actor\UnitActors\TestUnit.cpp" />
     <ClCompile Include="World\Actor\BActor.cpp" />
     <ClCompile Include="Physics\Collision\Collider\AABBCollider.cpp" />
     <ClCompile Include="Physics\Collision\Collider\OBBCollider.cpp" />
     <ClCompile Include="Physics\Collision\CollisionStructures.cpp" />
-    <ClCompile Include="Physics\RigidbodyPhysics.cpp" />
+    <ClCompile Include="Physics\Rigidbody.cpp" />
     <ClCompile Include="World\Prop\BProp.cpp" />
     <ClCompile Include="System\Transform.cpp" />
     <ClCompile Include="Rendering\CustomPipelineObject.cpp" />
@@ -168,6 +169,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Physics\Collision\CollisionResolution.h" />
+    <ClInclude Include="World\Prop\Objects\StaticProp.h" />
     <ClInclude Include="World\Actor\UnitActors\TestUnit.h" />
     <ClInclude Include="World\Actor\BActor.h" />
     <ClInclude Include="Physics\Collision\Collider\AABBCollider.h" />
@@ -176,7 +178,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClInclude Include="External\PerlinNoise.hpp" />
     <ClInclude Include="External\tiny_gltf.h" />
     <ClInclude Include="Physics\Collision\Collider\OBBCollider.h" />
-    <ClInclude Include="Physics\RigidbodyPhysics.h" />
+    <ClInclude Include="Physics\Rigidbody.h" />
     <ClInclude Include="World\Prop\BProp.h" />
     <ClInclude Include="System\Transform.h" />
     <ClInclude Include="Rendering\CustomPipelineObject.h" />

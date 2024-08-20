@@ -4,7 +4,7 @@
 
 namespace Bennett
 {
-	BActor::BActor(const std::string& name, const Transform& transform) : BProp(name, transform)
+	BActor::BActor(const std::string& name, const Transform& transform) : BProp(name, transform), m_SelectionCollider(GetTransform())
 	{
 		m_TargetPosition = NullTargetPosition;
 		m_IsSelected = false;
@@ -51,9 +51,16 @@ namespace Bennett
 		return m_IsSelected;
 	}
 
+	SphereCollider& BActor::GetSelectionCollider()
+	{
+		return m_SelectionCollider;
+	}
+
 	void BActor::Update(const float& deltaTime)
 	{
 		BProp::Update(deltaTime);
+
+		m_SelectionCollider.Update(deltaTime);
 
 		float movespeed = 10.0f * deltaTime;
 
@@ -74,5 +81,6 @@ namespace Bennett
 	void BActor::Render(const Renderer& renderer)
 	{
 		BProp::Render(renderer);
+		m_SelectionCollider.Render(renderer);
 	}
 }

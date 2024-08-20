@@ -50,7 +50,7 @@ namespace Bennett
 			Log(LOG_MINIMAL, "Max Depth: %i\n", m_MaxDepth);
 		};
 
-		AABBCollider* m_Collider = nullptr;
+		AABBCollider* m_PhysicsCollider = nullptr;
 
 		enum OCTREE_QUADRANT
 		{
@@ -91,7 +91,7 @@ namespace Bennett
 					break;
 				}
 
-				m_Collider = new AABBCollider(m_Centre, glm::vec3((float)halfSize));
+				m_PhysicsCollider = new AABBCollider(m_Centre, glm::vec3((float)halfSize));
 			}
 
 			for (size_t i = 0; i < OCTREE_CHILD_NODE_COUNT; i++)
@@ -122,10 +122,10 @@ namespace Bennett
 				m_NodeEntity = nullptr;
 			}
 
-			if (m_Collider)
+			if (m_PhysicsCollider)
 			{
-				delete m_Collider;
-				m_Collider = nullptr;
+				delete m_PhysicsCollider;
+				m_PhysicsCollider = nullptr;
 			}
 
 			m_DataObjects.clear();
@@ -174,9 +174,9 @@ namespace Bennett
 
 				for (size_t i = 0; i < OCTREE_CHILD_NODE_COUNT; i++)
 				{
-					AABBCollider* aabb = m_ChildNodes[i]->m_Collider;
+					AABBCollider* aabb = m_ChildNodes[i]->m_PhysicsCollider;
 
-					if (Collision::CheckCollision(entity->GetCollider(), *aabb))
+					if (Collision::CheckCollision(entity->GetPhysicsCollider(), *aabb))
 					{
 						m_ChildNodes[i]->AddDataToNode(data);
 						break;
@@ -215,9 +215,9 @@ namespace Bennett
 				{
 					node = m_ChildNodes[i];
 
-					AABBCollider* aabb = m_ChildNodes[i]->m_Collider;
+					AABBCollider* aabb = m_ChildNodes[i]->m_PhysicsCollider;
 
-					if (Collision::CheckCollision(entity->GetCollider(), *aabb))
+					if (Collision::CheckCollision(entity->GetPhysicsCollider(), *aabb))
 					{
 						break;
 					}

@@ -6,6 +6,8 @@ namespace Bennett
     class BENNETT_ENGINE TestUnit :
         public BActor
     {
+    private:
+
     public:
         TestUnit(const std::string& name, const Transform& transform);
         ~TestUnit();
