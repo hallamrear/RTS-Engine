@@ -1,5 +1,5 @@
 #include "BennettPCH.h"
-#include "RigidbodyPhysics.h"
+#include "Rigidbody.h"
 #include <System/Transform.h>
 
 namespace Bennett
