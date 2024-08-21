@@ -94,8 +94,6 @@ namespace Bennett
 		const VertexIndex RestartValue = IndexBuffer::GetPrimitiveEndIndex();
 
 		glm::vec3 position = glm::vec3(0.0f);
-		printf("%f %f %f\n", m_Position.x, m_Position.y, m_Position.z);
-
 		siv::PerlinNoise pn(800012);
 		float noiseSizeScale = 2.0f;
 		float noiseDistanceScale = 1 / 16.0f;

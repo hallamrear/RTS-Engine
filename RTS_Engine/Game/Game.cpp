@@ -95,12 +95,12 @@ bool Game::Initialise()
 
     glm::vec3 pos;
     
-    //for (size_t i = 0; i <= 1; i++)
-    //{
-    //    std::string name = std::to_string(i);
-    //    pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
-    //    GetWorld().SpawnActor(name, Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
-    //}
+    for (size_t i = 0; i <= 1; i++)
+    {
+        std::string name = std::to_string(i);
+        pos = glm::vec3(rand() % 30 - 15, 0.0f, rand() % 30 - 15);
+        GetWorld().SpawnActor(name, Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
+    }
 
     pos = glm::vec3(25.0f, 0.0f, 0.0f);
     GetWorld().SpawnActor("TestUnit", Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
@@ -109,6 +109,11 @@ bool Game::Initialise()
     testBuilding.SetModel(am.GetModel("Buildings/TestBuilding.gltf"));
     testBuilding.SetTexture(am.GetTexture("Buildings/TestBuilding"));
     testBuilding.GeneratePhysicsColliderFromModel(ColliderType::OBB);
+
+    BProp& floor = *GetWorld().SpawnProp("Floor", Transform(glm::vec3(30.0f, 5.0f, 30.0f), glm::vec3(0.0f, -2.5f, 0.0f), glm::vec3(0.0f)));
+    floor.SetModel(am.GetModel("1x1_Cube"));
+    floor.SetTexture(am.GetTexture("Terrain"));
+    floor.GeneratePhysicsColliderFromModel(ColliderType::AABB);
 
     std::vector<glm::ivec2> ids
     {

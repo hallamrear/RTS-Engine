@@ -36,6 +36,9 @@ namespace Bennett
 
 	void OBBCollider::Render(const Renderer& renderer)
 	{
+		if (IsEnabled() == false)
+			return;
+
 		const Transform& transform = GetTransform();
 		glm::mat4 matrix = glm::mat4(1.0f);
 		glm::mat4 translate = glm::translate(matrix, GetOffset());

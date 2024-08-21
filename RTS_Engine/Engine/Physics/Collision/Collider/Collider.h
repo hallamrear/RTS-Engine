@@ -25,6 +25,7 @@ namespace Bennett
 		glm::vec3 m_Offset;
 		virtual void SetType(const ColliderType& type) {};
 		Model* m_Model;
+		bool m_IsEnabled;
 
 	protected:
 		ColliderType m_Type = ColliderType::Unknown;
@@ -34,6 +35,9 @@ namespace Bennett
 
 	public:
 		~Collider();
+
+		void SetEnabled(const bool& state);
+		const bool& IsEnabled() const;
 
 		virtual glm::vec3 GetSupportVertex(const glm::vec3& direction) const = 0;
 

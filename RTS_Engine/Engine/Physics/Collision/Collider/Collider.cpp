@@ -9,6 +9,7 @@ namespace Bennett
 	{
 		m_Type = type;
 		m_Offset = offset;
+		m_IsEnabled = true;
 		SetModel();
 	}
 
@@ -25,6 +26,16 @@ namespace Bennett
 	Collider::~Collider()
 	{
 		m_Model = nullptr;
+	}
+
+	void Collider::SetEnabled(const bool& state)
+	{
+		m_IsEnabled = state;
+	}
+
+	const bool& Collider::IsEnabled() const
+	{
+		return m_IsEnabled;
 	}
 
 	void Collider::SetModel()

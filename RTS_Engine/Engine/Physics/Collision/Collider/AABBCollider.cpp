@@ -64,6 +64,9 @@ namespace Bennett
 
 	void AABBCollider::Render(const Renderer& renderer)
 	{
+		if (IsEnabled() == false)
+			return;
+
 		const glm::mat4 identity = glm::mat4(1.0f);
 		const glm::mat4 pTransform = glm::translate(identity, GetTransform().GetPosition());
 		const glm::mat4 pScale = glm::scale(identity, GetTransform().GetScale());

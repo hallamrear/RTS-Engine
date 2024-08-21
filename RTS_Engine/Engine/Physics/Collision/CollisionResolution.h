@@ -34,10 +34,10 @@ namespace Bennett
             }
             else
             {
-                objectA.AddImpulseForce(manifold.Normal * (manifold.Depth * +0.5f));
-                objectA.GetTransform().Translate(manifold.Normal * (manifold.Depth * +0.5f));
-                objectB.AddImpulseForce(manifold.Normal * (manifold.Depth * -0.5f));
-                objectB.GetTransform().Translate(manifold.Normal * (manifold.Depth * -0.5f));
+                objectA.AddImpulseForce(manifold.Normal * (manifold.Depth * -0.5f));
+                objectA.GetTransform().Translate(manifold.Normal * (manifold.Depth * -0.5f));
+                objectB.AddImpulseForce(manifold.Normal * (manifold.Depth * +0.5f));
+                objectB.GetTransform().Translate(manifold.Normal * (manifold.Depth * +0.5f));
             }
 		}
 	};

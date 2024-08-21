@@ -61,6 +61,9 @@ namespace Bennett
 
 		inline static bool CheckCollision(const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr)
 		{
+			if (colliderA.IsEnabled() == false || colliderB.IsEnabled() == false)
+				return false;
+
 			if (colliderA.GetType() == ColliderType::Sphere && colliderB.GetType() == ColliderType::Sphere)
 				return SphereSphereIntersection((SphereCollider&)colliderA, (SphereCollider&)colliderB, manifold);
 

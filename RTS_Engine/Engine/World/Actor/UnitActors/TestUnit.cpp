@@ -22,7 +22,7 @@ namespace Bennett
 			GetSelectionCollider().SetRadius(glm::max(maxExtentsLength, minExtentsLength));
 		}
 
-		GeneratePhysicsColliderFromModel(ColliderType::Sphere);
+		GeneratePhysicsColliderFromModel(ColliderType::OBB);
 	}
 
 	TestUnit::~TestUnit()

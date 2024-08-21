@@ -27,6 +27,9 @@ namespace Bennett
 
 	void SphereCollider::Render(const Renderer& renderer)
 	{
+		if (IsEnabled() == false)
+			return;
+
 		const glm::mat4 parent = GetTransform().GetModelMatrix();
 		const glm::mat4 identity = glm::mat4(1.0f);
 		const glm::mat4 translate = glm::translate(identity, GetOffset());
