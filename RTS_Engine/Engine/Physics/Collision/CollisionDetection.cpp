@@ -149,7 +149,7 @@ namespace Bennett
 							  (colliderB.GetTransform().GetPosition() + colliderB.GetOffset());
 
 		//Get support vertex in initial direction.
-		direction = glm::vec3(1.0f, 0.0f, 0.0f);
+		direction = glm::normalize(direction);
 		SupportVertex support = Collision::GetSupportVertex(colliderA, colliderB, direction);
 
 		std::vector<SupportVertex> simplex;
@@ -346,7 +346,17 @@ namespace Bennett
 		while (minDistance == FLT_MAX)
 		{
 			if (iterations > COLLISION_EPA_ITERATION_CAP)
+			{
+				for (size_t i = 0; i < faceDistances.size(); i++)
+				{
+					if (faceDistances[i] < minDistance)
+					{
+						minDistance = faceDistances[i];
+						minIndex = i;
+					}
+				}
 				break;
+			}
 
 			//Rather than generating a normal like in 2D EPA,
 			//we get a normal from our pregenerated list.

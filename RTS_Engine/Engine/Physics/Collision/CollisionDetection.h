@@ -61,6 +61,9 @@ namespace Bennett
 
 		inline static bool CheckCollision(const Collider& colliderA, const Collider& colliderB, CollisionDetails* manifold = nullptr)
 		{
+			if (colliderA.GetType() == ColliderType::Sphere && colliderB.GetType() == ColliderType::Sphere)
+				return SphereSphereIntersection((SphereCollider&)colliderA, (SphereCollider&)colliderB, manifold);
+
 			return GJK::CheckCollision(colliderA, colliderB, manifold);
 		};
 
@@ -96,7 +99,7 @@ namespace Bennett
 		/// <param name="colliderA">One of the colliders involved in the check.</param>
 		/// <param name="colliderB">The other collider involved in the check.</param>
 		/// <returns></returns>
-		inline static bool SphereSphere(const SphereCollider& colliderA, const SphereCollider& colliderB, CollisionDetails* manifold = nullptr)
+		inline static bool SphereSphereIntersection(const SphereCollider& colliderA, const SphereCollider& colliderB, CollisionDetails* manifold = nullptr)
 		{
 			const glm::vec3 positionDiff = colliderA.GetTransform().GetPosition() - colliderB.GetTransform().GetPosition();
 

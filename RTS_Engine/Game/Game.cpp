@@ -95,16 +95,21 @@ bool Game::Initialise()
 
     glm::vec3 pos;
     
-    for (size_t i = 0; i <= 1; i++)
-    {
-        std::string name = std::to_string(i);
-        pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
-        GetWorld().SpawnActor(name, Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
-    }
+    //for (size_t i = 0; i <= 1; i++)
+    //{
+    //    std::string name = std::to_string(i);
+    //    pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
+    //    GetWorld().SpawnActor(name, Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
+    //}
 
-    pos = glm::vec3(rand() % 20 - 10, 0.0f, rand() % 20 - 10);
+    pos = glm::vec3(25.0f, 0.0f, 0.0f);
     GetWorld().SpawnActor("TestUnit", Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
   
+    BProp& testBuilding = *GetWorld().SpawnProp("TestBuilding", Transform());
+    testBuilding.SetModel(am.GetModel("Buildings/TestBuilding.gltf"));
+    testBuilding.SetTexture(am.GetTexture("Buildings/TestBuilding"));
+    testBuilding.GeneratePhysicsColliderFromModel(ColliderType::OBB);
+
     std::vector<glm::ivec2> ids
     {
         glm::ivec2(-1, -1), glm::ivec2(+0, -1), glm::ivec2(+1, -1),
@@ -187,7 +192,7 @@ void Game::RunGameLoop()
                             Transform transform(glm::vec3(1.0f), position, glm::vec3(0.0f));
                             SphereCollider sphere(transform);
 
-                            if (Collision::SphereSphere(actor->GetSelectionCollider(), sphere))
+                            if (Collision::CheckCollision(actor->GetSelectionCollider(), sphere))
                             {
                                 if (inputMonitor->GetKeyState(BENNETT_KEY_LSHIFT) == false)
                                 {

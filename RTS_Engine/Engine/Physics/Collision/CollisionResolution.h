@@ -24,13 +24,13 @@ namespace Bennett
 
             if (objectA.IsStatic() == false && objectB.IsStatic() == true)
             {
-                objectA.GetTransform().Translate(manifold.Normal * (manifold.Depth * +1.0f));
-                objectA.AddImpulseForce(manifold.Normal * (manifold.Depth * +1.0f));
+                objectA.GetTransform().Translate(manifold.Normal * (manifold.Depth * -1.0f));
+                objectA.AddImpulseForce(manifold.Normal * (manifold.Depth * -1.0f));
             }
             else if (objectA.IsStatic() == true && objectB.IsStatic() == false)
             {
-                objectB.GetTransform().Translate(manifold.Normal * (manifold.Depth * -1.0f));
-                objectB.AddImpulseForce(manifold.Normal * (manifold.Depth * -1.0f));
+                objectB.GetTransform().Translate(manifold.Normal * (manifold.Depth * +1.0f));
+                objectB.AddImpulseForce(manifold.Normal * (manifold.Depth * +1.0f));
             }
             else
             {

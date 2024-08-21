@@ -230,6 +230,7 @@ namespace Bennett
         {
             entity = new TestUnit(name, transform);
             m_Entities.insert(std::make_pair(name, entity));
+            m_Actors.insert(std::make_pair(name, entity));
             m_PhysicsWorld.RegisterPhysicsEntity(entity);
 
             AddEntityToSpatialGrid(*entity);
@@ -279,6 +280,7 @@ namespace Bennett
         {
             entity = new StaticProp(name, transform);
             m_Entities.insert(std::make_pair(name, entity));
+            m_Props.insert(std::make_pair(name, entity));
             m_PhysicsWorld.RegisterPhysicsEntity(entity);
 
             AddEntityToSpatialGrid(*entity);

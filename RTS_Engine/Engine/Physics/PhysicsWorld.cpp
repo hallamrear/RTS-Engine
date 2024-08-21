@@ -65,16 +65,9 @@ namespace Bennett
 				if ((colliderI == nullptr) || (colliderJ == nullptr))
 					continue;
 
-				if ((colliderI->GetType() != ColliderType::Sphere) || (colliderJ->GetType() != ColliderType::Sphere))
-					continue;
-
 				CollisionDetails manifold;
 
-				auto scI = (SphereCollider*)colliderI;
-				auto scJ = (SphereCollider*)colliderJ;
-
-
-				if (Collision::SphereSphere(*scI, *scJ, &manifold))
+				if (Collision::CheckCollision(*colliderI, *colliderJ, &manifold))
 				{
 					CollisionResolution::SoftResolveCollision(i->second->GetRigidbody(), j->second->GetRigidbody(), manifold);
 				}
