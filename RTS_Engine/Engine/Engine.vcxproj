@@ -106,6 +106,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Physics\PhysicsWorld.cpp" />
     <ClCompile Include="Physics\Collision\CollisionResolution.cpp" />
     <ClCompile Include="World\Prop\Objects\StaticProp.cpp" />
     <ClCompile Include="World\Actor\UnitActors\TestUnit.cpp" />
@@ -168,6 +169,7 @@ xcopy /C /Y /I $(OutputPath)*.dll $(SolutionDir)Builds\$(Platform)\$(Configurati
     <ClCompile Include="World\World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Physics\PhysicsWorld.h" />
     <ClInclude Include="Physics\Collision\CollisionResolution.h" />
     <ClInclude Include="World\Prop\Objects\StaticProp.h" />
     <ClInclude Include="World\Actor\UnitActors\TestUnit.h" />

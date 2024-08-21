@@ -28,6 +28,8 @@
 #define new DEBUG_NEW
 #endif
 
+#include <System/ServiceLocator.h>
+#include <System/Assets/AssetManager.h>
 #include <Defines/BennettInputDefines.h>
 #include <System/Transform.h>
 #include <World/Actor/BActor.h>

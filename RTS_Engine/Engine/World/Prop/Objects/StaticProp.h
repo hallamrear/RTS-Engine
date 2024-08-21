@@ -3,7 +3,7 @@
 
 namespace Bennett
 {
-    class StaticProp :
+    class BENNETT_ENGINE StaticProp :
         public BProp
     {
     public:

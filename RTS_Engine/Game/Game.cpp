@@ -207,6 +207,22 @@ void Game::RunGameLoop()
             }
         }
 
+        if (inputMonitor->GetKeyState(BENNETT_KEY_C))
+        {
+            for (size_t i = 0; i < m_SelectedEntities.size(); i++)
+            {
+                m_SelectedEntities[i]->SetIsSelected(false);
+            }
+
+            m_SelectedEntities.clear();
+            GetWorld().GetAllActors(m_SelectedEntities);
+
+            for (size_t i = 0; i < m_SelectedEntities.size(); i++)
+            {
+                m_SelectedEntities[i]->SetIsSelected(true);
+            }
+        }
+
         if (inputMonitor->GetKeyState(BENNETT_MOUSE_RIGHT))
         {
             float t = 0.0f;
@@ -218,7 +234,6 @@ void Game::RunGameLoop()
                 {
                     m_SelectedEntities[i]->SetTargetPosition(position);
                 }
-
             }
         }
 
@@ -227,60 +242,6 @@ void Game::RunGameLoop()
             glm::vec3 position = GetCameraController().GetCurrentCamera().GetPosition() + (ndcRay.GetDirection() * t);
             ServiceLocator::GetRenderer().DrawDebugCircle(position, 1.0f);
         }
- 
-        //if (ground->GetPhysicsCollider() != nullptr && car->GetPhysicsCollider() != nullptr)
-        //{
-        //    details.Depth = 0.0f;
-        //    details.Normal = glm::vec3(0.0f);
-
-        //    if (Collision::CheckCollision(*ground->GetPhysicsCollider(), *car->GetPhysicsCollider(), &details))
-        //    {
-        //        check->GetTransform().SetPosition(glitch->GetTransform().GetPosition() + (details.Normal * details.Depth));
-
-        //        ServiceLocator::GetRenderer().DrawDebugLine(
-        //            details.CollisionPoints[0].Subject->GetTransform().GetPosition() + details.CollisionPoints[0].Subject->GetOffset(),
-        //            details.CollisionPoints[0].HitPoint);
-        //        check->GetTransform().SetPosition(details.CollisionPoints[0].HitPoint);
-
-        //        ServiceLocator::GetRenderer().DrawDebugLine(
-        //            details.CollisionPoints[1].Subject->GetTransform().GetPosition() + details.CollisionPoints[1].Subject->GetOffset(),
-        //            details.CollisionPoints[1].HitPoint);
-        //        check_two->GetTransform().SetPosition(details.CollisionPoints[1].HitPoint);
-
-        //        Transform& transformA = glitch->GetTransform();
-        //        Transform& transformB = car->GetTransform();
-
-        //        //if (glitch->GetRigidbody()->IsStatic() == true && car->GetRigidbody()->IsStatic() == true)
-        //        //   continue;
-
-        //        //if (glitch->GetRigidbody()->IsStatic() == false && car->GetRigidbody()->IsStatic() == true)
-        //        {
-        //            //transformA.Translate(details.Normal * (-details.Depth * 0.5f));
-        //            //car->GetRigidbody()->AddImpulseForce(details.Normal * (-details.Depth * 0.5f));
-        //        }
-        //       // else if (glitch->GetRigidbody()->IsStatic() == true && glitch->GetRigidbody()->IsStatic() == false)
-        //        {
-        //            //transformB.Translate(details.Normal * (details.Depth * 0.5f));
-        //            //car->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * 0.5f));
-        //        }
-        //        //else
-        //        {   
-        //            //transformA.Translate(details.Normal* (details.Depth * -0.5f * 0.5f));
-        //            //transformB.Translate(details.Normal* (details.Depth * +0.5f * 0.5f));
-        //            //glitch->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * -0.5f * 0.5f));
-        //            //car->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * +0.5f * 0.5f));
-        //        }
-
-        //        //car->GetTransform().Translate(details.Normal * (details.Depth * 0.5f));
-        //        //car->GetTransform().Translate(details.Normal * (details.Depth * 0.5f));
-        //        //glitch->GetTransform().Translate(details.Normal * (details.Depth * -0.5f));
-        //    }
-        //    else
-        //    {
-        //        check->GetTransform().SetPosition(glm::vec3(0.0f, -10.0f, 0.0f));
-        //        check_two->GetTransform().SetPosition(glm::vec3(0.0f, -10.0f, 0.0f));
-        //    }
-        //}
         
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(5.0f, 0.0f, 0.0f));
         ServiceLocator::GetRenderer().DrawDebugLine(glm::vec3(0.0f), glm::vec3(0.0f, 5.0f, 0.0f));

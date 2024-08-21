@@ -6,6 +6,7 @@
 #include <World/World.h>
 #include <World/WorldChunk.h>
 #include <World/Terrain/TerrainChunk.h>
+#include <Physics/Collision/CollisionResolution.h>
 
 namespace Bennett
 {
@@ -167,6 +168,12 @@ namespace Bennett
         auto itr = m_Entities.find(entity->GetName());
         if (itr != m_Entities.end())
         {
+            BProp* prop = dynamic_cast<BProp*>(entity);
+            if (prop)
+            {
+                m_PhysicsWorld.DeregisterPhysicsEntity(prop);
+            }
+
             RemoveEntityFromSpatialGrid(*entity);
 
             delete itr->second;
@@ -223,7 +230,7 @@ namespace Bennett
         {
             entity = new TestUnit(name, transform);
             m_Entities.insert(std::make_pair(name, entity));
-            m_Actors.insert(std::make_pair(name, entity));
+            m_PhysicsWorld.RegisterPhysicsEntity(entity);
 
             AddEntityToSpatialGrid(*entity);
 
@@ -238,6 +245,16 @@ namespace Bennett
         }
 
         return entity;
+    }
+
+    void World::GetAllActors(std::vector<BActor*>& actors)
+    {
+        actors.clear();
+        actors.reserve(m_Actors.size());
+        for (auto& itr : m_Actors)
+        {
+            actors.push_back(itr.second);
+        }
     }
 
     BActor* World::GetActor(const std::string& name)
@@ -262,7 +279,7 @@ namespace Bennett
         {
             entity = new StaticProp(name, transform);
             m_Entities.insert(std::make_pair(name, entity));
-            m_Props.insert(std::make_pair(name, entity));
+            m_PhysicsWorld.RegisterPhysicsEntity(entity);
 
             AddEntityToSpatialGrid(*entity);
 
@@ -294,73 +311,8 @@ namespace Bennett
 
     void World::Update(const float& deltaTime)
     {
-        Collider* colliderI = nullptr;
-        Collider* colliderJ = nullptr;
-
-        for (auto i = m_Entities.begin(); i != m_Entities.end(); i++)
-        {
-            for (auto j = i; j != m_Entities.end(); j++)
-            {
-                if (i->second == j->second)
-                    continue;
-
-                if (dynamic_cast<BProp*>(i->second))
-                {
-                    colliderI = dynamic_cast<BProp*>(i->second)->GetPhysicsCollider();
-                }
-
-                if (dynamic_cast<BProp*>(j->second))
-                {
-                    colliderJ = dynamic_cast<BProp*>(j->second)->GetPhysicsCollider();
-                }
-
-                if ((colliderI == nullptr) || (colliderJ == nullptr))
-                    continue;
-
-                if ((colliderI->GetType() != ColliderType::Sphere) || (colliderJ->GetType() != ColliderType::Sphere))
-                    continue;
-
-                CollisionDetails manifold;
-
-                auto scI = (SphereCollider*)colliderI;
-                auto scJ = (SphereCollider*)colliderJ;
-
-                if (Collision::SphereSphere(*scI, *scJ, &manifold))
-                {
-                    Transform& transformA = i->second->GetTransform();
-                    Transform& transformB = j->second->GetTransform();
-
-                    transformA.Translate(manifold.Normal * (manifold.Depth * +0.5f));
-                    ServiceLocator::GetRenderer().DrawDebugLine(transformA.GetPosition(), transformA.GetPosition() + (manifold.Normal * (manifold.Depth * +0.5f)));
-
-                    transformB.Translate(manifold.Normal * (manifold.Depth * -0.5f));
-                    ServiceLocator::GetRenderer().DrawDebugLine(transformB.GetPosition(), transformB.GetPosition() + (manifold.Normal * (manifold.Depth * -0.5f)));
-
-                    /*
-                    if (glitch->GetRigidbody()->IsStatic() == true && car->GetRigidbody()->IsStatic() == true)
-                       continue;
-
-                    if (glitch->GetRigidbody()->IsStatic() == false && car->GetRigidbody()->IsStatic() == true)
-                    {
-                        transformA.Translate(details.Normal * (-details.Depth * 0.5f));
-                        car->GetRigidbody()->AddImpulseForce(details.Normal * (-details.Depth * 0.5f));
-                    }
-                    else if (glitch->GetRigidbody()->IsStatic() == true && glitch->GetRigidbody()->IsStatic() == false)
-                    {
-                        transformB.Translate(details.Normal * (details.Depth * 0.5f));
-                        car->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * 0.5f));
-                    }
-                    else
-                    {
-                        transformA.Translate(details.Normal* (details.Depth * -0.5f * 0.5f));
-                        transformB.Translate(details.Normal* (details.Depth * +0.5f * 0.5f));
-                        glitch->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * -0.5f * 0.5f));
-                        car->GetRigidbody()->AddImpulseForce(details.Normal * (details.Depth * +0.5f * 0.5f));
-                    }
-                    */
-                }
-            }
-        }
+        m_PhysicsWorld.Prestep(deltaTime);
+        m_PhysicsWorld.Update(deltaTime);
 
         for (auto& chunk : m_SpatialGrid)
         {

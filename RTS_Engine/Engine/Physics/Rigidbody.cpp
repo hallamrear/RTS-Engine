@@ -52,6 +52,11 @@ namespace Bennett
 		m_IsStatic = isStatic;
 	}
 
+	const glm::vec3& Rigidbody::GetVelocity() const
+	{
+		return m_Velocity;
+	}
+
 	const float& Rigidbody::GetMass() const
 	{
 		return m_Mass;
@@ -78,6 +83,11 @@ namespace Bennett
 		m_ImpulseSum += force;
 	}
 
+	Transform& Rigidbody::GetTransform()
+	{
+		return m_Transform;
+	}
+
 	void Rigidbody::Update(const float& deltaTime)
 	{
 		//Compute forces and apply forces.
@@ -100,11 +110,14 @@ namespace Bennett
 		m_AngularVelocity += m_AngularAcceleration * deltaTime;
 		m_Transform.Rotate(m_AngularVelocity);
 
-		printf("Force Sum: {%f, %f, %f}\n", m_ForceSum.x, m_ForceSum.y, m_ForceSum.z);
-		printf("Acceleration: {%f, %f, %f}\n", m_Acceleration.x, m_Acceleration.y, m_Acceleration.z);
-		printf("Velocity: {%f, %f, %f}\n", m_Velocity.x, m_Velocity.y, m_Velocity.z);
-		printf("Angular Acceleration: {%f, %f, %f}\n", m_AngularAcceleration.x, m_AngularAcceleration.y, m_AngularAcceleration.z);
-		printf("Angular Velocity: {%f, %f, %f}\n\n", m_AngularVelocity.x, m_AngularVelocity.y, m_AngularVelocity.z);
+		if (ENABLE_LOG_RIGIDBODY_DATA_PRINT)
+		{
+			Log(LOG_SAFE, "Force Sum: {%f, %f, %f}\n", m_ForceSum.x, m_ForceSum.y, m_ForceSum.z);
+			Log(LOG_SAFE, "Acceleration: {%f, %f, %f}\n", m_Acceleration.x, m_Acceleration.y, m_Acceleration.z);
+			Log(LOG_SAFE, "Velocity: {%f, %f, %f}\n", m_Velocity.x, m_Velocity.y, m_Velocity.z);
+			Log(LOG_SAFE, "Angular Acceleration: {%f, %f, %f}\n", m_AngularAcceleration.x, m_AngularAcceleration.y, m_AngularAcceleration.z);
+			Log(LOG_SAFE, "Angular Velocity: {%f, %f, %f}\n\n", m_AngularVelocity.x, m_AngularVelocity.y, m_AngularVelocity.z);
+		}
 
 		m_ImpulseSum = glm::vec3(0.0f, 0.0f, 0.0f); 
 		m_ForceSum = glm::vec3(0.0f, 0.0f, 0.0f);

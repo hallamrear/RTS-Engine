@@ -10,6 +10,9 @@ namespace Bennett
 		m_IsSelected = false;
 		m_CanBeSelected = true;
 		m_InputMonitor = nullptr;
+
+		GetRigidbody().SetStatic(false);
+		GetRigidbody().SetGravityEnabled(false);
 	}
 
 	BActor::~BActor()
@@ -64,13 +67,16 @@ namespace Bennett
 
 		float movespeed = 10.0f * deltaTime;
 
+		constexpr float maxSpeed = 2100.0f;
+		constexpr glm::vec3 maxForce = glm::vec3(100.0f);
+		
 		if (m_TargetPosition != NullTargetPosition)
 		{
 			glm::vec3 newPosition = Helper::MoveTowards(GetTransform().GetPosition(), m_TargetPosition, movespeed);
 			GetTransform().SetPosition(newPosition);
-
+		
 			glm::vec3 dir = glm::normalize(glm::vec3(m_TargetPosition - GetTransform().GetPosition()));
-
+		
 			if (Helper::Distance(GetTransform().GetPosition(), m_TargetPosition) < 0.025f)
 			{
 				m_TargetPosition = NullTargetPosition;

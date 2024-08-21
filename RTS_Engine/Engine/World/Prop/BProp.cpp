@@ -12,11 +12,19 @@
 
 namespace Bennett
 {
-	BProp::BProp(const std::string& name, const Transform& transform) : BEntity(name, transform)
+	BProp::BProp(const std::string& name, const Transform& transform) : BEntity(name, transform), m_Rigidbody(GetTransform())
 	{
 		m_PhysicsCollider = nullptr;
 		m_Model = nullptr;
 		m_Texture = nullptr;
+
+		GetRigidbody().SetStatic(true);
+		GetRigidbody().SetGravityEnabled(false);
+	}
+
+	Rigidbody& BProp::GetRigidbody()
+	{
+		return m_Rigidbody;
 	}
 
 	BProp::~BProp()
@@ -27,6 +35,7 @@ namespace Bennett
 		m_Model = nullptr;
 		m_Texture = nullptr;
 	}
+
 
 	Model* BProp::GetModel()
 	{
@@ -134,6 +143,8 @@ namespace Bennett
 	{
 		BEntity::Update(deltaTime);
 
+		m_Rigidbody.Update(deltaTime);
+
 		if (m_PhysicsCollider)
 		{
 			m_PhysicsCollider->Update(deltaTime);
@@ -143,6 +154,8 @@ namespace Bennett
 	void BProp::Render(const Renderer& renderer)
 	{
 		BEntity::Render(renderer);
+
+		m_Rigidbody.Render(renderer);
 
 		if (HasTexture())
 		{

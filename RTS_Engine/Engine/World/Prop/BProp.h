@@ -1,6 +1,6 @@
 #pragma once
 #include <World/Entity/BEntity.h>
-#include <Physics/RigidbodyPhysics.h>
+#include <Physics/Rigidbody.h>
 
 namespace Bennett
 {
@@ -23,6 +23,8 @@ namespace Bennett
 	public:
 		virtual ~BProp();
 
+		Rigidbody& GetRigidbody();
+
 		Model* GetModel();
 		void SetModel(Model* model);
 		bool HasModel() const;
@@ -40,5 +42,6 @@ namespace Bennett
 
 		virtual void Update(const float& deltaTime) override;
 		virtual void Render(const Renderer& renderer) override;
+
 	};
 }

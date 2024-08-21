@@ -10,5 +10,6 @@ namespace Bennett
 
 	StaticProp::~StaticProp()
 	{
+
 	}
 }

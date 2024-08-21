@@ -1,6 +1,7 @@
 #pragma once
+#include <vector>
 #include <unordered_map>
-#include <Physics/Collision/Octree.h>
+#include <Physics/PhysicsWorld.h>
 
 namespace Bennett
 {
@@ -15,6 +16,8 @@ namespace Bennett
 	{
 	private:
 		friend class LevelManager;
+
+		PhysicsWorld m_PhysicsWorld;
 
 		bool m_IsLoaded;
 		std::unordered_map<std::string, BEntity*>	m_Entities;
@@ -37,6 +40,7 @@ namespace Bennett
 		WorldChunk* GetWorldChunk(const glm::vec3& position) const;
 		WorldChunk* GetWorldChunk(const glm::ivec2& id) const;
 		BActor* SpawnActor(const std::string& name, const Transform& transform);
+		void GetAllActors(std::vector<BActor*>& actors);
 		BActor* GetActor(const std::string& name);
 		BProp* SpawnProp(const std::string& name, const Transform& transform);
 		BProp* GetProp(const std::string& name);

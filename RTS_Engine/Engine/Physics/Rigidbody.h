@@ -35,6 +35,7 @@ namespace Bennett
 		const bool& IsStatic() const;
 		void SetStatic(const bool& isStatic);
 
+		const glm::vec3& GetVelocity() const;
 		const float& GetMass() const;
 		void SetMass(const float& mass);
 
@@ -42,6 +43,8 @@ namespace Bennett
 		void SetMomentOfInertia(const glm::vec3& moi);
 
 		void AddImpulseForce(const glm::vec3& force);
+
+		Transform& GetTransform();
 
 		virtual void Update(const float& deltaTime);
 		virtual void Render(const Renderer& renderer);
