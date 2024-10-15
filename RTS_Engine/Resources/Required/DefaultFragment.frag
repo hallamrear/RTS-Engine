@@ -1,27 +1,24 @@
 #version 450
 #extension GL_ARB_separate_shader_objects : enable
-
-layout(binding = 0) uniform UniformBufferObject
-{
-	mat4 View;
-	mat4 Projection;
-	vec2 ChunkPositions[64];
-} UBO;
-
-layout(binding = 1) uniform sampler2D texSampler;
+#include "ShaderStructs.glsl"
 
 layout(location = 0) in vec4 colour;
-layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 UV;
+layout(location = 1) in vec3 fragPosition;
+layout(location = 2) in vec3 normal;
+layout(location = 3) in vec2 UV;
+
 layout(location = 0) out vec4 outColor;
-
-layout(push_constant) uniform PushConstants
-{
-	mat4 Model;
-} PC;
-
 
 void main()
 {
-	outColor = texture(texSampler, UV);
+	vec4 texColour = texture(texSampler, UV);
+	vec3 lightSum = vec3(0.0f);
+
+	for(int i = 0; i < MAX_LIGHTS; i++)
+	{
+		lightSum += CalculateLighting(UBO.LightData[i], fragPosition, normal);	
+	}
+	
+	vec3 result = lightSum * texColour.xyz;
+    outColor = vec4(result, 1.0);
 }

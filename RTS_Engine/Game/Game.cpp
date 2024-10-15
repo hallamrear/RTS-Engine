@@ -17,6 +17,9 @@
 #include <World/Actor/BActor.h>
 #include <Defines/HelperFunctions.h>
 
+#include <Rendering/Renderer.h>
+#include <Rendering/Lighting/Light.h>
+
 using namespace Bennett;
 
 Game::Game()
@@ -95,17 +98,30 @@ bool Game::Initialise()
 
     glm::vec3 pos;
     
-    for (size_t i = 0; i <= 1; i++)
+   /* for (size_t i = 0; i <= 1; i++)
     {
         std::string name = std::to_string(i);
         pos = glm::vec3(rand() % 30 - 15, 0.0f, rand() % 30 - 15);
         GetWorld().SpawnActor(name, Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
-    }
+    }*/
 
     pos = glm::vec3(25.0f, 0.0f, 0.0f);
+    pos.x = 5.0f;
     GetWorld().SpawnActor("TestUnit", Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
-  
-    BProp& testBuilding = *GetWorld().SpawnProp("TestBuilding", Transform());
+    GetWorld().GetActor("TestUnit")->SetModel(am.GetModel("Car3.gltf"));
+    GetWorld().GetActor("TestUnit")->SetTexture(am.GetTexture("Car3"));
+    GetWorld().GetActor("TestUnit")->SetModel(am.GetModel("Human.gltf"));
+    GetWorld().GetActor("TestUnit")->SetTexture(am.GetTexture("Human"));
+
+    GetWorld().SpawnActor("WhiteCube", Transform(glm::vec3(1.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f)));
+    GetWorld().GetActor("WhiteCube")->SetModel(am.GetModel("1x1_Cube"));
+    GetWorld().GetActor("WhiteCube")->SetTexture(am.GetTexture("White"));
+
+    GetWorld().SpawnActor("RedCube", Transform(glm::vec3(1.0f), glm::vec3(0.0f, 0.0f, -5.0f), glm::vec3(0.0f)));
+    GetWorld().GetActor("RedCube")->SetModel(am.GetModel("1x1_Cube"));
+    GetWorld().GetActor("RedCube")->SetTexture(am.GetTexture("Red"));
+
+  /*  BProp& testBuilding = *GetWorld().SpawnProp("TestBuilding", Transform());
     testBuilding.SetModel(am.GetModel("Buildings/TestBuilding.gltf"));
     testBuilding.SetTexture(am.GetTexture("Buildings/TestBuilding"));
     testBuilding.GeneratePhysicsColliderFromModel(ColliderType::OBB);
@@ -113,7 +129,7 @@ bool Game::Initialise()
     BProp& floor = *GetWorld().SpawnProp("Floor", Transform(glm::vec3(30.0f, 5.0f, 30.0f), glm::vec3(0.0f, -2.5f, 0.0f), glm::vec3(0.0f)));
     floor.SetModel(am.GetModel("1x1_Cube"));
     floor.SetTexture(am.GetTexture("Terrain"));
-    floor.GeneratePhysicsColliderFromModel(ColliderType::AABB);
+    floor.GeneratePhysicsColliderFromModel(ColliderType::AABB);*/
 
     std::vector<glm::ivec2> ids
     {
@@ -165,15 +181,40 @@ void Game::RunGameLoop()
         m_Window->SetTitle(dtStr.c_str());
 
         ProcessInput(dTime);
-        Update(dTime);
+        Update(dTime);      
         Render();
 
-        float rotSpeed = 10.0f;
+        float rotSpeed = 5.0f;
         float r = 10.0f;
         float t = glm::radians<float>(90.0f);
         static float s = 0.0f;
         s += dTime * rotSpeed;
         s = fmod(s, 360.0f);
+
+        float x = sin(s) * 15.0f;
+        float z = cos(s) * 15.0f;
+
+        //GetWorld().GetActor("LightCube")->GetTransform().SetPosition(glm::vec3(x, 5.0f, z));
+        Renderer& renderer = ServiceLocator::GetRenderer();
+        renderer.UniformMatrixBuffer.LightData[0].RGBI = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        renderer.UniformMatrixBuffer.LightData[0].Position = glm::vec4(GetWorld().GetActor("WhiteCube")->GetTransform().GetPosition(), 1.0f);
+
+        renderer.UniformMatrixBuffer.LightData[1].RGBI = glm::vec4(1.0f, 0.0f, 0.0f, 2.0f);
+        renderer.UniformMatrixBuffer.LightData[1].Position = glm::vec4(GetWorld().GetActor("RedCube")->GetTransform().GetPosition(), 1.0f);
+        renderer.UpdateUniformBuffers();
+        renderer.PushConstants.CameraPosition = glm::vec4(GetCameraController().GetCurrentCamera().GetPosition(), 1.0f);
+
+        //renderer.UniformMatrixBuffer.LightData[1].Data.RGB = glm::vec3(0.0f, 1.0f, 0.0f);
+        //renderer.UniformMatrixBuffer.LightData[1].Data.Intensity = 1.0f;
+        //renderer.UniformMatrixBuffer.LightData[1].Position = glm::vec4(-5.0f, 5.0f, 5.0f, 1.0f);
+
+        //renderer.UniformMatrixBuffer.LightData[2].Data.RGB = glm::vec3(0.0f, 0.0f, 1.0f);
+        //renderer.UniformMatrixBuffer.LightData[2].Data.Intensity = 1.0f;
+        //renderer.UniformMatrixBuffer.LightData[2].Position = glm::vec4(5.0f, 5.0f, -5.0f, 1.0f);
+
+        //renderer.UniformMatrixBuffer.LightData[3].Data.RGB = glm::vec3(1.0f, 0.0f, 0.0f);
+        //renderer.UniformMatrixBuffer.LightData[3].Data.Intensity = 1.0f;
+        //renderer.UniformMatrixBuffer.LightData[3].Position = glm::vec4(-5.0f, 5.0f, -5.0f, 1.0f);
 
         Ray ndcRay = GetCameraController().GetCurrentCamera().Raycast(inputMonitor->GetMousePositionNDC());
 
@@ -219,7 +260,7 @@ void Game::RunGameLoop()
 
         if (inputMonitor->GetKeyState(BENNETT_KEY_C))
         {
-            for (size_t i = 0; i < m_SelectedEntities.size(); i++)
+            /*for (size_t i = 0; i < m_SelectedEntities.size(); i++)
             {
                 m_SelectedEntities[i]->SetIsSelected(false);
             }
@@ -230,7 +271,9 @@ void Game::RunGameLoop()
             for (size_t i = 0; i < m_SelectedEntities.size(); i++)
             {
                 m_SelectedEntities[i]->SetIsSelected(true);
-            }
+            }*/
+
+            GetWorld().GetActor("TestUnit")->GetTransform().Rotate(glm::vec3(0.0f, 180.0f * dTime, 0.0f));
         }
 
         if (inputMonitor->GetKeyState(BENNETT_MOUSE_RIGHT))

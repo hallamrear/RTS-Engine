@@ -25,9 +25,18 @@
 #define MAX_DEBUG_LINE_COUNT 100
 #define MAX_DEBUG_CIRCLE_COUNT 100
 #define DEBUG_CIRCLE_POINT_COUNT 12
+//Lighting Defines
+#define MAX_DIRECTIONAL_LIGHT_COUNT 2
+#define MAX_POINT_LIGHT_COUNT 2
+#define MAX_LIGHT_COUNT MAX_POINT_LIGHT_COUNT + MAX_DIRECTIONAL_LIGHT_COUNT
 
 //Custom Defines
+#ifdef ENGINE_EXPORTS
 #define BENNETT_ENGINE __declspec(dllexport)
+#else
+#define BENNETT_ENGINE __declspec(dllimport)
+#endif
+
 #define WIN32MSG UINT
 
 typedef signed short s16;

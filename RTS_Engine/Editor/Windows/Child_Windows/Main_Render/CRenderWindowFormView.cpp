@@ -20,6 +20,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+#include <System/ServiceLocator.h>
 
 // CRenderWindowView
 

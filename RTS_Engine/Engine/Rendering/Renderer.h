@@ -3,6 +3,7 @@
 #include <vulkan/vulkan.h>
 #include <Rendering/CustomPipelineObject.h>
 #include <Rendering/VertexBuffer.h>
+#include <Rendering/Lighting/Light.h>
 #include <optional>
 
 namespace Bennett
@@ -15,11 +16,25 @@ namespace Bennett
 	{
 		glm::mat4 View;
 		glm::mat4 Projection;
+		Light LightData[MAX_LIGHT_COUNT];
+
+		UniformBufferObject()
+		{
+			View = glm::mat4(1.0f);
+			Projection = glm::mat4(1.0f);
+
+			for (int i = 0; i < MAX_LIGHT_COUNT; i++)
+			{
+				LightData[i].RGBI = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
+				LightData[i].Position = glm::vec4(0.0f);
+			}
+		}
 	};
 
 	struct BENNETT_ENGINE PushConstantBuffer
 	{
 		glm::mat4 ModelMatrix;
+		glm::vec4 CameraPosition;
 	};
 
 	class BENNETT_ENGINE Renderer
