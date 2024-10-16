@@ -108,10 +108,12 @@ bool Game::Initialise()
     pos = glm::vec3(25.0f, 0.0f, 0.0f);
     pos.x = 5.0f;
     GetWorld().SpawnActor("TestUnit", Transform(glm::vec3(1.0f), pos, glm::vec3(0.0f)));
-    GetWorld().GetActor("TestUnit")->SetModel(am.GetModel("Car3.gltf"));
-    GetWorld().GetActor("TestUnit")->SetTexture(am.GetTexture("Car3"));
-    GetWorld().GetActor("TestUnit")->SetModel(am.GetModel("Human.gltf"));
-    GetWorld().GetActor("TestUnit")->SetTexture(am.GetTexture("Human"));
+    //GetWorld().GetActor("TestUnit")->SetModel(am.GetModel("Car3.gltf"));
+    //GetWorld().GetActor("TestUnit")->SetTexture(am.GetTexture("Car3"));
+    //GetWorld().GetActor("TestUnit")->SetModel(am.GetModel("Human.gltf"));
+    //GetWorld().GetActor("TestUnit")->SetTexture(am.GetTexture("Human"));
+    GetWorld().GetActor("TestUnit")->SetModel(am.GetModel("shakedown.gltf"));
+    GetWorld().GetActor("TestUnit")->SetTexture(am.GetTexture("shakedown"));
 
     GetWorld().SpawnActor("WhiteCube", Transform(glm::vec3(1.0f), glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f)));
     GetWorld().GetActor("WhiteCube")->SetModel(am.GetModel("1x1_Cube"));
